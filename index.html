@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>簡単家計簿アプリ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Chart.js for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800">
+
+    <div class="max-w-md mx-auto min-h-screen bg-white shadow-xl flex flex-col">
+        <!-- ヘッダー -->
+        <header class="bg-indigo-600 text-white p-6 rounded-b-3xl shadow-md">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold tracking-tight">かんたん家計簿</h1>
+                <button onclick="openFixedModal()" class="bg-indigo-700/60 hover:bg-indigo-700 text-xs px-3 py-2 rounded-xl border border-indigo-500/40 transition flex items-center gap-1.5 font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    固定費設定
+                </button>
+            </div>
+            <p class="text-indigo-200 text-sm mt-1">日々の収支をスマートに管理</p>
+            
+            <!-- サマリーカード -->
+            <div class="grid grid-cols-3 gap-3 mt-6 bg-indigo-700/50 p-4 rounded-2xl backdrop-blur-sm border border-indigo-500/30">
+                <div class="text-center">
+                    <p class="text-xs text-indigo-200">残高</p>
+                    <p id="totalBalance" class="text-lg font-bold mt-1">¥0</p>
+                </div>
+                <div class="text-center border-x border-indigo-500/30">
+                    <p class="text-xs text-emerald-200">収入</p>
+                    <p id="totalIncome" class="text-lg font-bold text-emerald-300 mt-1">¥0</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-xs text-rose-200">支出</p>
+                    <p id="totalExpense" class="text-lg font-bold text-rose-300 mt-1">¥0</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- メインコンテンツ -->
+        <main class="flex-1 p-6 space-y-6 pb-24">
+            
+            <!-- 入力フォームセクション -->
+            <section class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                <h2 class="text-base font-bold text-slate-700 mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    収支を追加
+                </h2>
+                <form id="transactionForm" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" id="typeExpense" class="py-2.5 rounded-xl font-medium text-sm transition bg-rose-500 text-white shadow-sm" onclick="switchType('expense')">支出</button>
+                        <button type="button" id="typeIncome" class="py-2.5 rounded-xl font-medium text-sm transition bg-slate-100 text-slate-600" onclick="switchType('income')">収入</button>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">金額 (円)</label>
+                        <input type="number" id="amount" required placeholder="例: 1500" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-lg">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">カテゴリ</label>
+                        <select id="category" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                            <!-- 動的に切り替わる -->
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">メモ (任意)</label>
+                        <input type="text" id="memo" placeholder="例: ランチ代" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">日付</label>
+                        <input type="date" id="date" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                    </div>
+
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow-md transition active:scale-[0.98]">
+                        追加する
+                    </button>
+                </form>
+            </section>
+
+            <!-- グラフセクション -->
+            <section class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                <h3 class="text-base font-bold text-slate-700 mb-3">支出カテゴリ内訳</h3>
+                <div class="relative w-full h-48 flex justify-center items-center">
+                    <canvas id="expenseChart"></canvas>
+                </div>
+            </section>
+
+            <!-- 履歴セクション -->
+            <section class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-base font-bold text-slate-700">最近の履歴</h3>
+                    <button onclick="clearAllData()" class="text-xs text-rose-500 hover:underline">すべて削除</button>
+                </div>
+                <div id="transactionList" class="space-y-3 max-h-64 overflow-y-auto pr-1">
+                    <!-- 動的生成 -->
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- 固定費設定モーダル -->
+    <div id="fixedModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold text-slate-800">月額固定費の管理</h3>
+                <button onclick="closeFixedModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">×</button>
+            </div>
+            <p class="text-xs text-slate-500">毎月登録した日付（または月初）に自動で適用、またはボタンから一括反映できます。</p>
+
+            <!-- 固定費登録フォーム -->
+            <form id="fixedForm" class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">名称 / メモ</label>
+                        <input type="text" id="fixedMemo" required placeholder="例: 家賃" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">金額 (円)</label>
+                        <input type="number" id="fixedAmount" required placeholder="例: 80000" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">カテゴリ</label>
+                        <select id="fixedCategory" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+                            <option value="家賃">家賃</option>
+                            <option value="光熱費">光熱費</option>
+                            <option value="通信費">通信費</option>
+                            <option value="その他">その他</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">適用日 (毎月何日)</label>
+                        <input type="number" id="fixedDay" min="1" max="31" value="1" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-medium py-2 rounded-xl text-sm transition">
+                    固定費を追加する
+                </button>
+            </form>
+
+            <!-- 登録済み固定費一覧 -->
+            <div class="flex-1 overflow-y-auto space-y-2 pr-1" id="fixedList">
+                <!-- 動的生成 -->
+            </div>
+
+            <!-- 今月分一括適用ボタン -->
+            <button onclick="applyFixedCostsNow()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow-sm">
+                今月分の固定費を反映する
+            </button>
+        </div>
+    </div>
+
+    <!-- アプリのロジック -->
+    <script>
+        // カテゴリ定義
+        const categories = {
+            expense: ['食費', '日用品', '交通費', '娯楽', '家賃', '光熱費', 'その他'],
+            income: ['給与', '副業', 'お小遣い', '一時所得', 'その他']
+        };
+
+        let currentType = 'expense';
+        let transactions = JSON.parse(localStorage.getItem('kakeibo_transactions')) || [];
+        let fixedCosts = JSON.parse(localStorage.getItem('kakeibo_fixed_costs')) || [];
+        let chartInstance = null;
+
+        // 初期化
+        document.getElementById('date').valueAsDate = new Date();
+        updateCategoryOptions();
+        renderApp();
+        checkAndApplyAutoFixedCosts(); // 自動反映チェック
+
+        // 収支タイプ切り替え
+        function switchType(type) {
+            currentType = type;
+            const expBtn = document.getElementById('typeExpense');
+            const incBtn = document.getElementById('typeIncome');
+            
+            if (type === 'expense') {
+                expBtn.className = "py-2.5 rounded-xl font-medium text-sm transition bg-rose-500 text-white shadow-sm";
+                incBtn.className = "py-2.5 rounded-xl font-medium text-sm transition bg-slate-100 text-slate-600";
+            } else {
+                expBtn.className = "py-2.5 rounded-xl font-medium text-sm transition bg-slate-100 text-slate-600";
+                incBtn.className = "py-2.5 rounded-xl font-medium text-sm transition bg-emerald-500 text-white shadow-sm";
+            }
+            updateCategoryOptions();
+        }
+
+        // カテゴリのセレクトボックス更新
+        function updateCategoryOptions() {
+            const select = document.getElementById('category');
+            select.innerHTML = '';
+            categories[currentType].forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                select.appendChild(opt);
+            });
+        }
+
+        // 通常フォーム送信
+        document.getElementById('transactionForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('amount').value);
+            const category = document.getElementById('category').value;
+            const memo = document.getElementById('memo').value;
+            const date = document.getElementById('date').value;
+
+            if (!amount || isNaN(amount)) return;
+
+            const newTx = {
+                id: Date.now(),
+                type: currentType,
+                amount,
+                category,
+                memo: memo || category,
+                date
+            };
+
+            transactions.unshift(newTx);
+            saveAndRender();
+            
+            document.getElementById('amount').value = '';
+            document.getElementById('memo').value = '';
+            document.getElementById('date').valueAsDate = new Date();
+        });
+
+        // 固定費フォーム送信
+        document.getElementById('fixedForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const memo = document.getElementById('fixedMemo').value;
+            const amount = parseFloat(document.getElementById('fixedAmount').value);
+            const category = document.getElementById('fixedCategory').value;
+            const day = parseInt(document.getElementById('fixedDay').value);
+
+            if (!amount || isNaN(amount)) return;
+
+            const newFixed = {
+                id: Date.now(),
+                memo,
+                amount,
+                category,
+                day
+            };
+
+            fixedCosts.push(newFixed);
+            localStorage.setItem('kakeibo_fixed_costs', JSON.stringify(fixedCosts));
+            renderFixedList();
+
+            document.getElementById('fixedMemo').value = '';
+            document.getElementById('fixedAmount').value = '';
+        });
+
+        // 固定費削除
+        function deleteFixedCost(id) {
+            fixedCosts = fixedCosts.filter(f => f.id !== id);
+            localStorage.setItem('kakeibo_fixed_costs', JSON.stringify(fixedCosts));
+            renderFixedList();
+        }
+
+        // モーダル操作
+        function openFixedModal() {
+            document.getElementById('fixedModal').classList.remove('hidden');
+            renderFixedList();
+        }
+        function closeFixedModal() {
+            document.getElementById('fixedModal').classList.add('hidden');
+        }
+
+        // 固定費一覧の描画
+        function renderFixedList() {
+            const listEl = document.getElementById('fixedList');
+            if (fixedCosts.length === 0) {
+                listEl.innerHTML = `<p class="text-center text-slate-400 text-xs py-3">登録されている固定費はありません</p>`;
+                return;
+            }
+
+            listEl.innerHTML = fixedCosts.map(f => `
+                <div class="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-100 text-sm">
+                    <div>
+                        <p class="font-semibold text-slate-800">${escapeHtml(f.memo)} <span class="text-xs font-normal text-slate-400">(${f.category})</span></p>
+                        <p class="text-xs text-indigo-600">毎月 ${f.day}日 · ¥${f.amount.toLocaleString()}</p>
+                    </div>
+                    <button onclick="deleteFixedCost(${f.id})" class="text-slate-300 hover:text-rose-500 px-2 transition text-sm">×</button>
+                </div>
+            `).join('');
+        }
+
+        // 今月分の固定費を手動（またはボタン）で一括反映
+        function applyFixedCostsNow() {
+            if (fixedCosts.length === 0) {
+                alert('固定費が登録されていません。');
+                return;
+            }
+
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            let addedCount = 0;
+
+            fixedCosts.forEach(f => {
+                const dayStr = String(f.day).padStart(2, '0');
+                const targetDate = `${year}-${month}-${dayStr}`;
+
+                // すでに同月・同名・同額のデータがなければ追加
+                const exists = transactions.some(t => t.date.startsWith(`${year}-${month}`) && t.memo === f.memo && t.amount === f.amount);
+                
+                if (!exists) {
+                    transactions.unshift({
+                        id: Date.now() + Math.random(),
+                        type: 'expense',
+                        amount: f.amount,
+                        category: f.category,
+                        memo: f.memo,
+                        date: targetDate
+                    });
+                    addedCount++;
+                }
+            });
+
+            saveAndRender();
+            closeFixedModal();
+            alert(`${addedCount}件の固定費を今月の履歴に反映しました！`);
+        }
+
+        // 月初に自動チェックして反映する仕組み
+        function checkAndApplyAutoFixedCosts() {
+            if (fixedCosts.length === 0) return;
+
+            const now = new Date();
+            const todayDate = now.getDate();
+            
+            // 例として「毎月1日以降」かつ「今月まだ一度も自動反映チェックをしていない」場合をローカルストレージで管理
+            const yearMonth = `${now.getFullYear()}-${now.getMonth() + 1}`;
+            const lastChecked = localStorage.getItem('kakeibo_last_checked_month');
+
+            if (todayDate >= 1 && lastChecked !== yearMonth) {
+                // 自動反映処理
+                let added = false;
+                fixedCosts.forEach(f => {
+                    const dayStr = String(f.day).padStart(2, '0');
+                    const targetDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${dayStr}`;
+                    
+                    const exists = transactions.some(t => t.date.startsWith(yearMonth) && t.memo === f.memo && t.amount === f.amount);
+                    if (!exists) {
+                        transactions.unshift({
+                            id: Date.now() + Math.random(),
+                            type: 'expense',
+                            amount: f.amount,
+                            category: f.category,
+                            memo: f.memo,
+                            date: targetDate
+                        });
+                        added = true;
+                    }
+                });
+
+                if (added) {
+                    saveAndRender();
+                }
+                localStorage.setItem('kakeibo_last_checked_month', yearMonth);
+            }
+        }
+
+        // 履歴削除
+        function deleteTransaction(id) {
+            transactions = transactions.filter(t => t.id !== id);
+            saveAndRender();
+        }
+
+        // すべて削除
+        function clearAllData() {
+            if (confirm('すべての履歴を削除しますか？')) {
+                transactions = [];
+                saveAndRender();
+            }
+        }
+
+        // データ保存と再描画
+        function saveAndRender() {
+            localStorage.setItem('kakeibo_transactions', JSON.stringify(transactions));
+            renderApp();
+        }
+
+        // アプリ全体の描画
+        function renderApp() {
+            renderSummary();
+            renderList();
+            renderChart();
+        }
+
+        // サマリー計算と表示
+        function renderSummary() {
+            let income = 0;
+            let expense = 0;
+
+            transactions.forEach(t => {
+                if (t.type === 'income') income += t.amount;
+                else expense += t.amount;
+            });
+
+            const balance = income - expense;
+
+            document.getElementById('totalBalance').textContent = `¥${balance.toLocaleString()}`;
+            document.getElementById('totalIncome').textContent = `¥${income.toLocaleString()}`;
+            document.getElementById('totalExpense').textContent = `¥${expense.toLocaleString()}`;
+        }
+
+        // 履歴リストの描画
+        function renderList() {
+            const listEl = document.getElementById('transactionList');
+            if (transactions.length === 0) {
+                listEl.innerHTML = `<p class="text-center text-slate-400 text-sm py-4">データがまだありません</p>`;
+                return;
+            }
+
+            listEl.innerHTML = transactions.map(t => `
+                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 hover:bg-slate-100/50 transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${t.type === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}">
+                            ${t.type === 'income' ? '収' : '支'}
+                        </div>
+                        <div>
+                            <p class="font-semibold text-sm text-slate-800">${escapeHtml(t.memo)}</p>
+                            <p class="text-xs text-slate-400">${t.date} · <span class="bg-slate-200/60 px-1.5 py-0.5 rounded text-slate-600">${t.category}</span></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold text-sm ${t.type === 'income' ? 'text-emerald-600' : 'text-slate-800'}">
+                            ${t.type === 'income' ? '+' : '-'}¥${t.amount.toLocaleString()}
+                        </span>
+                        <button onclick="deleteTransaction(${t.id})" class="text-slate-300 hover:text-rose-500 transition text-sm">×</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // グラフの描画
+        function renderChart() {
+            const ctx = document.getElementById('expenseChart').getContext('2d');
+            
+            const expenseData = {};
+            categories.expense.forEach(cat => expenseData[cat] = 0);
+            
+            transactions.filter(t => t.type === 'expense').forEach(t => {
+                if (expenseData[t.category] !== undefined) {
+                    expenseData[t.category] += t.amount;
+                } else {
+                    expenseData['その他'] += t.amount;
+                }
+            });
+
+            const labels = Object.keys(expenseData);
+            const data = Object.values(expenseData);
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            const hasData = data.some(val => val > 0);
+            const chartLabels = hasData ? labels : ['データなし'];
+            const chartDataValues = hasData ? data : [1];
+            const chartColors = hasData ? ['#f43f5e', '#fb7185', '#fda4af', '#fb923c', '#facc15', '#a78bfa', '#cbd5e1'] : ['#e2e8f0'];
+
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        data: chartDataValues,
+                        backgroundColor: chartColors,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                boxWidth: 12,
+                                font: { size: 11 }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 簡易XSS対策
+        function escapeHtml(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+    </script>
+</body>
+</html>
+
