@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>簡単家計簿アプリ</title>
+    <title>簡単家計簿 (クラウド共有版)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
@@ -11,6 +11,8 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; touch-action: manipulation; }
         .safe-area-top { padding-top: max(0.75rem, env(safe-area-inset-top)); }
         .safe-area-bottom { padding-bottom: calc(1rem + env(safe-area-inset-bottom)); }
+        /* スクロールバー非表示 */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
     </style>
 </head>
 <body class="bg-slate-50 h-screen overflow-hidden text-slate-800">
@@ -31,16 +33,17 @@
                 </div>
                 
                 <div class="flex items-center gap-1.5">
-                    <button id="openFixedBtn" class="bg-indigo-700/80 hover:bg-indigo-700 text-xs px-3 py-1.5 rounded-xl border border-indigo-500/40 transition flex items-center gap-1 font-medium">
+                    <button id="openFixedBtn" class="bg-indigo-700/80 hover:bg-indigo-700 text-xs px-2.5 py-1.5 rounded-xl border border-indigo-500/40 transition flex items-center gap-1 font-medium">
                         固定費
                     </button>
-                    <button id="resetKeyBtn" class="bg-indigo-800/80 hover:bg-indigo-800 text-[10px] px-2.5 py-1.5 rounded-xl text-indigo-100 transition cursor-pointer" title="新しい専用リンクを発行します">
-                        ID確認
+                    <button id="shareLinkBtn" class="bg-white text-indigo-600 hover:bg-indigo-50 text-[10px] font-bold px-2.5 py-1.5 rounded-xl shadow-sm transition cursor-pointer flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                        家族共有
                     </button>
                 </div>
             </div>
 
-            <!-- サマリーカード -->
+            <!-- サマリー -->
             <div class="grid grid-cols-3 gap-2">
                 <div class="bg-indigo-700/60 px-2 py-1.5 rounded-xl border border-indigo-500/30 text-center">
                     <p class="text-[10px] text-indigo-200">月間収支</p>
@@ -57,12 +60,15 @@
             </div>
         </header>
 
-        <!-- メインコンテンツ -->
+        <!-- メイン履歴エリア -->
         <main class="flex-1 px-4 py-3 overflow-y-auto space-y-3">
             <section class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">今月の履歴</h3>
-                    <span id="syncStatus" class="text-[10px] text-emerald-600 font-semibold">☁️ クラウド接続準備中</span>
+                    <span id="syncStatus" class="text-[10px] text-indigo-500 font-semibold flex items-center gap-1">
+                        <svg class="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        クラウド接続中...
+                    </span>
                 </div>
                 <div id="transactionList" class="space-y-2">
                     <!-- 動的生成 -->
@@ -70,7 +76,7 @@
             </section>
         </main>
 
-        <!-- 操作部 -->
+        <!-- 登録フォーム -->
         <footer class="bg-white border-t border-slate-100 px-4 pt-3 pb-6 shadow-lg shrink-0 rounded-t-3xl safe-area-bottom">
             <form id="transactionForm" class="space-y-2.5">
                 <div class="grid grid-cols-2 gap-2">
@@ -86,7 +92,7 @@
                     <div>
                         <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">カテゴリ</label>
                         <select id="category" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm">
-                            <!-- 動的 -->
+                            <!-- 動的生成 -->
                         </select>
                     </div>
                 </div>
@@ -102,7 +108,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl text-sm shadow-md transition active:scale-[0.98]">
+                <button type="submit" id="submitBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl text-sm shadow-md transition active:scale-[0.98]">
                     追加する
                 </button>
             </form>
@@ -121,17 +127,17 @@
             <form id="fixedForm" class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">名称 / メモ</label>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">名称 / メモ</label>
                         <input type="text" id="fixedMemo" required placeholder="例: 家賃" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">金額 (円)</label>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">金額 (円)</label>
                         <input type="number" id="fixedAmount" required placeholder="例: 80000" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">カテゴリ</label>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">カテゴリ</label>
                         <select id="fixedCategory" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
                             <option value="家賃">家賃</option>
                             <option value="光熱費">光熱費</option>
@@ -140,7 +146,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">適用日 (毎月何日)</label>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">適用日 (毎月何日)</label>
                         <input type="number" id="fixedDay" min="1" max="31" value="1" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
                     </div>
                 </div>
@@ -159,12 +165,15 @@
         </div>
     </div>
 
-    <!-- Firebase SDK & 自動同期ロジック -->
+    <!-- UI制御 ＆ Firebase クラウド同期ロジック -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // ==========================================
+        // 1. UI・ローカル状態の即時初期化 (絶対に止まらない)
+        // ==========================================
         const categories = {
             expense: ['食費', '日用品', '交通費', '娯楽', '家賃', '光熱費', 'その他'],
             income: ['給与', '副業', 'お小遣い', '一時所得', 'その他']
@@ -174,184 +183,71 @@
         let transactions = [];
         let fixedCosts = [];
         let selectedDate = new Date();
+        
         let db = null;
-        let auth = null;
-        let userId = null;
+        let authUser = null;
         let appId = 'default-app-id';
-
-        // ユーザー専用のクラウドキーを自動生成またはURLパラメータから取得
-        function getOrCreateUserKey() {
-            const urlParams = new URLSearchParams(window.location.search);
-            let key = urlParams.get('uid');
-            if (!key) {
-                key = localStorage.getItem('kakeibo_cloud_uid');
-                if (!key) {
-                    key = 'user_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-                    localStorage.setItem('kakeibo_cloud_uid', key);
-                }
-                const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?uid=' + key;
-                window.history.replaceState({path: newUrl}, '', newUrl);
-            } else {
-                localStorage.setItem('kakeibo_cloud_uid', key);
+        
+        // 共有IDの取得または生成 (URLパラメータ ?uid=xxx)
+        let familyId = new URLSearchParams(window.location.search).get('uid');
+        if (!familyId) {
+            familyId = localStorage.getItem('kakeibo_family_uid');
+            if (!familyId) {
+                familyId = 'fam_' + Math.random().toString(36).substring(2, 12);
+                localStorage.setItem('kakeibo_family_uid', familyId);
             }
-            return key;
+            // URLに付与
+            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?uid=' + familyId;
+            window.history.replaceState({path: newUrl}, '', newUrl);
+        } else {
+            localStorage.setItem('kakeibo_family_uid', familyId);
         }
 
-        // DOMContentLoaded時に確実にイベントをバインド
-        document.addEventListener('DOMContentLoaded', () => {
-            const dateInput = document.getElementById('date');
-            if (dateInput) dateInput.valueAsDate = new Date();
-            updateCategoryOptions();
+        // 初期表示の設定
+        document.getElementById('date').valueAsDate = new Date();
+        updateCategoryOptions();
+        renderApp();
+
+        // UIイベントのバインド
+        document.getElementById('prevMonthBtn').addEventListener('click', () => {
+            selectedDate.setMonth(selectedDate.getMonth() - 1);
             renderApp();
-
-            // 各種ボタンのイベント紐付け
-            document.getElementById('prevMonthBtn').addEventListener('click', () => changeMonth(-1));
-            document.getElementById('nextMonthBtn').addEventListener('click', () => changeMonth(1));
-            document.getElementById('openFixedBtn').addEventListener('click', openFixedModal);
-            document.getElementById('resetKeyBtn').addEventListener('click', resetCloudKey);
-            document.getElementById('closeFixedModalBtn').addEventListener('click', closeFixedModal);
-            document.getElementById('applyFixedBtn').addEventListener('click', applyFixedCostsNow);
-
-            document.getElementById('typeExpense').addEventListener('click', () => switchType('expense'));
-            document.getElementById('typeIncome').addEventListener('click', () => switchType('income'));
-
-            // 取引フォーム送信
-            document.getElementById('transactionForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                if (!db || !userId) {
-                    alert("データベース接続の準備中です。しばらくお待ちください。");
-                    return;
-                }
-
-                const amountVal = document.getElementById('amount').value;
-                const amount = parseFloat(amountVal);
-                const category = document.getElementById('category').value;
-                const memo = document.getElementById('memo').value;
-                const date = document.getElementById('date').value;
-
-                if (!amount || isNaN(amount)) return;
-
-                try {
-                    await addDoc(collection(db, 'artifacts', appId, 'users', userId, 'transactions'), {
-                        type: currentType,
-                        amount,
-                        category,
-                        memo: memo || category,
-                        date,
-                        createdAt: Date.now()
-                    });
-                    document.getElementById('amount').value = '';
-                    document.getElementById('memo').value = '';
-                    document.getElementById('date').valueAsDate = new Date();
-                } catch (err) {
-                    console.error("Add tx error:", err);
-                    alert("データの保存に失敗しました。");
-                }
-            });
-
-            // 固定費フォーム送信
-            document.getElementById('fixedForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                if (!db || !userId) return;
-
-                const memo = document.getElementById('fixedMemo').value;
-                const amount = parseFloat(document.getElementById('fixedAmount').value);
-                const category = document.getElementById('fixedCategory').value;
-                const day = parseInt(document.getElementById('fixedDay').value);
-
-                if (!amount || isNaN(amount)) return;
-
-                try {
-                    await addDoc(collection(db, 'artifacts', appId, 'users', userId, 'fixedCosts'), {
-                        memo,
-                        amount,
-                        category,
-                        day
-                    });
-                    document.getElementById('fixedMemo').value = '';
-                    document.getElementById('fixedAmount').value = '';
-                } catch (err) {
-                    console.error("Add fc error:", err);
-                }
-            });
+        });
+        document.getElementById('nextMonthBtn').addEventListener('click', () => {
+            selectedDate.setMonth(selectedDate.getMonth() + 1);
+            renderApp();
+        });
+        document.getElementById('typeExpense').addEventListener('click', () => switchType('expense'));
+        document.getElementById('typeIncome').addEventListener('click', () => switchType('income'));
+        
+        document.getElementById('openFixedBtn').addEventListener('click', () => {
+            document.getElementById('fixedModal').classList.remove('hidden');
+            renderFixedList();
+        });
+        document.getElementById('closeFixedModalBtn').addEventListener('click', () => {
+            document.getElementById('fixedModal').classList.add('hidden');
         });
 
-        function resetCloudKey() {
-            const currentUid = localStorage.getItem('kakeibo_cloud_uid') || userId;
-            alert(`あなたの専用クラウドID:\n${currentUid}\n\nこのURLをブックマークしておけば、どのスマホやPCからでも同じデータにアクセスできます！`);
-        }
-
-        // Firebase初期化 & 匿名認証
-        try {
-            const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-            const app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-            appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-            userId = getOrCreateUserKey();
-
-            async function initAuth() {
-                try {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                } catch (err) {
-                    console.error("Auth error:", err);
-                }
-            }
-            initAuth();
-
-            onAuthStateChanged(auth, (user) => {
-                if (user && db) {
-                    const statusEl = document.getElementById('syncStatus');
-                    if (statusEl) statusEl.textContent = "☁️ クラウド自動保存中";
-                    setupFirestoreListeners(userId);
-                }
-            });
-        } catch (e) {
-            console.error("Firebase init failed:", e);
-            const statusEl = document.getElementById('syncStatus');
-            if (statusEl) statusEl.textContent = "⚠️ ローカルモード";
-        }
-
-        function setupFirestoreListeners(uid) {
-            if (!db) return;
+        // コピー用の一時テキストエリアを作成してコピー (iframe制約対策)
+        document.getElementById('shareLinkBtn').addEventListener('click', () => {
+            const shareUrl = window.location.href;
+            const tempInput = document.createElement("input");
+            tempInput.value = shareUrl;
+            document.body.appendChild(tempInput);
+            tempInput.select();
             try {
-                const txCol = collection(db, 'artifacts', appId, 'users', uid, 'transactions');
-                onSnapshot(txCol, (snapshot) => {
-                    transactions = [];
-                    snapshot.forEach(docSnap => {
-                        transactions.push({ id: docSnap.id, ...docSnap.data() });
-                    });
-                    transactions.sort((a, b) => new Date(b.date) - new Date(a.date) || b.createdAt - a.createdAt);
-                    renderApp();
-                });
-
-                const fcCol = collection(db, 'artifacts', appId, 'users', uid, 'fixedCosts');
-                onSnapshot(fcCol, (snapshot) => {
-                    fixedCosts = [];
-                    snapshot.forEach(docSnap => {
-                        fixedCosts.push({ id: docSnap.id, ...docSnap.data() });
-                    });
-                    renderFixedList();
-                });
+                document.execCommand("copy");
+                alert("✨ 共有リンクをコピーしました！\n\nこのリンクをLINEやメールでご家族に送って開いてもらうだけで、同じ家計簿を一緒に使えます。");
             } catch (err) {
-                console.error("Firestore listener error:", err);
+                prompt("以下のURLをコピーして共有してください：", shareUrl);
             }
-        }
-
-        function changeMonth(direction) {
-            selectedDate.setMonth(selectedDate.getMonth() + direction);
-            renderApp();
-        }
+            document.body.removeChild(tempInput);
+        });
 
         function switchType(type) {
             currentType = type;
             const expBtn = document.getElementById('typeExpense');
             const incBtn = document.getElementById('typeIncome');
-            
             if (type === 'expense') {
                 expBtn.className = "py-1.5 rounded-xl font-medium text-xs transition bg-rose-500 text-white shadow-sm";
                 incBtn.className = "py-1.5 rounded-xl font-medium text-xs transition bg-slate-100 text-slate-600";
@@ -364,7 +260,6 @@
 
         function updateCategoryOptions() {
             const select = document.getElementById('category');
-            if (!select) return;
             select.innerHTML = '';
             categories[currentType].forEach(cat => {
                 const opt = document.createElement('option');
@@ -374,69 +269,245 @@
             });
         }
 
-        window.deleteTransaction = async function(id) {
-            if (!db || !userId) return;
+        // ==========================================
+        // 2. Firebase バックグラウンド同期処理
+        // ==========================================
+        async function initFirebase() {
             try {
-                await deleteDoc(doc(db, 'artifacts', appId, 'users', userId, 'transactions', id));
+                const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                db = getFirestore(app);
+                appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+                // 認証（ルール遵守）
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // 認証完了後にリスナーをセット (家族共有のためパブリックデータを使用)
+                const txCollectionPath = `tx_${familyId}`;
+                const txCol = collection(db, 'artifacts', appId, 'public', 'data', txCollectionPath);
+                
+                onSnapshot(txCol, (snapshot) => {
+                    const newList = [];
+                    snapshot.forEach(docSnap => {
+                        newList.push({ id: docSnap.id, ...docSnap.data() });
+                    });
+                    transactions = newList.sort((a, b) => new Date(b.date) - new Date(a.date) || b.createdAt - a.createdAt);
+                    renderApp();
+                    
+                    const statusEl = document.getElementById('syncStatus');
+                    statusEl.innerHTML = '☁️ 家族とクラウド同期済み';
+                    statusEl.className = 'text-[10px] text-emerald-600 font-semibold';
+                }, (err) => {
+                    console.error("Snapshot error:", err);
+                });
+
+                const fcCollectionPath = `fc_${familyId}`;
+                const fcCol = collection(db, 'artifacts', appId, 'public', 'data', fcCollectionPath);
+                
+                onSnapshot(fcCol, (snapshot) => {
+                    const newFcList = [];
+                    snapshot.forEach(docSnap => {
+                        newFcList.push({ id: docSnap.id, ...docSnap.data() });
+                    });
+                    fixedCosts = newFcList;
+                    renderFixedList();
+                });
+
+            } catch (err) {
+                console.error("Firebase init error:", err);
+                const statusEl = document.getElementById('syncStatus');
+                statusEl.innerHTML = '⚠️ オフライン';
+                statusEl.className = 'text-[10px] text-rose-500 font-semibold';
+            }
+        }
+        
+        // UIブロックを防ぐため、少し遅延させてFirebaseを初期化
+        setTimeout(initFirebase, 100);
+
+        // ==========================================
+        // 3. データ追加・削除の操作
+        // ==========================================
+        
+        // 取引の追加
+        document.getElementById('transactionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('amount').value);
+            const category = document.getElementById('category').value;
+            const memo = document.getElementById('memo').value;
+            const date = document.getElementById('date').value;
+
+            if (!amount || isNaN(amount)) return;
+
+            const txData = {
+                type: currentType,
+                amount,
+                category,
+                memo: memo || category,
+                date,
+                createdAt: Date.now()
+            };
+
+            // フォームリセット
+            document.getElementById('amount').value = '';
+            document.getElementById('memo').value = '';
+            document.getElementById('date').valueAsDate = new Date();
+
+            if (db) {
+                try {
+                    // クラウドへ保存
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', `tx_${familyId}`), txData);
+                } catch (err) {
+                    console.error("Add tx error:", err);
+                    alert("クラウドへの保存に失敗しました。");
+                }
+            } else {
+                alert("クラウドに接続中またはオフラインです。");
+            }
+        });
+
+        // 取引の削除 (windowに紐付けてHTMLから呼べるようにする)
+        window.deleteTransaction = async function(id) {
+            if (!db) return;
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', `tx_${familyId}`, id));
             } catch (err) {
                 console.error("Delete tx error:", err);
             }
-        }
+        };
 
+        // 固定費の追加
+        document.getElementById('fixedForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const memo = document.getElementById('fixedMemo').value;
+            const amount = parseFloat(document.getElementById('fixedAmount').value);
+            const category = document.getElementById('fixedCategory').value;
+            const day = parseInt(document.getElementById('fixedDay').value);
+
+            if (!amount || isNaN(amount)) return;
+
+            const fcData = { memo, amount, category, day };
+
+            if (db) {
+                try {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', `fc_${familyId}`), fcData);
+                    document.getElementById('fixedMemo').value = '';
+                    document.getElementById('fixedAmount').value = '';
+                } catch (err) {
+                    console.error("Add fc error:", err);
+                }
+            }
+        });
+
+        // 固定費の削除
         window.deleteFixedCost = async function(id) {
-            if (!db || !userId) return;
+            if (!db) return;
             try {
-                await deleteDoc(doc(db, 'artifacts', appId, 'users', userId, 'fixedCosts', id));
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', `fc_${familyId}`, id));
             } catch (err) {
                 console.error("Delete fc error:", err);
             }
-        }
+        };
 
-        function openFixedModal() {
-            const modal = document.getElementById('fixedModal');
-            if (modal) modal.classList.remove('hidden');
-            renderFixedList();
-        }
-
-        function closeFixedModal() {
-            const modal = document.getElementById('fixedModal');
-            if (modal) modal.classList.add('hidden');
-        }
-
-        async function applyFixedCostsNow() {
-            if (!db || !userId || fixedCosts.length === 0) {
-                alert('固定費が登録されていません。');
+        // 固定費の一括反映
+        document.getElementById('applyFixedBtn').addEventListener('click', async () => {
+            if (!db || fixedCosts.length === 0) {
+                alert('反映する固定費がありません。');
                 return;
             }
 
             const year = selectedDate.getFullYear();
             const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
             let addedCount = 0;
+            const txCol = collection(db, 'artifacts', appId, 'public', 'data', `tx_${familyId}`);
 
             for (const f of fixedCosts) {
                 const dayStr = String(f.day).padStart(2, '0');
                 const targetDate = `${year}-${month}-${dayStr}`;
+                // 今月すでに同じ名前と金額の履歴があるかチェック
                 const exists = transactions.some(t => t.date && t.date.startsWith(`${year}-${month}`) && t.memo === f.memo && t.amount === f.amount);
 
                 if (!exists) {
-                    await addDoc(collection(db, 'artifacts', appId, 'users', userId, 'transactions'), {
-                        type: 'expense',
-                        amount: f.amount,
-                        category: f.category,
-                        memo: f.memo,
-                        date: targetDate,
-                        createdAt: Date.now()
-                    });
-                    addedCount++;
+                    try {
+                        await addDoc(txCol, {
+                            type: 'expense',
+                            amount: f.amount,
+                            category: f.category,
+                            memo: f.memo,
+                            date: targetDate,
+                            createdAt: Date.now()
+                        });
+                        addedCount++;
+                    } catch (err) {
+                        console.error("Apply fc error:", err);
+                    }
                 }
             }
-            closeFixedModal();
-            alert(`${addedCount}件の固定費を現在の月の履歴に反映しました！`);
+            
+            document.getElementById('fixedModal').classList.add('hidden');
+            if (addedCount > 0) {
+                alert(`${addedCount}件の固定費を現在の月の履歴に反映しました！`);
+            } else {
+                alert(`今月分の固定費はすでに反映されています。`);
+            }
+        });
+
+
+        // ==========================================
+        // 4. UI 描画関数
+        // ==========================================
+        function renderApp() {
+            const year = selectedDate.getFullYear();
+            const month = selectedDate.getMonth() + 1;
+            document.getElementById('currentMonthLabel').textContent = `${year}年 ${month}月`;
+
+            const prefix = `${year}-${String(month).padStart(2, '0')}`;
+            const filtered = transactions.filter(t => t.date && t.date.startsWith(prefix));
+
+            let income = 0;
+            let expense = 0;
+            filtered.forEach(t => {
+                if (t.type === 'income') income += t.amount;
+                else expense += t.amount;
+            });
+
+            document.getElementById('totalBalance').textContent = `¥${(income - expense).toLocaleString()}`;
+            document.getElementById('totalIncome').textContent = `¥${income.toLocaleString()}`;
+            document.getElementById('totalExpense').textContent = `¥${expense.toLocaleString()}`;
+
+            const listEl = document.getElementById('transactionList');
+            if (filtered.length === 0) {
+                listEl.innerHTML = `<p class="text-center text-slate-400 text-xs py-6">この月のデータはまだありません</p>`;
+                return;
+            }
+
+            listEl.innerHTML = filtered.map(t => `
+                <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-sm">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${t.type === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}">
+                            ${t.type === 'income' ? '収' : '支'}
+                        </div>
+                        <div class="max-w-[150px] sm:max-w-[200px]">
+                            <p class="font-semibold text-xs text-slate-800 truncate">${escapeHtml(t.memo)}</p>
+                            <p class="text-[10px] text-slate-400">${t.date} · ${t.category}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <span class="font-bold text-xs ${t.type === 'income' ? 'text-emerald-600' : 'text-slate-800'}">
+                            ${t.type === 'income' ? '+' : '-'}¥${t.amount.toLocaleString()}
+                        </span>
+                        <button onclick="deleteTransaction('${t.id}')" class="text-slate-300 hover:text-rose-500 transition text-xs px-1">×</button>
+                    </div>
+                </div>
+            `).join('');
         }
 
         function renderFixedList() {
             const listEl = document.getElementById('fixedList');
-            if (!listEl) return;
             if (fixedCosts.length === 0) {
                 listEl.innerHTML = `<p class="text-center text-slate-400 text-xs py-3">登録されている固定費はありません</p>`;
                 return;
@@ -453,59 +524,6 @@
             `).join('');
         }
 
-        function renderApp() {
-            const year = selectedDate.getFullYear();
-            const month = selectedDate.getMonth() + 1;
-            const monthLabel = document.getElementById('currentMonthLabel');
-            if (monthLabel) monthLabel.textContent = `${year}年 ${month}月`;
-
-            const prefix = `${year}-${String(month).padStart(2, '0')}`;
-            const filtered = transactions.filter(t => t.date && t.date.startsWith(prefix));
-
-            let income = 0;
-            let expense = 0;
-            filtered.forEach(t => {
-                if (t.type === 'income') income += t.amount;
-                else expense += t.amount;
-            });
-
-            const balEl = document.getElementById('totalBalance');
-            const incEl = document.getElementById('totalIncome');
-            const expEl = document.getElementById('totalExpense');
-
-            if (balEl) balEl.textContent = `¥${(income - expense).toLocaleString()}`;
-            if (incEl) incEl.textContent = `¥${income.toLocaleString()}`;
-            if (expEl) expEl.textContent = `¥${expense.toLocaleString()}`;
-
-            const listEl = document.getElementById('transactionList');
-            if (!listEl) return;
-
-            if (filtered.length === 0) {
-                listEl.innerHTML = `<p class="text-center text-slate-400 text-xs py-6">この月のデータはまだありません</p>`;
-                return;
-            }
-
-            listEl.innerHTML = filtered.map(t => `
-                <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-sm">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${t.type === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}">
-                            ${t.type === 'income' ? '収' : '支'}
-                        </div>
-                        <div>
-                            <p class="font-semibold text-xs text-slate-800">${escapeHtml(t.memo)}</p>
-                            <p class="text-[10px] text-slate-400">${t.date} · ${t.category}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="font-bold text-xs ${t.type === 'income' ? 'text-emerald-600' : 'text-slate-800'}">
-                            ${t.type === 'income' ? '+' : '-'}¥${t.amount.toLocaleString()}
-                        </span>
-                        <button onclick="deleteTransaction('${t.id}')" class="text-slate-300 hover:text-rose-500 transition text-xs px-1">×</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
         function escapeHtml(str) {
             if (!str) return '';
             return str.replace(/[&<>'"]/g, 
@@ -515,4 +533,5 @@
     </script>
 </body>
 </html>
+
 
