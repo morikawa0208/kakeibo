@@ -1,519 +1,2955 @@
 <!DOCTYPE html>
+
 <html lang="ja">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
     <title>簡単家計簿アプリ</title>
-    <!-- Tailwind CSS -->
+
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
     <style>
+
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; touch-action: manipulation; }
-        .safe-area-top { padding-top: max(0.75rem, env(safe-area-inset-top)); }
-        .safe-area-bottom { padding-bottom: calc(1rem + env(safe-area-inset-bottom)); }
-        ::-webkit-scrollbar { width: 0px; background: transparent; }
+
+        body {
+
+            font-family: 'Plus Jakarta Sans', sans-serif;
+
+            touch-action: manipulation;
+
+        }
+
+        .safe-area-top {
+
+            padding-top: max(0.75rem, env(safe-area-inset-top));
+
+        }
+
+        .safe-area-bottom {
+
+            padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+
+        }
+
+        ::-webkit-scrollbar {
+
+            width: 0px;
+
+            background: transparent;
+
+        }
+
     </style>
+
 </head>
+
 <body class="bg-slate-50 h-screen overflow-hidden text-slate-800">
 
-    <div class="max-w-md mx-auto h-screen bg-white shadow-xl flex flex-col justify-between overflow-hidden relative">
-        
-        <!-- ヘッダー -->
-        <header class="bg-indigo-600 text-white px-4 pb-4 rounded-b-2xl shadow-md space-y-3 shrink-0 safe-area-top">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                    <button id="prevMonthBtn" class="p-1.5 hover:bg-indigo-700 rounded-lg transition text-indigo-200 hover:text-white">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                    </button>
-                    <span id="currentMonthLabel" class="font-bold text-sm tracking-wide">2026年 8月</span>
-                    <button id="nextMonthBtn" class="p-1.5 hover:bg-indigo-700 rounded-lg transition text-indigo-200 hover:text-white">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                    </button>
-                </div>
-                
-                <div class="flex items-center gap-1.5">
-                    <button id="openFixedBtn" class="bg-indigo-700/80 hover:bg-indigo-700 text-xs px-2.5 py-1.5 rounded-xl border border-indigo-500/40 transition flex items-center gap-1 font-medium">
-                        固定費
-                    </button>
-                    <button id="shareLinkBtn" class="bg-white text-indigo-600 hover:bg-indigo-50 text-[10px] font-bold px-2.5 py-1.5 rounded-xl shadow-sm transition cursor-pointer flex items-center gap-1">
-                        家族共有リンク
-                    </button>
-                </div>
-            </div>
+<div class="max-w-md mx-auto h-screen bg-white shadow-xl flex flex-col justify-between overflow-hidden relative">
 
-            <!-- サマリー -->
-            <div class="grid grid-cols-3 gap-2">
-                <div class="bg-indigo-700/60 px-2 py-1.5 rounded-xl border border-indigo-500/30 text-center">
-                    <p class="text-[10px] text-indigo-200">月間収支</p>
-                    <p id="totalBalance" class="text-xs sm:text-sm font-bold truncate">¥0</p>
-                </div>
-                <div class="bg-indigo-700/60 px-2 py-1.5 rounded-xl border border-indigo-500/30 text-center">
-                    <p class="text-[10px] text-emerald-200">収入</p>
-                    <p id="totalIncome" class="text-xs sm:text-sm font-bold text-emerald-300 truncate">¥0</p>
-                </div>
-                <div class="bg-indigo-700/60 px-2 py-1.5 rounded-xl border border-indigo-500/30 text-center">
-                    <p class="text-[10px] text-rose-200">支出</p>
-                    <p id="totalExpense" class="text-xs sm:text-sm font-bold text-rose-300 truncate">¥0</p>
-                </div>
-            </div>
-        </header>
+    <!-- ヘッダー -->
 
-        <!-- メイン履歴エリア -->
-        <main class="flex-1 px-4 py-3 overflow-y-auto space-y-3">
-            <section class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">今月の履歴</h3>
-                    <span id="syncStatus" class="text-[10px] text-amber-500 font-semibold">🔄 クラウド接続中...</span>
-                </div>
-                <div id="transactionList" class="space-y-2">
-                    <!-- 動的生成 -->
-                </div>
-            </section>
-        </main>
+    <header class="bg-indigo-600 text-white px-4 pb-4 rounded-b-2xl shadow-md space-y-3 shrink-0 safe-area-top">
 
-        <!-- 登録フォーム -->
-        <footer class="bg-white border-t border-slate-100 px-4 pt-3 pb-6 shadow-lg shrink-0 rounded-t-3xl safe-area-bottom">
-            <form id="transactionForm" class="space-y-2.5">
-                <div class="grid grid-cols-2 gap-2">
-                    <button type="button" id="typeExpense" class="py-1.5 rounded-xl font-medium text-xs transition bg-rose-500 text-white shadow-sm">支出</button>
-                    <button type="button" id="typeIncome" class="py-1.5 rounded-xl font-medium text-xs transition bg-slate-100 text-slate-600">収入</button>
-                </div>
+        <div class="flex justify-between items-center">
 
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">金額 (円)</label>
-                        <input type="number" id="amount" required placeholder="例: 1500" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">カテゴリ</label>
-                        <select id="category" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm">
-                            <!-- 動的生成 -->
-                        </select>
-                    </div>
-                </div>
+            <div class="flex items-center gap-2">
 
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">メモ (任意)</label>
-                        <input type="text" id="memo" placeholder="例: ランチ" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">日付</label>
-                        <input type="date" id="date" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs box-border">
-                    </div>
-                </div>
+                <button
 
-                <button type="submit" id="submitBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl text-sm shadow-md transition active:scale-[0.98]">
-                    追加する
+                    id="prevMonthBtn"
+
+                    class="p-1.5 hover:bg-indigo-700 rounded-lg transition text-indigo-200 hover:text-white">
+
+                    <svg
+
+                        class="w-4 h-4"
+
+                        fill="none"
+
+                        stroke="currentColor"
+
+                        viewBox="0 0 24 24">
+
+                        <path
+
+                            stroke-linecap="round"
+
+                            stroke-linejoin="round"
+
+                            stroke-width="2"
+
+                            d="M15 19l-7-7 7-7">
+
+                        </path>
+
+                    </svg>
+
                 </button>
-            </form>
-        </footer>
-    </div>
 
-    <!-- 固定費設定モーダル -->
-    <div id="fixedModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
-            <div class="flex justify-between items-center">
-                <h3 class="text-lg font-bold text-slate-800">月額固定費の管理</h3>
-                <button id="closeFixedModalBtn" class="text-slate-400 hover:text-slate-600 text-lg font-bold">×</button>
-            </div>
-            <p class="text-xs text-slate-500">毎月の固定費を登録しておくと、ボタン一つで今月の履歴に反映できます。</p>
+                <span
 
-            <form id="fixedForm" class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">名称 / メモ</label>
-                        <input type="text" id="fixedMemo" required placeholder="例: 家賃" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">金額 (円)</label>
-                        <input type="number" id="fixedAmount" required placeholder="例: 80000" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">カテゴリ</label>
-                        <select id="fixedCategory" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
-                            <option value="家賃">家賃</option>
-                            <option value="光熱費">光熱費</option>
-                            <option value="通信費">通信費</option>
-                            <option value="その他">その他</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">適用日 (毎月何日)</label>
-                        <input type="number" id="fixedDay" min="1" max="31" value="1" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
-                    </div>
-                </div>
-                <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-medium py-2 rounded-xl text-sm transition">
-                    固定費を追加する
+                    id="currentMonthLabel"
+
+                    class="font-bold text-sm tracking-wide">
+
+                    2026年 8月
+
+                </span>
+
+                <button
+
+                    id="nextMonthBtn"
+
+                    class="p-1.5 hover:bg-indigo-700 rounded-lg transition text-indigo-200 hover:text-white">
+
+                    <svg
+
+                        class="w-4 h-4"
+
+                        fill="none"
+
+                        stroke="currentColor"
+
+                        viewBox="0 0 24 24">
+
+                        <path
+
+                            stroke-linecap="round"
+
+                            stroke-linejoin="round"
+
+                            stroke-width="2"
+
+                            d="M9 5l7 7-7 7">
+
+                        </path>
+
+                    </svg>
+
                 </button>
-            </form>
 
-            <div class="flex-1 overflow-y-auto space-y-2 pr-1" id="fixedList">
-                <!-- 動的 -->
             </div>
 
-            <button id="applyFixedBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow-sm">
-                今月分の固定費を反映する
-            </button>
+            <div class="flex items-center gap-1.5">
+
+                <button
+
+                    id="openFixedBtn"
+
+                    class="bg-indigo-700/80 hover:bg-indigo-700 text-xs px-2.5 py-1.5 rounded-xl border border-indigo-500/40 transition font-medium">
+
+                    固定費
+
+                </button>
+
+                <button
+
+                    id="shareLinkBtn"
+
+                    class="bg-white text-indigo-600 hover:bg-indigo-50 text-[10px] font-bold px-2.5 py-1.5 rounded-xl shadow-sm transition">
+
+                    家族共有リンク
+
+                </button>
+
+            </div>
+
         </div>
+
+        <!-- サマリー -->
+
+        <div class="grid grid-cols-3 gap-2">
+
+            <div class="bg-indigo-700/60 px-2 py-1.5 rounded-xl border border-indigo-500/30 text-center">
+
+                <p class="text-[10px] text-indigo-200">
+
+                    月間収支
+
+                </p>
+
+                <p
+
+                    id="totalBalance"
+
+                    class="text-xs sm:text-sm font-bold truncate">
+
+                    ¥0
+
+                </p>
+
+            </div>
+
+            <div class="bg-indigo-700/60 px-2 py-1.5 rounded-xl border border-indigo-500/30 text-center">
+
+                <p class="text-[10px] text-emerald-200">
+
+                    収入
+
+                </p>
+
+                <p
+
+                    id="totalIncome"
+
+                    class="text-xs sm:text-sm font-bold text-emerald-300 truncate">
+
+                    ¥0
+
+                </p>
+
+            </div>
+
+            <div class="bg-indigo-700/60 px-2 py-1.5 rounded-xl border border-indigo-500/30 text-center">
+
+                <p class="text-[10px] text-rose-200">
+
+                    支出
+
+                </p>
+
+                <p
+
+                    id="totalExpense"
+
+                    class="text-xs sm:text-sm font-bold text-rose-300 truncate">
+
+                    ¥0
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </header>
+
+    <!-- メイン -->
+
+    <main class="flex-1 px-4 py-3 overflow-y-auto space-y-3">
+
+        <section class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100">
+
+            <div class="flex justify-between items-center mb-2">
+
+                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">
+
+                    今月の履歴
+
+                </h3>
+
+                <span
+
+                    id="syncStatus"
+
+                    class="text-[10px] text-amber-500 font-semibold">
+
+                    🔄 Firebase接続中...
+
+                </span>
+
+            </div>
+
+            <div
+
+                id="transactionList"
+
+                class="space-y-2">
+
+            </div>
+
+            <!-- デバッグ表示 -->
+
+            <div
+
+                id="debugArea"
+
+                class="hidden mt-3 p-3 bg-rose-50 border border-rose-200 rounded-xl text-[10px] text-rose-700 break-all">
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- 登録フォーム -->
+
+    <footer class="bg-white border-t border-slate-100 px-4 pt-3 pb-6 shadow-lg shrink-0 rounded-t-3xl safe-area-bottom">
+
+        <form
+
+            id="transactionForm"
+
+            class="space-y-2.5">
+
+            <div class="grid grid-cols-2 gap-2">
+
+                <button
+
+                    type="button"
+
+                    id="typeExpense"
+
+                    class="py-1.5 rounded-xl font-medium text-xs transition bg-rose-500 text-white shadow-sm">
+
+                    支出
+
+                </button>
+
+                <button
+
+                    type="button"
+
+                    id="typeIncome"
+
+                    class="py-1.5 rounded-xl font-medium text-xs transition bg-slate-100 text-slate-600">
+
+                    収入
+
+                </button>
+
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+
+                <div>
+
+                    <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
+
+                        金額 (円)
+
+                    </label>
+
+                    <input
+
+                        type="number"
+
+                        id="amount"
+
+                        required
+
+                        placeholder="例: 1500"
+
+                        class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+
+                </div>
+
+                <div>
+
+                    <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
+
+                        カテゴリ
+
+                    </label>
+
+                    <select
+
+                        id="category"
+
+                        class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm">
+
+                    </select>
+
+                </div>
+
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+
+                <div>
+
+                    <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
+
+                        メモ (任意)
+
+                    </label>
+
+                    <input
+
+                        type="text"
+
+                        id="memo"
+
+                        placeholder="例: ランチ"
+
+                        class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+
+                </div>
+
+                <div>
+
+                    <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
+
+                        日付
+
+                    </label>
+
+                    <input
+
+                        type="date"
+
+                        id="date"
+
+                        required
+
+                        class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs">
+
+                </div>
+
+            </div>
+
+            <button
+
+                type="submit"
+
+                id="submitBtn"
+
+                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl text-sm shadow-md transition active:scale-[0.98]">
+
+                追加する
+
+            </button>
+
+        </form>
+
+    </footer>
+
+</div>
+
+<!-- 固定費モーダル -->
+
+<div
+
+    id="fixedModal"
+
+    class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50">
+
+    <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+
+        <div class="flex justify-between items-center">
+
+            <h3 class="text-lg font-bold text-slate-800">
+
+                月額固定費の管理
+
+            </h3>
+
+            <button
+
+                id="closeFixedModalBtn"
+
+                class="text-slate-400 hover:text-slate-600 text-lg font-bold">
+
+                ×
+
+            </button>
+
+        </div>
+
+        <p class="text-xs text-slate-500">
+
+            毎月の固定費を登録しておくと、ボタン一つで今月の履歴に反映できます。
+
+        </p>
+
+        <form
+
+            id="fixedForm"
+
+            class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+
+            <div class="grid grid-cols-2 gap-2">
+
+                <div>
+
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+
+                        名称 / メモ
+
+                    </label>
+
+                    <input
+
+                        type="text"
+
+                        id="fixedMemo"
+
+                        required
+
+                        placeholder="例: 家賃"
+
+                        class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+
+                </div>
+
+                <div>
+
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+
+                        金額 (円)
+
+                    </label>
+
+                    <input
+
+                        type="number"
+
+                        id="fixedAmount"
+
+                        required
+
+                        placeholder="例: 80000"
+
+                        class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+
+                </div>
+
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+
+                <div>
+
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+
+                        カテゴリ
+
+                    </label>
+
+                    <select
+
+                        id="fixedCategory"
+
+                        class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+
+                        <option value="家賃">家賃</option>
+
+                        <option value="光熱費">光熱費</option>
+
+                        <option value="通信費">通信費</option>
+
+                        <option value="その他">その他</option>
+
+                    </select>
+
+                </div>
+
+                <div>
+
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+
+                        適用日
+
+                    </label>
+
+                    <input
+
+                        type="number"
+
+                        id="fixedDay"
+
+                        min="1"
+
+                        max="31"
+
+                        value="1"
+
+                        required
+
+                        class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+
+                </div>
+
+            </div>
+
+            <button
+
+                type="submit"
+
+                class="w-full bg-slate-800 hover:bg-slate-900 text-white font-medium py-2 rounded-xl text-sm transition">
+
+                固定費を追加する
+
+            </button>
+
+        </form>
+
+        <div
+
+            id="fixedList"
+
+            class="flex-1 overflow-y-auto space-y-2 pr-1">
+
+        </div>
+
+        <button
+
+            id="applyFixedBtn"
+
+            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow-sm">
+
+            今月分の固定費を反映する
+
+        </button>
+
     </div>
 
-    <!-- デバッグログ強化版スクリプト -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+</div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBnc3RBpaLeXBninYx9dXAAKBLvVenFK3I",
-            authDomain: "kakeibo-e13ee.firebaseapp.com",
-            projectId: "kakeibo-e13ee",
-            storageBucket: "kakeibo-e13ee.firebasestorage.app",
-            messagingSenderId: "826192711708",
-            appId: "1:826192711708:web:0fd72a0d74158055620fd9",
-            measurementId: "G-ECNJ536EDT"
-        };
+<script type="module">
 
-        const categories = {
-            expense: ['食費', '日用品', '交通費', '娯楽', '家賃', '光熱費', 'その他'],
-            income: ['給与', '副業', 'お小遣い', '一時所得', 'その他']
-        };
+import {
 
-        let currentType = 'expense';
-        let transactions = [];
-        let fixedCosts = [];
-        let selectedDate = new Date();
-        
-        let db = null;
-        let auth = null;
-        
-        let familyId = new URLSearchParams(window.location.search).get('uid');
-        if (!familyId) {
-            familyId = 'fam_' + Math.random().toString(36).substring(2, 12);
-            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?uid=' + familyId;
-            window.history.replaceState({path: newUrl}, '', newUrl);
-        }
+    initializeApp
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const dateInput = document.getElementById('date');
-            if (dateInput) dateInput.valueAsDate = new Date();
-            updateCategoryOptions();
-            renderApp();
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 
-            document.getElementById('prevMonthBtn').addEventListener('click', () => {
-                selectedDate.setMonth(selectedDate.getMonth() - 1);
-                renderApp();
-            });
-            document.getElementById('nextMonthBtn').addEventListener('click', () => {
-                selectedDate.setMonth(selectedDate.getMonth() + 1);
-                renderApp();
-            });
-            document.getElementById('typeExpense').addEventListener('click', () => switchType('expense'));
-            document.getElementById('typeIncome').addEventListener('click', () => switchType('income'));
-            
-            document.getElementById('openFixedBtn').addEventListener('click', () => {
-                document.getElementById('fixedModal').classList.remove('hidden');
-                renderFixedList();
-            });
-            document.getElementById('closeFixedModalBtn').addEventListener('click', () => {
-                document.getElementById('fixedModal').classList.add('hidden');
-            });
+import {
 
-            document.getElementById('shareLinkBtn').addEventListener('click', () => {
-                const shareUrl = window.location.href;
-                const tempInput = document.createElement("input");
-                tempInput.value = shareUrl;
-                document.body.appendChild(tempInput);
-                tempInput.select();
-                try {
-                    document.execCommand("copy");
-                    alert("✨ 共有リンクをコピーしました！");
-                } catch (err) {
-                    prompt("以下のURLをコピーして共有してください：", shareUrl);
-                }
-                document.body.removeChild(tempInput);
-            });
-        });
+    getAuth,
 
-        function switchType(type) {
-            currentType = type;
-            const expBtn = document.getElementById('typeExpense');
-            const incBtn = document.getElementById('typeIncome');
-            if (type === 'expense') {
-                expBtn.className = "py-1.5 rounded-xl font-medium text-xs transition bg-rose-500 text-white shadow-sm";
-                incBtn.className = "py-1.5 rounded-xl font-medium text-xs transition bg-slate-100 text-slate-600";
-            } else {
-                expBtn.className = "py-1.5 rounded-xl font-medium text-xs transition bg-slate-100 text-slate-600";
-                incBtn.className = "py-1.5 rounded-xl font-medium text-xs transition bg-emerald-500 text-white shadow-sm";
-            }
-            updateCategoryOptions();
-        }
+    signInAnonymously,
 
-        function updateCategoryOptions() {
-            const select = document.getElementById('category');
-            if (!select) return;
-            select.innerHTML = '';
-            categories[currentType].forEach(cat => {
-                const opt = document.createElement('option');
-                opt.value = cat;
-                opt.textContent = cat;
-                select.appendChild(opt);
-            });
-        }
+    onAuthStateChanged,
 
-        // Firebase初期化 & 匿名認証とエラーハンドリング
-        try {
-            const app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
+    setPersistence,
 
-            async function startCloudSync() {
-                try {
-                    console.log("Signing in anonymously...");
-                    await signInAnonymously(auth);
-                    console.log("Signed in successfully!");
+    browserLocalPersistence
 
-                    const appId = "github_pages_app";
-                    const txColRef = collection(db, 'artifacts', appId, 'public', 'data', `family_tx_${familyId}`);
-                    const fcColRef = collection(db, 'artifacts', appId, 'public', 'data', `family_fc_${familyId}`);
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-                    onSnapshot(txColRef, (snapshot) => {
-                        transactions = [];
-                        snapshot.forEach(docSnap => {
-                            transactions.push({ id: docSnap.id, ...docSnap.data() });
-                        });
-                        transactions.sort((a, b) => new Date(b.date) - new Date(a.date) || b.createdAt - a.createdAt);
-                        renderApp();
-                        
-                        const statusEl = document.getElementById('syncStatus');
-                        if (statusEl) {
-                            statusEl.textContent = '☁️ クラウド自動保存中';
-                            statusEl.className = 'text-[10px] text-emerald-600 font-semibold';
-                        }
-                    }, (error) => {
-                        console.error("Tx snapshot error:", error);
-                        const statusEl = document.getElementById('syncStatus');
-                        if (statusEl) statusEl.textContent = '⚠️ 同期エラー (コンソール確認)';
-                    });
+import {
 
-                    onSnapshot(fcColRef, (snapshot) => {
-                        fixedCosts = [];
-                        snapshot.forEach(docSnap => {
-                            fixedCosts.push({ id: docSnap.id, ...docSnap.data() });
-                        });
-                        renderFixedList();
-                    }, (error) => {
-                        console.error("Fc snapshot error:", error);
-                    });
+    getFirestore,
 
-                } catch (authErr) {
-                    console.error("Auth error details:", authErr);
-                    const statusEl = document.getElementById('syncStatus');
-                    if (statusEl) statusEl.textContent = '⚠️ 認証失敗 (ルール要確認)';
-                }
-            }
+    collection,
 
-            startCloudSync();
+    addDoc,
 
-        } catch (e) {
-            console.error("Firebase init failed:", e);
-        }
+    deleteDoc,
 
-        // データ登録
-        document.getElementById('transactionForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!db) {
-                alert("クラウドデータベースに接続されていません。");
-                return;
-            }
+    doc,
 
-            const amount = parseFloat(document.getElementById('amount').value);
-            const category = document.getElementById('category').value;
-            const memo = document.getElementById('memo').value;
-            const date = document.getElementById('date').value;
+    onSnapshot
 
-            if (!amount || isNaN(amount)) return;
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-            try {
-                await addDoc(collection(db, 'artifacts', 'github_pages_app', 'public', 'data', `family_tx_${familyId}`), {
-                    type: currentType,
-                    amount,
-                    category,
-                    memo: memo || category,
-                    date,
-                    createdAt: Date.now()
-                });
+/* ----------------------------------------
 
-                document.getElementById('amount').value = '';
-                document.getElementById('memo').value = '';
-                document.getElementById('date').valueAsDate = new Date();
-            } catch (err) {
-                console.error("Add tx error:", err);
-                alert("データの保存に失敗しました。コンソールをご確認ください。");
-            }
-        });
+   Firebase
 
-        window.deleteTransaction = async function(id) {
-            if (!db) return;
-            try {
-                await deleteDoc(doc(db, 'artifacts', 'github_pages_app', 'public', 'data', `family_tx_${familyId}`, id));
-            } catch (err) {
-                console.error("Delete error:", err);
-            }
-        };
+---------------------------------------- */
 
-        document.getElementById('fixedForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!db) return;
+const firebaseConfig = {
 
-            const memo = document.getElementById('fixedMemo').value;
-            const amount = parseFloat(document.getElementById('fixedAmount').value);
-            const category = document.getElementById('fixedCategory').value;
-            const day = parseInt(document.getElementById('fixedDay').value);
+    apiKey:
 
-            if (!amount || isNaN(amount)) return;
+        "AIzaSyBnc3RBpaLeXBninYx9dXAAKBLvVenFK3I",
 
-            try {
-                await addDoc(collection(db, 'artifacts', 'github_pages_app', 'public', 'data', `family_fc_${familyId}`), {
-                    memo,
-                    amount,
-                    category,
-                    day
-                });
-                document.getElementById('fixedMemo').value = '';
-                document.getElementById('fixedAmount').value = '';
-            } catch (err) {
-                console.error("Add fc error:", err);
-            }
-        });
+    authDomain:
 
-        window.deleteFixedCost = async function(id) {
-            if (!db) return;
-            try {
-                await deleteDoc(doc(db, 'artifacts', 'github_pages_app', 'public', 'data', `family_fc_${familyId}`, id));
-            } catch (err) {
-                console.error("Delete error:", err);
-            }
-        };
+        "kakeibo-e13ee.firebaseapp.com",
 
-        document.getElementById('applyFixedBtn').addEventListener('click', async () => {
-            if (!db || fixedCosts.length === 0) {
-                alert('固定費が登録されていません。');
-                return;
-            }
+    projectId:
 
-            const year = selectedDate.getFullYear();
-            const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-            let addedCount = 0;
-            const txColRef = collection(db, 'artifacts', 'github_pages_app', 'public', 'data', `family_tx_${familyId}`);
+        "kakeibo-e13ee",
 
-            for (const f of fixedCosts) {
-                const dayStr = String(f.day).padStart(2, '0');
-                const targetDate = `${year}-${month}-${dayStr}`;
-                const exists = transactions.some(t => t.date && t.date.startsWith(`${year}-${month}`) && t.memo === f.memo && t.amount === f.amount);
+    storageBucket:
 
-                if (!exists) {
-                    try {
-                        await addDoc(txColRef, {
-                            type: 'expense',
-                            amount: f.amount,
-                            category: f.category,
-                            memo: f.memo,
-                            date: targetDate,
-                            createdAt: Date.now()
-                        });
-                        addedCount++;
-                    } catch (err) {
-                        console.error("Apply fc error:", err);
-                    }
-                }
-            }
-            
-            document.getElementById('fixedModal').classList.add('hidden');
-            alert(`${addedCount}件の固定費を現在の月の履歴に反映しました！`);
-        });
+        "kakeibo-e13ee.firebasestorage.app",
 
-        function renderApp() {
-            const year = selectedDate.getFullYear();
-            const month = selectedDate.getMonth() + 1;
-            const monthLabel = document.getElementById('currentMonthLabel');
-            if (monthLabel) monthLabel.textContent = `${year}年 ${month}月`;
+    messagingSenderId:
 
-            const prefix = `${year}-${String(month).padStart(2, '0')}`;
-            const filtered = transactions.filter(t => t.date && t.date.startsWith(prefix));
+        "826192711708",
 
-            let income = 0;
-            let expense = 0;
-            filtered.forEach(t => {
-                if (t.type === 'income') income += t.amount;
-                else expense += t.amount;
-            });
+    appId:
 
-            const balEl = document.getElementById('totalBalance');
-            const incEl = document.getElementById('totalIncome');
-            const expEl = document.getElementById('totalExpense');
+        "1:826192711708:web:0fd72a0d74158055620fd9",
 
-            if (balEl) balEl.textContent = `¥${(income - expense).toLocaleString()}`;
-            if (incEl) incEl.textContent = `¥${income.toLocaleString()}`;
-            if (expEl) expEl.textContent = `¥${expense.toLocaleString()}`;
+    measurementId:
 
-            const listEl = document.getElementById('transactionList');
-            if (!listEl) return;
+        "G-ECNJ536EDT"
 
-            if (filtered.length === 0) {
-                listEl.innerHTML = `<p class="text-center text-slate-400 text-xs py-6">この月のデータはまだありません</p>`;
-                return;
-            }
+};
 
-            listEl.innerHTML = filtered.map(t => `
-                <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-sm">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${t.type === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}">
-                            ${t.type === 'income' ? '収' : '支'}
-                        </div>
-                        <div class="max-w-[150px] sm:max-w-[200px]">
-                            <p class="font-semibold text-xs text-slate-800 truncate">${escapeHtml(t.memo)}</p>
-                            <p class="text-[10px] text-slate-400">${t.date} · ${t.category}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2 shrink-0">
-                        <span class="font-bold text-xs ${t.type === 'income' ? 'text-emerald-600' : 'text-slate-800'}">
-                            ${t.type === 'income' ? '+' : '-'}¥${t.amount.toLocaleString()}
-                        </span>
-                        <button onclick="deleteTransaction('${t.id}')" class="text-slate-300 hover:text-rose-500 transition text-xs px-1">×</button>
-                    </div>
-                </div>
-            `).join('');
-        }
+const categories = {
 
-        function renderFixedList() {
-            const listEl = document.getElementById('fixedList');
-            if (!listEl) return;
-            if (fixedCosts.length === 0) {
-                listEl.innerHTML = `<p class="text-center text-slate-400 text-xs py-3">登録されている固定費はありません</p>`;
-                return;
-            }
+    expense: [
 
-            listEl.innerHTML = fixedCosts.map(f => `
-                <div class="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-100 text-sm">
-                    <div>
-                        <p class="font-semibold text-slate-800">${escapeHtml(f.memo)} <span class="text-xs font-normal text-slate-400">(${f.category})</span></p>
-                        <p class="text-xs text-indigo-600">毎月 ${f.day}日 · ¥${f.amount.toLocaleString()}</p>
-                    </div>
-                    <button onclick="deleteFixedCost('${f.id}')" class="text-slate-300 hover:text-rose-500 px-2 transition text-sm">×</button>
-                </div>
-            `).join('');
-        }
+        '食費',
 
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&<>'"]/g, 
-                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+        '日用品',
+
+        '交通費',
+
+        '娯楽',
+
+        '家賃',
+
+        '光熱費',
+
+        'その他'
+
+    ],
+
+    income: [
+
+        '給与',
+
+        '副業',
+
+        'お小遣い',
+
+        '一時所得',
+
+        'その他'
+
+    ]
+
+};
+
+let currentType = 'expense';
+
+let transactions = [];
+
+let fixedCosts = [];
+
+let selectedDate = new Date();
+
+let db = null;
+
+let auth = null;
+
+let unsubscribeTransactions = null;
+
+let unsubscribeFixedCosts = null;
+
+/* ----------------------------------------
+
+   家族ID
+
+---------------------------------------- */
+
+let familyId =
+
+    new URLSearchParams(
+
+        window.location.search
+
+    ).get('uid');
+
+if (!familyId) {
+
+    familyId =
+
+        'fam_' +
+
+        crypto.randomUUID()
+
+            .replaceAll('-', '')
+
+            .slice(0, 20);
+
+    const newUrl =
+
+        window.location.protocol +
+
+        "//" +
+
+        window.location.host +
+
+        window.location.pathname +
+
+        '?uid=' +
+
+        familyId;
+
+    window.history.replaceState(
+
+        {},
+
+        '',
+
+        newUrl
+
+    );
+
+}
+
+/* ----------------------------------------
+
+   UI
+
+---------------------------------------- */
+
+function setStatus(text, type = 'normal') {
+
+    const el =
+
+        document.getElementById('syncStatus');
+
+    if (!el) {
+
+        return;
+
+    }
+
+    el.textContent = text;
+
+    if (type === 'success') {
+
+        el.className =
+
+            'text-[10px] text-emerald-600 font-semibold';
+
+    }
+
+    else if (type === 'error') {
+
+        el.className =
+
+            'text-[10px] text-rose-600 font-semibold';
+
+    }
+
+    else {
+
+        el.className =
+
+            'text-[10px] text-amber-500 font-semibold';
+
+    }
+
+}
+
+function showDebug(error) {
+
+    console.error(error);
+
+    const area =
+
+        document.getElementById('debugArea');
+
+    if (!area) {
+
+        return;
+
+    }
+
+    area.classList.remove('hidden');
+
+    const code =
+
+        error?.code ||
+
+        'unknown-error';
+
+    const message =
+
+        error?.message ||
+
+        String(error);
+
+    area.innerHTML = `
+
+        <strong>Firebaseエラー</strong><br>
+
+        code:
+
+        ${escapeHtml(code)}
+
+        <br><br>
+
+        ${escapeHtml(message)}
+
+    `;
+
+}
+
+/* ----------------------------------------
+
+   Firebase開始
+
+---------------------------------------- */
+
+async function initializeFirebase() {
+
+    try {
+
+        setStatus(
+
+            '🔄 Firebase初期化中...'
+
+        );
+
+        const app =
+
+            initializeApp(
+
+                firebaseConfig
+
             );
-        }
-    </script>
-</body>
-</html>
 
+        auth =
+
+            getAuth(app);
+
+        db =
+
+            getFirestore(app);
+
+        /*
+
+        ログイン状態をブラウザに保存
+
+        */
+
+        await setPersistence(
+
+            auth,
+
+            browserLocalPersistence
+
+        );
+
+        setStatus(
+
+            '🔄 匿名認証中...'
+
+        );
+
+        /*
+
+        すでにログイン済みなら
+
+        新規匿名ユーザーを作らない
+
+        */
+
+        if (!auth.currentUser) {
+
+            await signInAnonymously(
+
+                auth
+
+            );
+
+        }
+
+        /*
+
+        Auth状態確認
+
+        */
+
+        onAuthStateChanged(
+
+            auth,
+
+            user => {
+
+                if (user) {
+
+                    console.log(
+
+                        'Firebase UID:',
+
+                        user.uid
+
+                    );
+
+                    setStatus(
+
+                        '🔄 Firestore接続中...'
+
+                    );
+
+                    startFirestoreListeners();
+
+                }
+
+                else {
+
+                    setStatus(
+
+                        '⚠️ Firebase未認証',
+
+                        'error'
+
+                    );
+
+                }
+
+            }
+
+        );
+
+    }
+
+    catch (error) {
+
+        setStatus(
+
+            `⚠️ ${error.code || 'Firebaseエラー'}`,
+
+            'error'
+
+        );
+
+        showDebug(
+
+            error
+
+        );
+
+    }
+
+}
+
+/* ----------------------------------------
+
+   Firestore同期
+
+---------------------------------------- */
+
+function startFirestoreListeners() {
+
+    /*
+
+    重複リスナー防止
+
+    */
+
+    if (
+
+        unsubscribeTransactions
+
+    ) {
+
+        unsubscribeTransactions();
+
+    }
+
+    if (
+
+        unsubscribeFixedCosts
+
+    ) {
+
+        unsubscribeFixedCosts();
+
+    }
+
+    try {
+
+        const txColRef =
+
+            collection(
+
+                db,
+
+                'artifacts',
+
+                'github_pages_app',
+
+                'public',
+
+                'data',
+
+                `family_tx_${familyId}`
+
+            );
+
+        const fcColRef =
+
+            collection(
+
+                db,
+
+                'artifacts',
+
+                'github_pages_app',
+
+                'public',
+
+                'data',
+
+                `family_fc_${familyId}`
+
+            );
+
+        console.log(
+
+            'Family ID:',
+
+            familyId
+
+        );
+
+        console.log(
+
+            'Transaction collection:',
+
+            txColRef.path
+
+        );
+
+        console.log(
+
+            'Fixed collection:',
+
+            fcColRef.path
+
+        );
+
+        unsubscribeTransactions =
+
+            onSnapshot(
+
+                txColRef,
+
+                snapshot => {
+
+                    transactions = [];
+
+                    snapshot.forEach(
+
+                        docSnap => {
+
+                            transactions.push({
+
+                                id:
+
+                                    docSnap.id,
+
+                                ...docSnap.data()
+
+                            });
+
+                        }
+
+                    );
+
+                    transactions.sort(
+
+                        (a, b) => {
+
+                            const dateDiff =
+
+                                new Date(
+
+                                    b.date
+
+                                ) -
+
+                                new Date(
+
+                                    a.date
+
+                                );
+
+                            if (dateDiff !== 0) {
+
+                                return dateDiff;
+
+                            }
+
+                            return (
+
+                                Number(
+
+                                    b.createdAt || 0
+
+                                )
+
+                                -
+
+                                Number(
+
+                                    a.createdAt || 0
+
+                                )
+
+                            );
+
+                        }
+
+                    );
+
+                    renderApp();
+
+                    setStatus(
+
+                        '☁️ クラウド自動保存中',
+
+                        'success'
+
+                    );
+
+                },
+
+                error => {
+
+                    setStatus(
+
+                        `⚠️ Firestore: ${error.code}`,
+
+                        'error'
+
+                    );
+
+                    showDebug(
+
+                        error
+
+                    );
+
+                }
+
+            );
+
+        unsubscribeFixedCosts =
+
+            onSnapshot(
+
+                fcColRef,
+
+                snapshot => {
+
+                    fixedCosts = [];
+
+                    snapshot.forEach(
+
+                        docSnap => {
+
+                            fixedCosts.push({
+
+                                id:
+
+                                    docSnap.id,
+
+                                ...docSnap.data()
+
+                            });
+
+                        }
+
+                    );
+
+                    renderFixedList();
+
+                },
+
+                error => {
+
+                    showDebug(
+
+                        error
+
+                    );
+
+                }
+
+            );
+
+    }
+
+    catch (error) {
+
+        setStatus(
+
+            '⚠️ Firestore接続失敗',
+
+            'error'
+
+        );
+
+        showDebug(
+
+            error
+
+        );
+
+    }
+
+}
+
+/* ----------------------------------------
+
+   DOM開始
+
+---------------------------------------- */
+
+document.addEventListener(
+
+    'DOMContentLoaded',
+
+    () => {
+
+        const dateInput =
+
+            document.getElementById(
+
+                'date'
+
+            );
+
+        dateInput.valueAsDate =
+
+            new Date();
+
+        updateCategoryOptions();
+
+        renderApp();
+
+        document
+
+            .getElementById(
+
+                'prevMonthBtn'
+
+            )
+
+            .addEventListener(
+
+                'click',
+
+                () => {
+
+                    selectedDate.setMonth(
+
+                        selectedDate.getMonth() - 1
+
+                    );
+
+                    renderApp();
+
+                }
+
+            );
+
+        document
+
+            .getElementById(
+
+                'nextMonthBtn'
+
+            )
+
+            .addEventListener(
+
+                'click',
+
+                () => {
+
+                    selectedDate.setMonth(
+
+                        selectedDate.getMonth() + 1
+
+                    );
+
+                    renderApp();
+
+                }
+
+            );
+
+        document
+
+            .getElementById(
+
+                'typeExpense'
+
+            )
+
+            .addEventListener(
+
+                'click',
+
+                () =>
+
+                    switchType(
+
+                        'expense'
+
+                    )
+
+            );
+
+        document
+
+            .getElementById(
+
+                'typeIncome'
+
+            )
+
+            .addEventListener(
+
+                'click',
+
+                () =>
+
+                    switchType(
+
+                        'income'
+
+                    )
+
+            );
+
+        document
+
+            .getElementById(
+
+                'openFixedBtn'
+
+            )
+
+            .addEventListener(
+
+                'click',
+
+                () => {
+
+                    document
+
+                        .getElementById(
+
+                            'fixedModal'
+
+                        )
+
+                        .classList
+
+                        .remove(
+
+                            'hidden'
+
+                        );
+
+                    renderFixedList();
+
+                }
+
+            );
+
+        document
+
+            .getElementById(
+
+                'closeFixedModalBtn'
+
+            )
+
+            .addEventListener(
+
+                'click',
+
+                () => {
+
+                    document
+
+                        .getElementById(
+
+                            'fixedModal'
+
+                        )
+
+                        .classList
+
+                        .add(
+
+                            'hidden'
+
+                        );
+
+                }
+
+            );
+
+        document
+
+            .getElementById(
+
+                'shareLinkBtn'
+
+            )
+
+            .addEventListener(
+
+                'click',
+
+                async () => {
+
+                    const shareUrl =
+
+                        window.location.href;
+
+                    try {
+
+                        await navigator
+
+                            .clipboard
+
+                            .writeText(
+
+                                shareUrl
+
+                            );
+
+                        alert(
+
+                            '✨ 共有リンクをコピーしました！'
+
+                        );
+
+                    }
+
+                    catch (error) {
+
+                        prompt(
+
+                            '以下のURLをコピーしてください',
+
+                            shareUrl
+
+                        );
+
+                    }
+
+                }
+
+            );
+
+        initializeFirebase();
+
+    }
+
+);
+
+/* ----------------------------------------
+
+   支出 / 収入
+
+---------------------------------------- */
+
+function switchType(type) {
+
+    currentType =
+
+        type;
+
+    const expBtn =
+
+        document.getElementById(
+
+            'typeExpense'
+
+        );
+
+    const incBtn =
+
+        document.getElementById(
+
+            'typeIncome'
+
+        );
+
+    if (
+
+        type ===
+
+        'expense'
+
+    ) {
+
+        expBtn.className =
+
+            "py-1.5 rounded-xl font-medium text-xs transition bg-rose-500 text-white shadow-sm";
+
+        incBtn.className =
+
+            "py-1.5 rounded-xl font-medium text-xs transition bg-slate-100 text-slate-600";
+
+    }
+
+    else {
+
+        expBtn.className =
+
+            "py-1.5 rounded-xl font-medium text-xs transition bg-slate-100 text-slate-600";
+
+        incBtn.className =
+
+            "py-1.5 rounded-xl font-medium text-xs transition bg-emerald-500 text-white shadow-sm";
+
+    }
+
+    updateCategoryOptions();
+
+}
+
+/* ----------------------------------------
+
+   カテゴリ
+
+---------------------------------------- */
+
+function updateCategoryOptions() {
+
+    const select =
+
+        document.getElementById(
+
+            'category'
+
+        );
+
+    if (!select) {
+
+        return;
+
+    }
+
+    select.innerHTML =
+
+        '';
+
+    categories[
+
+        currentType
+
+    ].forEach(
+
+        cat => {
+
+            const option =
+
+                document.createElement(
+
+                    'option'
+
+                );
+
+            option.value =
+
+                cat;
+
+            option.textContent =
+
+                cat;
+
+            select.appendChild(
+
+                option
+
+            );
+
+        }
+
+    );
+
+}
+
+/* ----------------------------------------
+
+   通常取引追加
+
+---------------------------------------- */
+
+document
+
+    .getElementById(
+
+        'transactionForm'
+
+    )
+
+    .addEventListener(
+
+        'submit',
+
+        async event => {
+
+            event.preventDefault();
+
+            if (
+
+                !db ||
+
+                !auth?.currentUser
+
+            ) {
+
+                alert(
+
+                    'Firebase接続が完了していません。'
+
+                );
+
+                return;
+
+            }
+
+            const amount =
+
+                Number(
+
+                    document
+
+                        .getElementById(
+
+                            'amount'
+
+                        )
+
+                        .value
+
+                );
+
+            const category =
+
+                document
+
+                    .getElementById(
+
+                        'category'
+
+                    )
+
+                    .value;
+
+            const memo =
+
+                document
+
+                    .getElementById(
+
+                        'memo'
+
+                    )
+
+                    .value
+
+                    .trim();
+
+            const date =
+
+                document
+
+                    .getElementById(
+
+                        'date'
+
+                    )
+
+                    .value;
+
+            if (
+
+                !Number.isFinite(
+
+                    amount
+
+                ) ||
+
+                amount <= 0
+
+            ) {
+
+                return;
+
+            }
+
+            try {
+
+                const txColRef =
+
+                    collection(
+
+                        db,
+
+                        'artifacts',
+
+                        'github_pages_app',
+
+                        'public',
+
+                        'data',
+
+                        `family_tx_${familyId}`
+
+                    );
+
+                await addDoc(
+
+                    txColRef,
+
+                    {
+
+                        type:
+
+                            currentType,
+
+                        amount,
+
+                        category,
+
+                        memo:
+
+                            memo ||
+
+                            category,
+
+                        date,
+
+                        createdAt:
+
+                            Date.now()
+
+                    }
+
+                );
+
+                document
+
+                    .getElementById(
+
+                        'amount'
+
+                    )
+
+                    .value =
+
+                    '';
+
+                document
+
+                    .getElementById(
+
+                        'memo'
+
+                    )
+
+                    .value =
+
+                    '';
+
+                document
+
+                    .getElementById(
+
+                        'date'
+
+                    )
+
+                    .valueAsDate =
+
+                    new Date();
+
+            }
+
+            catch (error) {
+
+                showDebug(
+
+                    error
+
+                );
+
+                alert(
+
+                    `保存失敗\n${error.code || error.message}`
+
+                );
+
+            }
+
+        }
+
+    );
+
+/* ----------------------------------------
+
+   取引削除
+
+---------------------------------------- */
+
+window.deleteTransaction =
+
+async function(id) {
+
+    if (
+
+        !db ||
+
+        !auth?.currentUser
+
+    ) {
+
+        return;
+
+    }
+
+    try {
+
+        await deleteDoc(
+
+            doc(
+
+                db,
+
+                'artifacts',
+
+                'github_pages_app',
+
+                'public',
+
+                'data',
+
+                `family_tx_${familyId}`,
+
+                id
+
+            )
+
+        );
+
+    }
+
+    catch (error) {
+
+        showDebug(
+
+            error
+
+        );
+
+    }
+
+};
+
+/* ----------------------------------------
+
+   固定費追加
+
+---------------------------------------- */
+
+document
+
+    .getElementById(
+
+        'fixedForm'
+
+    )
+
+    .addEventListener(
+
+        'submit',
+
+        async event => {
+
+            event.preventDefault();
+
+            if (
+
+                !db ||
+
+                !auth?.currentUser
+
+            ) {
+
+                return;
+
+            }
+
+            const memo =
+
+                document
+
+                    .getElementById(
+
+                        'fixedMemo'
+
+                    )
+
+                    .value
+
+                    .trim();
+
+            const amount =
+
+                Number(
+
+                    document
+
+                        .getElementById(
+
+                            'fixedAmount'
+
+                        )
+
+                        .value
+
+                );
+
+            const category =
+
+                document
+
+                    .getElementById(
+
+                        'fixedCategory'
+
+                    )
+
+                    .value;
+
+            const day =
+
+                Number(
+
+                    document
+
+                        .getElementById(
+
+                            'fixedDay'
+
+                        )
+
+                        .value
+
+                );
+
+            if (
+
+                !memo ||
+
+                !Number.isFinite(
+
+                    amount
+
+                ) ||
+
+                amount <= 0
+
+            ) {
+
+                return;
+
+            }
+
+            try {
+
+                const fcColRef =
+
+                    collection(
+
+                        db,
+
+                        'artifacts',
+
+                        'github_pages_app',
+
+                        'public',
+
+                        'data',
+
+                        `family_fc_${familyId}`
+
+                    );
+
+                await addDoc(
+
+                    fcColRef,
+
+                    {
+
+                        memo,
+
+                        amount,
+
+                        category,
+
+                        day
+
+                    }
+
+                );
+
+                document
+
+                    .getElementById(
+
+                        'fixedMemo'
+
+                    )
+
+                    .value =
+
+                    '';
+
+                document
+
+                    .getElementById(
+
+                        'fixedAmount'
+
+                    )
+
+                    .value =
+
+                    '';
+
+            }
+
+            catch (error) {
+
+                showDebug(
+
+                    error
+
+                );
+
+            }
+
+        }
+
+    );
+
+/* ----------------------------------------
+
+   固定費削除
+
+---------------------------------------- */
+
+window.deleteFixedCost =
+
+async function(id) {
+
+    if (
+
+        !db ||
+
+        !auth?.currentUser
+
+    ) {
+
+        return;
+
+    }
+
+    try {
+
+        await deleteDoc(
+
+            doc(
+
+                db,
+
+                'artifacts',
+
+                'github_pages_app',
+
+                'public',
+
+                'data',
+
+                `family_fc_${familyId}`,
+
+                id
+
+            )
+
+        );
+
+    }
+
+    catch (error) {
+
+        showDebug(
+
+            error
+
+        );
+
+    }
+
+};
+
+/* ----------------------------------------
+
+   固定費反映
+
+---------------------------------------- */
+
+document
+
+    .getElementById(
+
+        'applyFixedBtn'
+
+    )
+
+    .addEventListener(
+
+        'click',
+
+        async () => {
+
+            if (
+
+                !db ||
+
+                !auth?.currentUser
+
+            ) {
+
+                alert(
+
+                    'Firebase接続が完了していません。'
+
+                );
+
+                return;
+
+            }
+
+            if (
+
+                fixedCosts.length === 0
+
+            ) {
+
+                alert(
+
+                    '固定費が登録されていません。'
+
+                );
+
+                return;
+
+            }
+
+            const year =
+
+                selectedDate
+
+                    .getFullYear();
+
+            const monthIndex =
+
+                selectedDate
+
+                    .getMonth();
+
+            const month =
+
+                String(
+
+                    monthIndex + 1
+
+                )
+
+                .padStart(
+
+                    2,
+
+                    '0'
+
+                );
+
+            /*
+
+            その月の最終日
+
+            */
+
+            const lastDay =
+
+                new Date(
+
+                    year,
+
+                    monthIndex + 1,
+
+                    0
+
+                )
+
+                .getDate();
+
+            let addedCount =
+
+                0;
+
+            const txColRef =
+
+                collection(
+
+                    db,
+
+                    'artifacts',
+
+                    'github_pages_app',
+
+                    'public',
+
+                    'data',
+
+                    `family_tx_${familyId}`
+
+                );
+
+            for (
+
+                const fixed of
+
+                fixedCosts
+
+            ) {
+
+                /*
+
+                2月31日などを防ぐ
+
+                */
+
+                const actualDay =
+
+                    Math.min(
+
+                        Number(
+
+                            fixed.day
+
+                        ),
+
+                        lastDay
+
+                    );
+
+                const day =
+
+                    String(
+
+                        actualDay
+
+                    )
+
+                    .padStart(
+
+                        2,
+
+                        '0'
+
+                    );
+
+                const targetDate =
+
+                    `${year}-${month}-${day}`;
+
+                const exists =
+
+                    transactions.some(
+
+                        transaction =>
+
+                            transaction.date
+
+                                ?.startsWith(
+
+                                    `${year}-${month}`
+
+                                )
+
+                            &&
+
+                            transaction.memo ===
+
+                                fixed.memo
+
+                            &&
+
+                            Number(
+
+                                transaction.amount
+
+                            ) ===
+
+                                Number(
+
+                                    fixed.amount
+
+                                )
+
+                    );
+
+                if (exists) {
+
+                    continue;
+
+                }
+
+                try {
+
+                    await addDoc(
+
+                        txColRef,
+
+                        {
+
+                            type:
+
+                                'expense',
+
+                            amount:
+
+                                Number(
+
+                                    fixed.amount
+
+                                ),
+
+                            category:
+
+                                fixed.category,
+
+                            memo:
+
+                                fixed.memo,
+
+                            date:
+
+                                targetDate,
+
+                            createdAt:
+
+                                Date.now()
+
+                        }
+
+                    );
+
+                    addedCount++;
+
+                }
+
+                catch (error) {
+
+                    showDebug(
+
+                        error
+
+                    );
+
+                }
+
+            }
+
+            document
+
+                .getElementById(
+
+                    'fixedModal'
+
+                )
+
+                .classList
+
+                .add(
+
+                    'hidden'
+
+                );
+
+            alert(
+
+                `${addedCount}件の固定費を反映しました！`
+
+            );
+
+        }
+
+    );
+
+/* ----------------------------------------
+
+   メイン描画
+
+---------------------------------------- */
+
+function renderApp() {
+
+    const year =
+
+        selectedDate
+
+            .getFullYear();
+
+    const month =
+
+        selectedDate
+
+            .getMonth() + 1;
+
+    const monthLabel =
+
+        document.getElementById(
+
+            'currentMonthLabel'
+
+        );
+
+    if (
+
+        monthLabel
+
+    ) {
+
+        monthLabel.textContent =
+
+            `${year}年 ${month}月`;
+
+    }
+
+    const prefix =
+
+        `${year}-${String(month).padStart(2, '0')}`;
+
+    const filtered =
+
+        transactions.filter(
+
+            transaction =>
+
+                transaction.date &&
+
+                transaction.date.startsWith(
+
+                    prefix
+
+                )
+
+        );
+
+    let income =
+
+        0;
+
+    let expense =
+
+        0;
+
+    filtered.forEach(
+
+        transaction => {
+
+            if (
+
+                transaction.type ===
+
+                'income'
+
+            ) {
+
+                income +=
+
+                    Number(
+
+                        transaction.amount
+
+                    );
+
+            }
+
+            else {
+
+                expense +=
+
+                    Number(
+
+                        transaction.amount
+
+                    );
+
+            }
+
+        }
+
+    );
+
+    document
+
+        .getElementById(
+
+            'totalBalance'
+
+        )
+
+        .textContent =
+
+        `¥${(
+
+            income -
+
+            expense
+
+        ).toLocaleString()}`;
+
+    document
+
+        .getElementById(
+
+            'totalIncome'
+
+        )
+
+        .textContent =
+
+        `¥${income.toLocaleString()}`;
+
+    document
+
+        .getElementById(
+
+            'totalExpense'
+
+        )
+
+        .textContent =
+
+        `¥${expense.toLocaleString()}`;
+
+    const listEl =
+
+        document.getElementById(
+
+            'transactionList'
+
+        );
+
+    if (
+
+        filtered.length === 0
+
+    ) {
+
+        listEl.innerHTML =
+
+            `<p class="text-center text-slate-400 text-xs py-6">
+
+                この月のデータはまだありません
+
+            </p>`;
+
+        return;
+
+    }
+
+    listEl.innerHTML =
+
+        filtered.map(
+
+            transaction => `
+
+            <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-sm">
+
+                <div class="flex items-center gap-2.5">
+
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${
+
+                        transaction.type === 'income'
+
+                            ? 'bg-emerald-100 text-emerald-600'
+
+                            : 'bg-rose-100 text-rose-600'
+
+                    }">
+
+                        ${
+
+                            transaction.type === 'income'
+
+                                ? '収'
+
+                                : '支'
+
+                        }
+
+                    </div>
+
+                    <div class="max-w-[150px] sm:max-w-[200px]">
+
+                        <p class="font-semibold text-xs text-slate-800 truncate">
+
+                            ${
+
+                                escapeHtml(
+
+                                    transaction.memo
+
+                                )
+
+                            }
+
+                        </p>
+
+                        <p class="text-[10px] text-slate-400">
+
+                            ${
+
+                                escapeHtml(
+
+                                    transaction.date
+
+                                )
+
+                            }
+
+                            ·
+
+                            ${
+
+                                escapeHtml(
+
+                                    transaction.category
+
+                                )
+
+                            }
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="flex items-center gap-2 shrink-0">
+
+                    <span class="font-bold text-xs ${
+
+                        transaction.type === 'income'
+
+                            ? 'text-emerald-600'
+
+                            : 'text-slate-800'
+
+                    }">
+
+                        ${
+
+                            transaction.type === 'income'
+
+                                ? '+'
+
+                                : '-'
+
+                        }
+
+                        ¥${Number(
+
+                            transaction.amount
+
+                        ).toLocaleString()}
+
+                    </span>
+
+                    <button
+
+                        onclick="deleteTransaction('${transaction.id}')"
+
+                        class="text-slate-300 hover:text-rose-500 transition text-xs px-1">
+
+                        ×
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        `).join('');
+
+}
+
+/* ----------------------------------------
+
+   固定費描画
+
+---------------------------------------- */
+
+function renderFixedList() {
+
+    const listEl =
+
+        document.getElementById(
+
+            'fixedList'
+
+        );
+
+    if (!listEl) {
+
+        return;
+
+    }
+
+    if (
+
+        fixedCosts.length === 0
+
+    ) {
+
+        listEl.innerHTML =
+
+            `<p class="text-center text-slate-400 text-xs py-3">
+
+                登録されている固定費はありません
+
+            </p>`;
+
+        return;
+
+    }
+
+    listEl.innerHTML =
+
+        fixedCosts.map(
+
+            fixed => `
+
+            <div class="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-100 text-sm">
+
+                <div>
+
+                    <p class="font-semibold text-slate-800">
+
+                        ${
+
+                            escapeHtml(
+
+                                fixed.memo
+
+                            )
+
+                        }
+
+                        <span class="text-xs font-normal text-slate-400">
+
+                            (${
+
+                                escapeHtml(
+
+                                    fixed.category
+
+                                )
+
+                            })
+
+                        </span>
+
+                    </p>
+
+                    <p class="text-xs text-indigo-600">
+
+                        毎月
+
+                        ${Number(fixed.day)}
+
+                        日
+
+                        ·
+
+                        ¥${Number(
+
+                            fixed.amount
+
+                        ).toLocaleString()}
+
+                    </p>
+
+                </div>
+
+                <button
+
+                    onclick="deleteFixedCost('${fixed.id}')"
+
+                    class="text-slate-300 hover:text-rose-500 px-2 transition text-sm">
+
+                    ×
+
+                </button>
+
+            </div>
+
+        `).join('');
+
+}
+
+/* ----------------------------------------
+
+   HTML Escape
+
+---------------------------------------- */
+
+function escapeHtml(value) {
+
+    if (
+
+        value === null ||
+
+        value === undefined
+
+    ) {
+
+        return '';
+
+    }
+
+    return String(value)
+
+        .replace(
+
+            /[&<>'"]/g,
+
+            char => ({
+
+                '&':
+
+                    '&amp;',
+
+                '<':
+
+                    '&lt;',
+
+                '>':
+
+                    '&gt;',
+
+                "'":
+
+                    '&#39;',
+
+                '"':
+
+                    '&quot;'
+
+            }[char])
+
+        );
+
+}
+
+</script>
+
+</body>
+
+</html>
