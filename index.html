@@ -21,21 +21,21 @@
         <header class="bg-indigo-600 text-white px-4 pb-4 rounded-b-2xl shadow-md space-y-3 shrink-0 safe-area-top">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-2">
-                    <button onclick="changeMonth(-1)" class="p-1.5 hover:bg-indigo-700 rounded-lg transition text-indigo-200 hover:text-white">
+                    <button id="prevMonthBtn" class="p-1.5 hover:bg-indigo-700 rounded-lg transition text-indigo-200 hover:text-white">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                     </button>
                     <span id="currentMonthLabel" class="font-bold text-sm tracking-wide">2026年 8月</span>
-                    <button onclick="changeMonth(1)" class="p-1.5 hover:bg-indigo-700 rounded-lg transition text-indigo-200 hover:text-white">
+                    <button id="nextMonthBtn" class="p-1.5 hover:bg-indigo-700 rounded-lg transition text-indigo-200 hover:text-white">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                     </button>
                 </div>
                 
                 <div class="flex items-center gap-1.5">
-                    <button onclick="openFixedModal()" class="bg-indigo-700/80 hover:bg-indigo-700 text-xs px-2.5 py-1.5 rounded-xl border border-indigo-500/40 transition flex items-center gap-1 font-medium">
+                    <button id="openFixedBtn" class="bg-indigo-700/80 hover:bg-indigo-700 text-xs px-3 py-1.5 rounded-xl border border-indigo-500/40 transition flex items-center gap-1 font-medium">
                         固定費
                     </button>
-                    <button onclick="handleLogout()" class="bg-indigo-800/80 hover:bg-indigo-800 text-[10px] px-2.5 py-1.5 rounded-xl text-indigo-100 transition">
-                        ログアウト
+                    <button id="resetKeyBtn" class="bg-indigo-800/80 hover:bg-indigo-800 text-[10px] px-2.5 py-1.5 rounded-xl text-indigo-100 transition cursor-pointer" title="新しい専用リンクを発行します">
+                        ID確認
                     </button>
                 </div>
             </div>
@@ -62,7 +62,7 @@
             <section class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">今月の履歴</h3>
-                    <span id="syncStatus" class="text-[10px] text-emerald-600 font-semibold">☁️ クラウド自動保存中</span>
+                    <span id="syncStatus" class="text-[10px] text-emerald-600 font-semibold">☁️ クラウド接続準備中</span>
                 </div>
                 <div id="transactionList" class="space-y-2">
                     <!-- 動的生成 -->
@@ -74,8 +74,8 @@
         <footer class="bg-white border-t border-slate-100 px-4 pt-3 pb-6 shadow-lg shrink-0 rounded-t-3xl safe-area-bottom">
             <form id="transactionForm" class="space-y-2.5">
                 <div class="grid grid-cols-2 gap-2">
-                    <button type="button" id="typeExpense" class="py-1.5 rounded-xl font-medium text-xs transition bg-rose-500 text-white shadow-sm" onclick="switchType('expense')">支出</button>
-                    <button type="button" id="typeIncome" class="py-1.5 rounded-xl font-medium text-xs transition bg-slate-100 text-slate-600" onclick="switchType('income')">収入</button>
+                    <button type="button" id="typeExpense" class="py-1.5 rounded-xl font-medium text-xs transition bg-rose-500 text-white shadow-sm">支出</button>
+                    <button type="button" id="typeIncome" class="py-1.5 rounded-xl font-medium text-xs transition bg-slate-100 text-slate-600">収入</button>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
@@ -109,31 +109,12 @@
         </footer>
     </div>
 
-    <!-- ログイン必須モーダル（未ログイン時に強制表示） -->
-    <div id="loginOverlay" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md hidden flex items-center justify-center p-6 z-50">
-        <div class="bg-white w-full max-w-sm rounded-3xl p-8 shadow-2xl text-center space-y-6">
-            <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-2xl mx-auto flex items-center justify-center text-2xl font-bold">
-                💰
-            </div>
-            <div class="space-y-2">
-                <h2 class="text-xl font-bold text-slate-800">かんたん家計簿</h2>
-                <p class="text-xs text-slate-500 leading-relaxed">
-                    データをクラウドに安全に自動保存するため、Googleアカウントでのログインが必要です。
-                </p>
-            </div>
-            <button onclick="handleLogin()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-2xl shadow-lg transition flex items-center justify-center gap-2 text-sm">
-                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12.24 10.285V13.5h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.584s3.344-7.584 7.439-7.584c2.333 0 3.896.99 4.787 1.83l2.585-2.524C17.973 1.792 15.347 1 12.24 1 6.04 1 1.035 6.005 1.035 12.205s5.005 11.205 11.205 11.205c6.467 0 10.748-4.557 10.748-10.963 0-.759-.082-1.334-.188-1.962H12.24z"/></svg>
-                Googleアカウントでログイン
-            </button>
-        </div>
-    </div>
-
     <!-- 固定費設定モーダル -->
     <div id="fixedModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center">
                 <h3 class="text-lg font-bold text-slate-800">月額固定費の管理</h3>
-                <button onclick="closeFixedModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">×</button>
+                <button id="closeFixedModalBtn" class="text-slate-400 hover:text-slate-600 text-lg font-bold">×</button>
             </div>
             <p class="text-xs text-slate-500">毎月の固定費を登録しておくと、ボタン一つで今月の履歴に反映できます。</p>
 
@@ -172,16 +153,16 @@
                 <!-- 動的 -->
             </div>
 
-            <button onclick="applyFixedCostsNow()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow-sm">
+            <button id="applyFixedBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow-sm">
                 今月分の固定費を反映する
             </button>
         </div>
     </div>
 
-    <!-- Firebase SDK & ロジック -->
+    <!-- Firebase SDK & 自動同期ロジック -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const categories = {
@@ -193,75 +174,147 @@
         let transactions = [];
         let fixedCosts = [];
         let selectedDate = new Date();
-        let currentUser = null;
         let db = null;
         let auth = null;
+        let userId = null;
         let appId = 'default-app-id';
 
+        // ユーザー専用のクラウドキーを自動生成またはURLパラメータから取得
+        function getOrCreateUserKey() {
+            const urlParams = new URLSearchParams(window.location.search);
+            let key = urlParams.get('uid');
+            if (!key) {
+                key = localStorage.getItem('kakeibo_cloud_uid');
+                if (!key) {
+                    key = 'user_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+                    localStorage.setItem('kakeibo_cloud_uid', key);
+                }
+                const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?uid=' + key;
+                window.history.replaceState({path: newUrl}, '', newUrl);
+            } else {
+                localStorage.setItem('kakeibo_cloud_uid', key);
+            }
+            return key;
+        }
+
+        // DOMContentLoaded時に確実にイベントをバインド
         document.addEventListener('DOMContentLoaded', () => {
             const dateInput = document.getElementById('date');
             if (dateInput) dateInput.valueAsDate = new Date();
             updateCategoryOptions();
             renderApp();
+
+            // 各種ボタンのイベント紐付け
+            document.getElementById('prevMonthBtn').addEventListener('click', () => changeMonth(-1));
+            document.getElementById('nextMonthBtn').addEventListener('click', () => changeMonth(1));
+            document.getElementById('openFixedBtn').addEventListener('click', openFixedModal);
+            document.getElementById('resetKeyBtn').addEventListener('click', resetCloudKey);
+            document.getElementById('closeFixedModalBtn').addEventListener('click', closeFixedModal);
+            document.getElementById('applyFixedBtn').addEventListener('click', applyFixedCostsNow);
+
+            document.getElementById('typeExpense').addEventListener('click', () => switchType('expense'));
+            document.getElementById('typeIncome').addEventListener('click', () => switchType('income'));
+
+            // 取引フォーム送信
+            document.getElementById('transactionForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!db || !userId) {
+                    alert("データベース接続の準備中です。しばらくお待ちください。");
+                    return;
+                }
+
+                const amountVal = document.getElementById('amount').value;
+                const amount = parseFloat(amountVal);
+                const category = document.getElementById('category').value;
+                const memo = document.getElementById('memo').value;
+                const date = document.getElementById('date').value;
+
+                if (!amount || isNaN(amount)) return;
+
+                try {
+                    await addDoc(collection(db, 'artifacts', appId, 'users', userId, 'transactions'), {
+                        type: currentType,
+                        amount,
+                        category,
+                        memo: memo || category,
+                        date,
+                        createdAt: Date.now()
+                    });
+                    document.getElementById('amount').value = '';
+                    document.getElementById('memo').value = '';
+                    document.getElementById('date').valueAsDate = new Date();
+                } catch (err) {
+                    console.error("Add tx error:", err);
+                    alert("データの保存に失敗しました。");
+                }
+            });
+
+            // 固定費フォーム送信
+            document.getElementById('fixedForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!db || !userId) return;
+
+                const memo = document.getElementById('fixedMemo').value;
+                const amount = parseFloat(document.getElementById('fixedAmount').value);
+                const category = document.getElementById('fixedCategory').value;
+                const day = parseInt(document.getElementById('fixedDay').value);
+
+                if (!amount || isNaN(amount)) return;
+
+                try {
+                    await addDoc(collection(db, 'artifacts', appId, 'users', userId, 'fixedCosts'), {
+                        memo,
+                        amount,
+                        category,
+                        day
+                    });
+                    document.getElementById('fixedMemo').value = '';
+                    document.getElementById('fixedAmount').value = '';
+                } catch (err) {
+                    console.error("Add fc error:", err);
+                }
+            });
         });
 
+        function resetCloudKey() {
+            const currentUid = localStorage.getItem('kakeibo_cloud_uid') || userId;
+            alert(`あなたの専用クラウドID:\n${currentUid}\n\nこのURLをブックマークしておけば、どのスマホやPCからでも同じデータにアクセスできます！`);
+        }
+
+        // Firebase初期化 & 匿名認証
         try {
             const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
             const app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app);
             appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            userId = getOrCreateUserKey();
 
             async function initAuth() {
                 try {
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                         await signInWithCustomToken(auth, __initial_auth_token);
-                    } else if (!auth.currentUser) {
+                    } else {
                         await signInAnonymously(auth);
                     }
-                    await getRedirectResult(auth);
                 } catch (err) {
-                    console.error("Auth init error:", err);
+                    console.error("Auth error:", err);
                 }
             }
             initAuth();
 
             onAuthStateChanged(auth, (user) => {
-                currentUser = user;
-                const loginOverlay = document.getElementById('loginOverlay');
-                
-                // 匿名ユーザー（未ログイン）またはユーザーがいない場合は強制的にログイン画面を表示
-                if (!user || user.isAnonymous) {
-                    if (loginOverlay) loginOverlay.classList.remove('hidden');
-                } else {
-                    if (loginOverlay) loginOverlay.classList.add('hidden');
-                    setupFirestoreListeners(user.uid);
+                if (user && db) {
+                    const statusEl = document.getElementById('syncStatus');
+                    if (statusEl) statusEl.textContent = "☁️ クラウド自動保存中";
+                    setupFirestoreListeners(userId);
                 }
             });
         } catch (e) {
             console.error("Firebase init failed:", e);
+            const statusEl = document.getElementById('syncStatus');
+            if (statusEl) statusEl.textContent = "⚠️ ローカルモード";
         }
-
-        window.handleLogin = async function() {
-            if (!auth) return;
-            try {
-                const provider = new GoogleAuthProvider();
-                await signInWithRedirect(auth, provider);
-            } catch (err) {
-                console.error("Google login error:", err);
-                alert("ログインに失敗しました。");
-            }
-        };
-
-        window.handleLogout = async function() {
-            if (!auth) return;
-            try {
-                await signOut(auth);
-                window.location.reload();
-            } catch (err) {
-                console.error("Logout error:", err);
-            }
-        };
 
         function setupFirestoreListeners(uid) {
             if (!db) return;
@@ -285,16 +338,16 @@
                     renderFixedList();
                 });
             } catch (err) {
-                console.error("Firestore setup error:", err);
+                console.error("Firestore listener error:", err);
             }
         }
 
-        window.changeMonth = function(direction) {
+        function changeMonth(direction) {
             selectedDate.setMonth(selectedDate.getMonth() + direction);
             renderApp();
         }
 
-        window.switchType = function(type) {
+        function switchType(type) {
             currentType = type;
             const expBtn = document.getElementById('typeExpense');
             const incBtn = document.getElementById('typeIncome');
@@ -321,95 +374,37 @@
             });
         }
 
-        const txForm = document.getElementById('transactionForm');
-        if (txForm) {
-            txForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                if (!currentUser || currentUser.isAnonymous || !db) return;
-
-                const amount = parseFloat(document.getElementById('amount').value);
-                const category = document.getElementById('category').value;
-                const memo = document.getElementById('memo').value;
-                const date = document.getElementById('date').value;
-
-                if (!amount || isNaN(amount)) return;
-
-                try {
-                    await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), {
-                        type: currentType,
-                        amount,
-                        category,
-                        memo: memo || category,
-                        date,
-                        createdAt: Date.now()
-                    });
-                    document.getElementById('amount').value = '';
-                    document.getElementById('memo').value = '';
-                    document.getElementById('date').valueAsDate = new Date();
-                } catch (err) {
-                    console.error("Add tx error:", err);
-                }
-            });
-        }
-
         window.deleteTransaction = async function(id) {
-            if (!currentUser || !db) return;
+            if (!db || !userId) return;
             try {
-                await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', id));
+                await deleteDoc(doc(db, 'artifacts', appId, 'users', userId, 'transactions', id));
             } catch (err) {
                 console.error("Delete tx error:", err);
             }
         }
 
-        const fixedForm = document.getElementById('fixedForm');
-        if (fixedForm) {
-            fixedForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                if (!currentUser || !db) return;
-
-                const memo = document.getElementById('fixedMemo').value;
-                const amount = parseFloat(document.getElementById('fixedAmount').value);
-                const category = document.getElementById('fixedCategory').value;
-                const day = parseInt(document.getElementById('fixedDay').value);
-
-                if (!amount || isNaN(amount)) return;
-
-                try {
-                    await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'fixedCosts'), {
-                        memo,
-                        amount,
-                        category,
-                        day
-                    });
-                    document.getElementById('fixedMemo').value = '';
-                    document.getElementById('fixedAmount').value = '';
-                } catch (err) {
-                    console.error("Add fc error:", err);
-                }
-            });
-        }
-
         window.deleteFixedCost = async function(id) {
-            if (!currentUser || !db) return;
+            if (!db || !userId) return;
             try {
-                await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'fixedCosts', id));
+                await deleteDoc(doc(db, 'artifacts', appId, 'users', userId, 'fixedCosts', id));
             } catch (err) {
                 console.error("Delete fc error:", err);
             }
         }
 
-        window.openFixedModal = function() {
+        function openFixedModal() {
             const modal = document.getElementById('fixedModal');
             if (modal) modal.classList.remove('hidden');
             renderFixedList();
         }
-        window.closeFixedModal = function() {
+
+        function closeFixedModal() {
             const modal = document.getElementById('fixedModal');
             if (modal) modal.classList.add('hidden');
         }
 
-        window.applyFixedCostsNow = async function() {
-            if (!currentUser || !db || fixedCosts.length === 0) {
+        async function applyFixedCostsNow() {
+            if (!db || !userId || fixedCosts.length === 0) {
                 alert('固定費が登録されていません。');
                 return;
             }
@@ -424,7 +419,7 @@
                 const exists = transactions.some(t => t.date && t.date.startsWith(`${year}-${month}`) && t.memo === f.memo && t.amount === f.amount);
 
                 if (!exists) {
-                    await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), {
+                    await addDoc(collection(db, 'artifacts', appId, 'users', userId, 'transactions'), {
                         type: 'expense',
                         amount: f.amount,
                         category: f.category,
