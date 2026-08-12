@@ -9,17 +9,14 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        /* Safariのセーフエリア対応用パディング */
-        .safe-area-bottom {
-            padding-bottom: calc(1rem + env(safe-area-inset-bottom));
-        }
+        .safe-area-bottom { padding-bottom: calc(1rem + env(safe-area-inset-bottom)); }
     </style>
 </head>
 <body class="bg-slate-50 h-screen overflow-hidden text-slate-800">
 
-    <div class="max-w-md mx-auto h-screen bg-white shadow-xl flex flex-col justify-between overflow-hidden">
+    <div class="max-w-md mx-auto h-screen bg-white shadow-xl flex flex-col justify-between overflow-hidden relative">
         
-        <!-- ヘッダー（月選択・サマリー：固定） -->
+        <!-- ヘッダー（月選択・サマリー・ログイン状態：固定） -->
         <header class="bg-indigo-600 text-white px-4 pt-3 pb-4 rounded-b-2xl shadow-md space-y-3 shrink-0">
             <div class="flex justify-between items-center">
                 <!-- 月切り替え -->
@@ -32,11 +29,16 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                     </button>
                 </div>
-                <!-- 固定費ボタン -->
-                <button onclick="openFixedModal()" class="bg-indigo-700/80 hover:bg-indigo-700 text-xs px-3 py-1.5 rounded-xl border border-indigo-500/40 transition flex items-center gap-1 font-medium">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    固定費
-                </button>
+                
+                <!-- 右上アクション（固定費 ＆ ログイン状態） -->
+                <div class="flex items-center gap-1.5">
+                    <button onclick="openFixedModal()" class="bg-indigo-700/80 hover:bg-indigo-700 text-xs px-2.5 py-1.5 rounded-xl border border-indigo-500/40 transition flex items-center gap-1 font-medium">
+                        固定費
+                    </button>
+                    <button id="authBtn" onclick="handleAuthAction()" class="bg-white text-indigo-600 hover:bg-indigo-50 text-[10px] font-bold px-2.5 py-1.5 rounded-xl shadow-sm transition">
+                        Google連携
+                    </button>
+                </div>
             </div>
 
             <!-- サマリーカード -->
@@ -56,12 +58,12 @@
             </div>
         </header>
 
-        <!-- メインコンテンツ（履歴エリア・ここだけスクロール） -->
+        <!-- メインコンテンツ（履歴リスト：スクロール領域） -->
         <main class="flex-1 px-4 py-3 overflow-y-auto space-y-3">
             <section class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">今月の履歴</h3>
-                    <button onclick="clearAllData()" class="text-[11px] text-rose-500 hover:underline">すべて削除</button>
+                    <span id="syncStatus" class="text-[10px] text-slate-400">読み込み中...</span>
                 </div>
                 <div id="transactionList" class="space-y-2">
                     <!-- 動的生成 -->
@@ -69,7 +71,7 @@
             </section>
         </main>
 
-        <!-- 操作部（下部固定：Safariセーフエリア対応） -->
+        <!-- 操作部（下部固定・セーフエリア対応） -->
         <footer class="bg-white border-t border-slate-100 px-4 pt-3 pb-6 shadow-lg shrink-0 rounded-t-3xl safe-area-bottom">
             <form id="transactionForm" class="space-y-2.5">
                 <div class="grid grid-cols-2 gap-2">
@@ -115,7 +117,7 @@
                 <h3 class="text-lg font-bold text-slate-800">月額固定費の管理</h3>
                 <button onclick="closeFixedModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">×</button>
             </div>
-            <p class="text-xs text-slate-500">毎月登録した日付に自動適用、またはボタンから一括反映できます。</p>
+            <p class="text-xs text-slate-500">毎月の固定費を登録しておくと、ボタン一つで今月の履歴に反映できます。</p>
 
             <form id="fixedForm" class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
                 <div class="grid grid-cols-2 gap-2">
@@ -158,30 +160,120 @@
         </div>
     </div>
 
-    <!-- アプリのロジック -->
-    <script>
+    <!-- Firebase SDK (モジュール方式) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
         const categories = {
             expense: ['食費', '日用品', '交通費', '娯楽', '家賃', '光熱費', 'その他'],
             income: ['給与', '副業', 'お小遣い', '一時所得', 'その他']
         };
 
         let currentType = 'expense';
-        let transactions = JSON.parse(localStorage.getItem('kakeibo_transactions')) || [];
-        let fixedCosts = JSON.parse(localStorage.getItem('kakeibo_fixed_costs')) || [];
-        
+        let transactions = [];
+        let fixedCosts = [];
         let selectedDate = new Date();
+        let currentUser = null;
 
         document.getElementById('date').valueAsDate = new Date();
         updateCategoryOptions();
-        renderApp();
-        checkAndApplyAutoFixedCosts();
 
-        function changeMonth(direction) {
+        // 認証初期化 (RULE 3 遵守)
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else if (!auth.currentUser) {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Auth init error:", err);
+            }
+        }
+        initAuth();
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            updateAuthUI();
+            if (user) {
+                setupFirestoreListeners(user.uid);
+            }
+        });
+
+        function updateAuthUI() {
+            const authBtn = document.getElementById('authBtn');
+            const syncStatus = document.getElementById('syncStatus');
+            if (currentUser && !currentUser.isAnonymous) {
+                authBtn.textContent = "ログアウト";
+                authBtn.className = "bg-indigo-800/80 hover:bg-indigo-800 text-[10px] px-2.5 py-1.5 rounded-xl text-indigo-100 transition";
+                syncStatus.textContent = "☁️ クラウド自動保存中";
+            } else {
+                authBtn.textContent = "Google連携";
+                authBtn.className = "bg-white text-indigo-600 hover:bg-indigo-50 text-[10px] font-bold px-2.5 py-1.5 rounded-xl shadow-sm transition";
+                syncStatus.textContent = "🔒 端末保存中 (Google連携推奨)";
+            }
+        }
+
+        window.handleAuthAction = async function() {
+            if (currentUser && !currentUser.isAnonymous) {
+                try {
+                    await signOut(auth);
+                    await signInAnonymously(auth);
+                } catch (err) {
+                    console.error("Signout error:", err);
+                }
+            } else {
+                try {
+                    const provider = new GoogleAuthProvider();
+                    await signInWithPopup(auth, provider);
+                } catch (err) {
+                    console.error("Google login error:", err);
+                    alert("ログインに失敗しました。");
+                }
+            }
+        };
+
+        // Firestore リスナー (RULE 1 & RULE 2 遵守)
+        function setupFirestoreListeners(uid) {
+            const txCol = collection(db, 'artifacts', appId, 'users', uid, 'transactions');
+            onSnapshot(txCol, (snapshot) => {
+                transactions = [];
+                snapshot.forEach(docSnap => {
+                    transactions.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                transactions.sort((a, b) => new Date(b.date) - new Date(a.date) || b.createdAt - a.createdAt);
+                renderApp();
+            }, (error) => {
+                console.error("Tx snapshot error:", error);
+            });
+
+            const fcCol = collection(db, 'artifacts', appId, 'users', uid, 'fixedCosts');
+            onSnapshot(fcCol, (snapshot) => {
+                fixedCosts = [];
+                snapshot.forEach(docSnap => {
+                    fixedCosts.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                renderFixedList();
+            }, (error) => {
+                console.error("Fc snapshot error:", error);
+            });
+        }
+
+        // 月切り替え
+        window.changeMonth = function(direction) {
             selectedDate.setMonth(selectedDate.getMonth() + direction);
             renderApp();
         }
 
-        function switchType(type) {
+        window.switchType = function(type) {
             currentType = type;
             const expBtn = document.getElementById('typeExpense');
             const incBtn = document.getElementById('typeIncome');
@@ -207,8 +299,11 @@
             });
         }
 
-        document.getElementById('transactionForm').addEventListener('submit', (e) => {
+        // 取引追加
+        document.getElementById('transactionForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!currentUser) return;
+
             const amount = parseFloat(document.getElementById('amount').value);
             const category = document.getElementById('category').value;
             const memo = document.getElementById('memo').value;
@@ -216,23 +311,37 @@
 
             if (!amount || isNaN(amount)) return;
 
-            transactions.unshift({
-                id: Date.now(),
-                type: currentType,
-                amount,
-                category,
-                memo: memo || category,
-                date
-            });
-
-            saveAndRender();
-            document.getElementById('amount').value = '';
-            document.getElementById('memo').value = '';
-            document.getElementById('date').valueAsDate = new Date();
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), {
+                    type: currentType,
+                    amount,
+                    category,
+                    memo: memo || category,
+                    date,
+                    createdAt: Date.now()
+                });
+                document.getElementById('amount').value = '';
+                document.getElementById('memo').value = '';
+                document.getElementById('date').valueAsDate = new Date();
+            } catch (err) {
+                console.error("Add tx error:", err);
+            }
         });
 
-        document.getElementById('fixedForm').addEventListener('submit', (e) => {
+        window.deleteTransaction = async function(id) {
+            if (!currentUser) return;
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', id));
+            } catch (err) {
+                console.error("Delete tx error:", err);
+            }
+        }
+
+        // 固定費追加
+        document.getElementById('fixedForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!currentUser) return;
+
             const memo = document.getElementById('fixedMemo').value;
             const amount = parseFloat(document.getElementById('fixedAmount').value);
             const category = document.getElementById('fixedCategory').value;
@@ -240,26 +349,66 @@
 
             if (!amount || isNaN(amount)) return;
 
-            fixedCosts.push({ id: Date.now(), memo, amount, category, day });
-            localStorage.setItem('kakeibo_fixed_costs', JSON.stringify(fixedCosts));
-            renderFixedList();
-
-            document.getElementById('fixedMemo').value = '';
-            document.getElementById('fixedAmount').value = '';
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'fixedCosts'), {
+                    memo,
+                    amount,
+                    category,
+                    day
+                });
+                document.getElementById('fixedMemo').value = '';
+                document.getElementById('fixedAmount').value = '';
+            } catch (err) {
+                console.error("Add fc error:", err);
+            }
         });
 
-        function deleteFixedCost(id) {
-            fixedCosts = fixedCosts.filter(f => f.id !== id);
-            localStorage.setItem('kakeibo_fixed_costs', JSON.stringify(fixedCosts));
-            renderFixedList();
+        window.deleteFixedCost = async function(id) {
+            if (!currentUser) return;
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'fixedCosts', id));
+            } catch (err) {
+                console.error("Delete fc error:", err);
+            }
         }
 
-        function openFixedModal() {
+        window.openFixedModal = function() {
             document.getElementById('fixedModal').classList.remove('hidden');
             renderFixedList();
         }
-        function closeFixedModal() {
+        window.closeFixedModal = function() {
             document.getElementById('fixedModal').classList.add('hidden');
+        }
+
+        window.applyFixedCostsNow = async function() {
+            if (!currentUser || fixedCosts.length === 0) {
+                alert('固定費が登録されていません。');
+                return;
+            }
+
+            const year = selectedDate.getFullYear();
+            const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+            let addedCount = 0;
+
+            for (const f of fixedCosts) {
+                const dayStr = String(f.day).padStart(2, '0');
+                const targetDate = `${year}-${month}-${dayStr}`;
+                const exists = transactions.some(t => t.date && t.date.startsWith(`${year}-${month}`) && t.memo === f.memo && t.amount === f.amount);
+
+                if (!exists) {
+                    await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), {
+                        type: 'expense',
+                        amount: f.amount,
+                        category: f.category,
+                        memo: f.memo,
+                        date: targetDate,
+                        createdAt: Date.now()
+                    });
+                    addedCount++;
+                }
+            }
+            closeFixedModal();
+            alert(`${addedCount}件の固定費を現在の月の履歴に反映しました！`);
         }
 
         function renderFixedList() {
@@ -275,88 +424,9 @@
                         <p class="font-semibold text-slate-800">${escapeHtml(f.memo)} <span class="text-xs font-normal text-slate-400">(${f.category})</span></p>
                         <p class="text-xs text-indigo-600">毎月 ${f.day}日 · ¥${f.amount.toLocaleString()}</p>
                     </div>
-                    <button onclick="deleteFixedCost(${f.id})" class="text-slate-300 hover:text-rose-500 px-2 transition text-sm">×</button>
+                    <button onclick="deleteFixedCost('${f.id}')" class="text-slate-300 hover:text-rose-500 px-2 transition text-sm">×</button>
                 </div>
             `).join('');
-        }
-
-        function applyFixedCostsNow() {
-            if (fixedCosts.length === 0) {
-                alert('固定費が登録されていません。');
-                return;
-            }
-
-            const year = selectedDate.getFullYear();
-            const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-            let addedCount = 0;
-
-            fixedCosts.forEach(f => {
-                const dayStr = String(f.day).padStart(2, '0');
-                const targetDate = `${year}-${month}-${dayStr}`;
-                const exists = transactions.some(t => t.date.startsWith(`${year}-${month}`) && t.memo === f.memo && t.amount === f.amount);
-                
-                if (!exists) {
-                    transactions.unshift({
-                        id: Date.now() + Math.random(),
-                        type: 'expense',
-                        amount: f.amount,
-                        category: f.category,
-                        memo: f.memo,
-                        date: targetDate
-                    });
-                    addedCount++;
-                }
-            });
-
-            saveAndRender();
-            closeFixedModal();
-            alert(`${addedCount}件の固定費を現在の月の履歴に反映しました！`);
-        }
-
-        function checkAndApplyAutoFixedCosts() {
-            if (fixedCosts.length === 0) return;
-            const now = new Date();
-            const yearMonth = `${now.getFullYear()}-${now.getMonth() + 1}`;
-            const lastChecked = localStorage.getItem('kakeibo_last_checked_month');
-
-            if (now.getDate() >= 1 && lastChecked !== yearMonth) {
-                let added = false;
-                fixedCosts.forEach(f => {
-                    const dayStr = String(f.day).padStart(2, '0');
-                    const targetDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${dayStr}`;
-                    const exists = transactions.some(t => t.date.startsWith(yearMonth) && t.memo === f.memo && t.amount === f.amount);
-                    if (!exists) {
-                        transactions.unshift({
-                            id: Date.now() + Math.random(),
-                            type: 'expense',
-                            amount: f.amount,
-                            category: f.category,
-                            memo: f.memo,
-                            date: targetDate
-                        });
-                        added = true;
-                    }
-                });
-                if (added) saveAndRender();
-                localStorage.setItem('kakeibo_last_checked_month', yearMonth);
-            }
-        }
-
-        function deleteTransaction(id) {
-            transactions = transactions.filter(t => t.id !== id);
-            saveAndRender();
-        }
-
-        function clearAllData() {
-            if (confirm('すべての履歴を削除しますか？')) {
-                transactions = [];
-                saveAndRender();
-            }
-        }
-
-        function saveAndRender() {
-            localStorage.setItem('kakeibo_transactions', JSON.stringify(transactions));
-            renderApp();
         }
 
         function renderApp() {
@@ -364,22 +434,11 @@
             const month = selectedDate.getMonth() + 1;
             document.getElementById('currentMonthLabel').textContent = `${year}年 ${month}月`;
 
-            renderSummary();
-            renderList();
-        }
+            const prefix = `${year}-${String(month).padStart(2, '0')}`;
+            const filtered = transactions.filter(t => t.date && t.date.startsWith(prefix));
 
-        function getFilteredTransactions() {
-            const year = selectedDate.getFullYear();
-            const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-            const prefix = `${year}-${month}`;
-            return transactions.filter(t => t.date.startsWith(prefix));
-        }
-
-        function renderSummary() {
-            const filtered = getFilteredTransactions();
             let income = 0;
             let expense = 0;
-
             filtered.forEach(t => {
                 if (t.type === 'income') income += t.amount;
                 else expense += t.amount;
@@ -388,12 +447,8 @@
             document.getElementById('totalBalance').textContent = `¥${(income - expense).toLocaleString()}`;
             document.getElementById('totalIncome').textContent = `¥${income.toLocaleString()}`;
             document.getElementById('totalExpense').textContent = `¥${expense.toLocaleString()}`;
-        }
 
-        function renderList() {
             const listEl = document.getElementById('transactionList');
-            const filtered = getFilteredTransactions();
-
             if (filtered.length === 0) {
                 listEl.innerHTML = `<p class="text-center text-slate-400 text-xs py-6">この月のデータはまだありません</p>`;
                 return;
@@ -414,13 +469,14 @@
                         <span class="font-bold text-xs ${t.type === 'income' ? 'text-emerald-600' : 'text-slate-800'}">
                             ${t.type === 'income' ? '+' : '-'}¥${t.amount.toLocaleString()}
                         </span>
-                        <button onclick="deleteTransaction(${t.id})" class="text-slate-300 hover:text-rose-500 transition text-xs px-1">×</button>
+                        <button onclick="deleteTransaction('${t.id}')" class="text-slate-300 hover:text-rose-500 transition text-xs px-1">×</button>
                     </div>
                 </div>
             `).join('');
         }
 
         function escapeHtml(str) {
+            if (!str) return '';
             return str.replace(/[&<>'"]/g, 
                 tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
             );
