@@ -122,17 +122,17 @@
             <form id="fixedForm" class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">名称 / メモ</label>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">名称 / メモ</label>
                         <input type="text" id="fixedMemo" required placeholder="例: 家賃" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">金額 (円)</label>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">金額 (円)</label>
                         <input type="number" id="fixedAmount" required placeholder="例: 80000" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">カテゴリ</label>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">カテゴリ</label>
                         <select id="fixedCategory" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
                             <option value="家賃">家賃</option>
                             <option value="光熱費">光熱費</option>
@@ -141,7 +141,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">適用日 (毎月何日)</label>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">適用日 (毎月何日)</label>
                         <input type="number" id="fixedDay" min="1" max="31" value="1" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
                     </div>
                 </div>
@@ -160,13 +160,12 @@
         </div>
     </div>
 
-    <!-- GitHub Pages対応クラウド同期ロジック (設定済み) -->
+    <!-- デバッグログ強化版スクリプト -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ご提示いただいたFirebase設定
         const firebaseConfig = {
             apiKey: "AIzaSyBnc3RBpaLeXBninYx9dXAAKBLvVenFK3I",
             authDomain: "kakeibo-e13ee.firebaseapp.com",
@@ -190,21 +189,13 @@
         let db = null;
         let auth = null;
         
-        // 共有ID（ファミリーキー）の取得または生成
         let familyId = new URLSearchParams(window.location.search).get('uid');
         if (!familyId) {
-            familyId = localStorage.getItem('kakeibo_cloud_family_id');
-            if (!familyId) {
-                familyId = 'fam_' + Math.random().toString(36).substring(2, 12);
-                localStorage.setItem('kakeibo_cloud_family_id', familyId);
-            }
+            familyId = 'fam_' + Math.random().toString(36).substring(2, 12);
             const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?uid=' + familyId;
             window.history.replaceState({path: newUrl}, '', newUrl);
-        } else {
-            localStorage.setItem('kakeibo_cloud_family_id', familyId);
         }
 
-        // UI初期化
         document.addEventListener('DOMContentLoaded', () => {
             const dateInput = document.getElementById('date');
             if (dateInput) dateInput.valueAsDate = new Date();
@@ -238,7 +229,7 @@
                 tempInput.select();
                 try {
                     document.execCommand("copy");
-                    alert("✨ 共有リンクをコピーしました！\n\nこのリンクをご家族に送るだけで、まったく同じ家計簿をリアルタイムで一緒に使えます。");
+                    alert("✨ 共有リンクをコピーしました！");
                 } catch (err) {
                     prompt("以下のURLをコピーして共有してください：", shareUrl);
                 }
@@ -272,7 +263,7 @@
             });
         }
 
-        // Firebaseの初期化 & 匿名認証
+        // Firebase初期化 & 匿名認証とエラーハンドリング
         try {
             const app = initializeApp(firebaseConfig);
             auth = getAuth(app);
@@ -280,7 +271,9 @@
 
             async function startCloudSync() {
                 try {
+                    console.log("Signing in anonymously...");
                     await signInAnonymously(auth);
+                    console.log("Signed in successfully!");
 
                     const appId = "github_pages_app";
                     const txColRef = collection(db, 'artifacts', appId, 'public', 'data', `family_tx_${familyId}`);
@@ -301,6 +294,8 @@
                         }
                     }, (error) => {
                         console.error("Tx snapshot error:", error);
+                        const statusEl = document.getElementById('syncStatus');
+                        if (statusEl) statusEl.textContent = '⚠️ 同期エラー (コンソール確認)';
                     });
 
                     onSnapshot(fcColRef, (snapshot) => {
@@ -314,9 +309,9 @@
                     });
 
                 } catch (authErr) {
-                    console.error("Auth error:", authErr);
+                    console.error("Auth error details:", authErr);
                     const statusEl = document.getElementById('syncStatus');
-                    if (statusEl) statusEl.textContent = '⚠️ 認証エラー';
+                    if (statusEl) statusEl.textContent = '⚠️ 認証失敗 (ルール要確認)';
                 }
             }
 
@@ -330,7 +325,7 @@
         document.getElementById('transactionForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!db) {
-                alert("クラウドデータベース接続中です。");
+                alert("クラウドデータベースに接続されていません。");
                 return;
             }
 
@@ -356,7 +351,7 @@
                 document.getElementById('date').valueAsDate = new Date();
             } catch (err) {
                 console.error("Add tx error:", err);
-                alert("データの保存に失敗しました。");
+                alert("データの保存に失敗しました。コンソールをご確認ください。");
             }
         });
 
