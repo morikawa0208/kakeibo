@@ -15,11 +15,9 @@
 
     <title>簡単家計簿アプリ</title>
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
     <style>
-
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
         * {
@@ -37,25 +35,16 @@
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-
             width: 100%;
             height: 100%;
             min-height: 100dvh;
-
             margin: 0;
             padding: 0;
-
             overflow: hidden;
-
             touch-action: manipulation;
             overscroll-behavior: none;
-
             -webkit-text-size-adjust: 100%;
         }
-
-        /*
-         * iPhone Safe Area
-         */
 
         .safe-area-top {
             padding-top: max(
@@ -71,20 +60,11 @@
             );
         }
 
-        /*
-         * アプリ全体
-         */
-
         .app-container {
             height: 100vh;
             height: 100dvh;
             max-height: 100dvh;
         }
-
-        /*
-         * iPhoneの日付入力が
-         * Gridからはみ出す問題対策
-         */
 
         .form-grid > div {
             min-width: 0;
@@ -98,20 +78,13 @@
 
         input[type="date"] {
             display: block;
-
             width: 100%;
             min-width: 0;
             max-width: 100%;
-
             -webkit-appearance: none;
             appearance: none;
-
             overflow: hidden;
         }
-
-        /*
-         * iOSの日付欄内部
-         */
 
         input[type="date"]::-webkit-date-and-time-value {
             text-align: left;
@@ -123,23 +96,15 @@
             padding: 0;
         }
 
-        /*
-         * スクロールバー非表示
-         */
-
         ::-webkit-scrollbar {
             width: 0;
             height: 0;
             background: transparent;
         }
-
     </style>
-
 </head>
 
-
 <body class="bg-slate-50 text-slate-800">
-
 
 <div
     class="
@@ -155,11 +120,7 @@
     "
 >
 
-
-    <!-- =============================
-         ヘッダー
-    ============================== -->
-
+    <!-- ヘッダー -->
     <header
         class="
             bg-indigo-600
@@ -174,14 +135,9 @@
         "
     >
 
-
         <div class="flex justify-between items-center gap-2">
 
-
-            <!-- 月移動 -->
-
             <div class="flex items-center gap-1 min-w-0">
-
 
                 <button
                     id="prevMonthBtn"
@@ -196,26 +152,15 @@
                         shrink-0
                     "
                 >
-
-                    <svg
-                        class="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
                             d="M15 19l-7-7 7-7"
-                        >
-                        </path>
-
+                        ></path>
                     </svg>
-
                 </button>
-
 
                 <span
                     id="currentMonthLabel"
@@ -228,7 +173,6 @@
                 >
                     2026年 8月
                 </span>
-
 
                 <button
                     id="nextMonthBtn"
@@ -243,34 +187,19 @@
                         shrink-0
                     "
                 >
-
-                    <svg
-                        class="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
                             d="M9 5l7 7-7 7"
-                        >
-                        </path>
-
+                        ></path>
                     </svg>
-
                 </button>
-
 
             </div>
 
-
-            <!-- 右ボタン -->
-
             <div class="flex items-center gap-1.5 shrink-0">
-
 
                 <button
                     id="openFixedBtn"
@@ -292,7 +221,6 @@
                     固定費
                 </button>
 
-
                 <button
                     id="shareLinkBtn"
                     type="button"
@@ -313,194 +241,51 @@
                     家族共有リンク
                 </button>
 
-
             </div>
-
 
         </div>
 
-
-
-        <!-- =============================
-             サマリー
-        ============================== -->
-
+        <!-- サマリー -->
         <div class="grid grid-cols-3 gap-2">
 
-
-            <div
-                class="
-                    bg-indigo-700/60
-                    px-2
-                    py-1.5
-                    rounded-xl
-                    border
-                    border-indigo-500/30
-                    text-center
-                    min-w-0
-                "
-            >
-
-                <p class="text-[10px] text-indigo-200">
-                    月間収支
-                </p>
-
-                <p
-                    id="totalBalance"
-                    class="text-xs sm:text-sm font-bold truncate"
-                >
-                    ¥0
-                </p>
-
+            <div class="bg-indigo-700/60 px-2 py-1.5 rounded-xl border border-indigo-500/30 text-center min-w-0">
+                <p class="text-[10px] text-indigo-200">月間収支</p>
+                <p id="totalBalance" class="text-xs sm:text-sm font-bold truncate">¥0</p>
             </div>
 
-
-
-            <div
-                class="
-                    bg-indigo-700/60
-                    px-2
-                    py-1.5
-                    rounded-xl
-                    border
-                    border-indigo-500/30
-                    text-center
-                    min-w-0
-                "
-            >
-
-                <p class="text-[10px] text-emerald-200">
-                    収入
-                </p>
-
-                <p
-                    id="totalIncome"
-                    class="
-                        text-xs
-                        sm:text-sm
-                        font-bold
-                        text-emerald-300
-                        truncate
-                    "
-                >
-                    ¥0
-                </p>
-
+            <div class="bg-indigo-700/60 px-2 py-1.5 rounded-xl border border-indigo-500/30 text-center min-w-0">
+                <p class="text-[10px] text-emerald-200">収入</p>
+                <p id="totalIncome" class="text-xs sm:text-sm font-bold text-emerald-300 truncate">¥0</p>
             </div>
 
-
-
-            <div
-                class="
-                    bg-indigo-700/60
-                    px-2
-                    py-1.5
-                    rounded-xl
-                    border
-                    border-indigo-500/30
-                    text-center
-                    min-w-0
-                "
-            >
-
-                <p class="text-[10px] text-rose-200">
-                    支出
-                </p>
-
-                <p
-                    id="totalExpense"
-                    class="
-                        text-xs
-                        sm:text-sm
-                        font-bold
-                        text-rose-300
-                        truncate
-                    "
-                >
-                    ¥0
-                </p>
-
+            <div class="bg-indigo-700/60 px-2 py-1.5 rounded-xl border border-indigo-500/30 text-center min-w-0">
+                <p class="text-[10px] text-rose-200">支出</p>
+                <p id="totalExpense" class="text-xs sm:text-sm font-bold text-rose-300 truncate">¥0</p>
             </div>
-
 
         </div>
-
 
     </header>
 
+    <!-- 履歴 -->
+    <main class="flex-1 min-h-0 px-4 py-3 overflow-y-auto overscroll-contain">
 
-
-    <!-- =============================
-         履歴
-    ============================== -->
-
-    <main
-        class="
-            flex-1
-            min-h-0
-            px-4
-            py-3
-            overflow-y-auto
-            overscroll-contain
-        "
-    >
-
-
-        <section
-            class="
-                bg-white
-                p-3.5
-                rounded-2xl
-                shadow-sm
-                border
-                border-slate-100
-            "
-        >
-
+        <section class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100">
 
             <div class="flex justify-between items-center gap-2 mb-2">
-
-
-                <h3
-                    class="
-                        text-xs
-                        font-bold
-                        text-slate-700
-                        uppercase
-                        tracking-wider
-                        shrink-0
-                    "
-                >
+                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider shrink-0">
                     今月の履歴
                 </h3>
 
-
                 <span
                     id="syncStatus"
-                    class="
-                        text-[10px]
-                        text-amber-500
-                        font-semibold
-                        text-right
-                    "
+                    class="text-[10px] text-amber-500 font-semibold text-right"
                 >
                     🔄 Firebase接続中...
                 </span>
-
-
             </div>
 
-
-
-            <div
-                id="transactionList"
-                class="space-y-2"
-            >
-            </div>
-
-
-
-            <!-- Firebase エラー表示 -->
+            <div id="transactionList" class="space-y-2"></div>
 
             <div
                 id="debugArea"
@@ -516,21 +301,13 @@
                     text-rose-700
                     break-all
                 "
-            >
-            </div>
-
+            ></div>
 
         </section>
 
-
     </main>
 
-
-
-    <!-- =============================
-         登録フォーム
-    ============================== -->
-
+    <!-- 登録フォーム -->
     <footer
         class="
             bg-white
@@ -545,87 +322,34 @@
         "
     >
 
-
-        <form
-            id="transactionForm"
-            class="space-y-2.5 overflow-hidden"
-        >
-
-
-            <!-- 支出 / 収入 -->
+        <form id="transactionForm" class="space-y-2.5 overflow-hidden">
 
             <div class="grid grid-cols-2 gap-2">
-
 
                 <button
                     type="button"
                     id="typeExpense"
-                    class="
-                        py-1.5
-                        rounded-xl
-                        font-medium
-                        text-xs
-                        transition
-                        bg-rose-500
-                        text-white
-                        shadow-sm
-                    "
+                    class="py-1.5 rounded-xl font-medium text-xs transition bg-rose-500 text-white shadow-sm"
                 >
                     支出
                 </button>
 
-
                 <button
                     type="button"
                     id="typeIncome"
-                    class="
-                        py-1.5
-                        rounded-xl
-                        font-medium
-                        text-xs
-                        transition
-                        bg-slate-100
-                        text-slate-600
-                    "
+                    class="py-1.5 rounded-xl font-medium text-xs transition bg-slate-100 text-slate-600"
                 >
                     収入
                 </button>
 
-
             </div>
 
-
-
-            <!-- 金額 / カテゴリ -->
-
-            <div
-                class="
-                    form-grid
-                    grid
-                    grid-cols-2
-                    gap-2
-                    min-w-0
-                "
-            >
-
+            <div class="form-grid grid grid-cols-2 gap-2 min-w-0">
 
                 <div class="min-w-0">
-
-
-                    <label
-                        class="
-                            block
-                            text-[10px]
-                            font-semibold
-                            text-slate-400
-                            uppercase
-                            tracking-wider
-                            mb-0.5
-                        "
-                    >
+                    <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
                         金額 (円)
                     </label>
-
 
                     <input
                         type="number"
@@ -648,29 +372,12 @@
                             text-sm
                         "
                     >
-
-
                 </div>
 
-
-
                 <div class="min-w-0">
-
-
-                    <label
-                        class="
-                            block
-                            text-[10px]
-                            font-semibold
-                            text-slate-400
-                            uppercase
-                            tracking-wider
-                            mb-0.5
-                        "
-                    >
+                    <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
                         カテゴリ
                     </label>
-
 
                     <select
                         id="category"
@@ -689,47 +396,17 @@
                             bg-white
                             text-sm
                         "
-                    >
-                    </select>
-
-
+                    ></select>
                 </div>
-
 
             </div>
 
-
-
-            <!-- メモ / 日付 -->
-
-            <div
-                class="
-                    form-grid
-                    grid
-                    grid-cols-2
-                    gap-2
-                    min-w-0
-                "
-            >
-
+            <div class="form-grid grid grid-cols-2 gap-2 min-w-0">
 
                 <div class="min-w-0">
-
-
-                    <label
-                        class="
-                            block
-                            text-[10px]
-                            font-semibold
-                            text-slate-400
-                            uppercase
-                            tracking-wider
-                            mb-0.5
-                        "
-                    >
+                    <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
                         メモ (任意)
                     </label>
-
 
                     <input
                         type="text"
@@ -750,29 +427,12 @@
                             text-sm
                         "
                     >
-
-
                 </div>
 
-
-
                 <div class="min-w-0 overflow-hidden">
-
-
-                    <label
-                        class="
-                            block
-                            text-[10px]
-                            font-semibold
-                            text-slate-400
-                            uppercase
-                            tracking-wider
-                            mb-0.5
-                        "
-                    >
+                    <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
                         日付
                     </label>
-
 
                     <input
                         type="date"
@@ -795,14 +455,9 @@
                             bg-white
                         "
                     >
-
-
                 </div>
 
-
             </div>
-
-
 
             <button
                 type="submit"
@@ -824,21 +479,13 @@
                 追加する
             </button>
 
-
         </form>
-
 
     </footer>
 
-
 </div>
 
-
-
-<!-- =============================
-     固定費モーダル
-============================== -->
-
+<!-- 固定費モーダル -->
 <div
     id="fixedModal"
     class="
@@ -858,7 +505,6 @@
     "
 >
 
-
     <div
         class="
             bg-white
@@ -874,40 +520,71 @@
         "
     >
 
-
         <div class="flex justify-between items-center">
-
 
             <h3 class="text-lg font-bold text-slate-800">
                 月額固定費の管理
             </h3>
 
-
             <button
                 id="closeFixedModalBtn"
                 type="button"
-                class="
-                    text-slate-400
-                    hover:text-slate-600
-                    text-lg
-                    font-bold
-                    p-2
-                "
+                class="text-slate-400 hover:text-slate-600 text-lg font-bold p-2"
             >
                 ×
             </button>
 
-
         </div>
-
-
 
         <p class="text-xs text-slate-500">
             毎月の固定費を登録しておくと、ボタン一つで今月の履歴に反映できます。
         </p>
 
+        <!-- 固定費サマリー -->
+        <div
+            class="
+                bg-indigo-50
+                border
+                border-indigo-100
+                rounded-2xl
+                px-4
+                py-3
+                flex
+                items-center
+                justify-between
+                gap-4
+            "
+        >
 
+            <div>
+                <p class="text-[10px] font-semibold text-indigo-400 uppercase tracking-wider">
+                    登録済み固定費
+                </p>
 
+                <p
+                    id="fixedCount"
+                    class="text-xs text-slate-500 mt-0.5"
+                >
+                    0件
+                </p>
+            </div>
+
+            <div class="text-right">
+                <p class="text-[10px] font-semibold text-indigo-400 uppercase tracking-wider">
+                    月額合計
+                </p>
+
+                <p
+                    id="fixedTotal"
+                    class="text-lg font-bold text-indigo-700 mt-0.5"
+                >
+                    ¥0
+                </p>
+            </div>
+
+        </div>
+
+        <!-- 固定費登録 -->
         <form
             id="fixedForm"
             class="
@@ -920,68 +597,26 @@
             "
         >
 
-
             <div class="form-grid grid grid-cols-2 gap-2 min-w-0">
 
-
                 <div class="min-w-0">
-
-
-                    <label
-                        class="
-                            block
-                            text-[11px]
-                            font-semibold
-                            text-slate-400
-                            uppercase
-                            tracking-wider
-                            mb-1
-                        "
-                    >
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
                         名称 / メモ
                     </label>
-
 
                     <input
                         type="text"
                         id="fixedMemo"
                         required
                         placeholder="例: 家賃"
-                        class="
-                            w-full
-                            min-w-0
-                            px-3
-                            py-2
-                            rounded-xl
-                            border
-                            border-slate-200
-                            text-sm
-                            bg-white
-                        "
+                        class="w-full min-w-0 px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white"
                     >
-
-
                 </div>
 
-
-
                 <div class="min-w-0">
-
-
-                    <label
-                        class="
-                            block
-                            text-[11px]
-                            font-semibold
-                            text-slate-400
-                            uppercase
-                            tracking-wider
-                            mb-1
-                        "
-                    >
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
                         金額 (円)
                     </label>
-
 
                     <input
                         type="number"
@@ -989,103 +624,34 @@
                         id="fixedAmount"
                         required
                         placeholder="例: 80000"
-                        class="
-                            w-full
-                            min-w-0
-                            px-3
-                            py-2
-                            rounded-xl
-                            border
-                            border-slate-200
-                            text-sm
-                            bg-white
-                        "
+                        class="w-full min-w-0 px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white"
                     >
-
-
                 </div>
-
 
             </div>
 
-
-
             <div class="form-grid grid grid-cols-2 gap-2 min-w-0">
 
-
                 <div class="min-w-0">
-
-
-                    <label
-                        class="
-                            block
-                            text-[11px]
-                            font-semibold
-                            text-slate-400
-                            uppercase
-                            tracking-wider
-                            mb-1
-                        "
-                    >
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
                         カテゴリ
                     </label>
 
-
                     <select
                         id="fixedCategory"
-                        class="
-                            w-full
-                            min-w-0
-                            px-3
-                            py-2
-                            rounded-xl
-                            border
-                            border-slate-200
-                            text-sm
-                            bg-white
-                        "
+                        class="w-full min-w-0 px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white"
                     >
-
-                        <option value="家賃">
-                            家賃
-                        </option>
-
-                        <option value="光熱費">
-                            光熱費
-                        </option>
-
-                        <option value="通信費">
-                            通信費
-                        </option>
-
-                        <option value="その他">
-                            その他
-                        </option>
-
+                        <option value="家賃">家賃</option>
+                        <option value="光熱費">光熱費</option>
+                        <option value="通信費">通信費</option>
+                        <option value="その他">その他</option>
                     </select>
-
-
                 </div>
 
-
-
                 <div class="min-w-0">
-
-
-                    <label
-                        class="
-                            block
-                            text-[11px]
-                            font-semibold
-                            text-slate-400
-                            uppercase
-                            tracking-wider
-                            mb-1
-                        "
-                    >
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
                         適用日
                     </label>
-
 
                     <input
                         type="number"
@@ -1095,26 +661,11 @@
                         max="31"
                         value="1"
                         required
-                        class="
-                            w-full
-                            min-w-0
-                            px-3
-                            py-2
-                            rounded-xl
-                            border
-                            border-slate-200
-                            text-sm
-                            bg-white
-                        "
+                        class="w-full min-w-0 px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white"
                     >
-
-
                 </div>
 
-
             </div>
-
-
 
             <button
                 type="submit"
@@ -1133,11 +684,9 @@
                 固定費を追加する
             </button>
 
-
         </form>
 
-
-
+        <!-- 固定費一覧 -->
         <div
             id="fixedList"
             class="
@@ -1147,10 +696,7 @@
                 space-y-2
                 pr-1
             "
-        >
-        </div>
-
-
+        ></div>
 
         <button
             id="applyFixedBtn"
@@ -1171,25 +717,15 @@
             今月分の固定費を反映する
         </button>
 
-
     </div>
-
 
 </div>
 
-
-
-<!-- =============================
-     Firebase
-============================== -->
-
 <script type="module">
-
 
     import {
         initializeApp
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-
 
     import {
         getAuth,
@@ -1198,7 +734,6 @@
         setPersistence,
         browserLocalPersistence
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-
 
     import {
         getFirestore,
@@ -1210,40 +745,18 @@
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 
-
-    /* =============================
-       Firebase 設定
-    ============================== */
-
     const firebaseConfig = {
-
-        apiKey:
-            "AIzaSyBnc3RBpaLeXBninYx9dXAAKBLvVenFK3I",
-
-        authDomain:
-            "kakeibo-e13ee.firebaseapp.com",
-
-        projectId:
-            "kakeibo-e13ee",
-
-        storageBucket:
-            "kakeibo-e13ee.firebasestorage.app",
-
-        messagingSenderId:
-            "826192711708",
-
-        appId:
-            "1:826192711708:web:0fd72a0d74158055620fd9",
-
-        measurementId:
-            "G-ECNJ536EDT"
-
+        apiKey: "AIzaSyBnc3RBpaLeXBninYx9dXAAKBLvVenFK3I",
+        authDomain: "kakeibo-e13ee.firebaseapp.com",
+        projectId: "kakeibo-e13ee",
+        storageBucket: "kakeibo-e13ee.firebasestorage.app",
+        messagingSenderId: "826192711708",
+        appId: "1:826192711708:web:0fd72a0d74158055620fd9",
+        measurementId: "G-ECNJ536EDT"
     };
 
 
-
     const categories = {
-
         expense: [
             '食費',
             '日用品',
@@ -1253,7 +766,6 @@
             '光熱費',
             'その他'
         ],
-
         income: [
             '給与',
             '副業',
@@ -1261,38 +773,26 @@
             '一時所得',
             'その他'
         ]
-
     };
 
 
-
     let currentType = 'expense';
-
     let transactions = [];
-
     let fixedCosts = [];
-
     let selectedDate = new Date();
 
     let db = null;
-
     let auth = null;
 
     let unsubscribeTransactions = null;
-
     let unsubscribeFixedCosts = null;
 
 
-
-    /* =============================
-       家族ID
-    ============================== */
-
+    /* 家族ID */
     let familyId =
         new URLSearchParams(
             window.location.search
         ).get('uid');
-
 
 
     if (!familyId) {
@@ -1303,7 +803,6 @@
                 .replaceAll('-', '')
                 .slice(0, 20);
 
-
         const newUrl =
             window.location.protocol +
             "//" +
@@ -1312,128 +811,62 @@
             '?uid=' +
             encodeURIComponent(familyId);
 
-
         window.history.replaceState(
             {},
             '',
             newUrl
         );
-
     }
 
 
-
-    /* =============================
-       ズーム防止
-    ============================== */
-
-    /*
-     * Safari ピンチズーム
-     */
-
+    /* ズーム防止 */
     document.addEventListener(
         'gesturestart',
-        function (event) {
-
-            event.preventDefault();
-
-        },
-        {
-            passive: false
-        }
+        event => event.preventDefault(),
+        { passive: false }
     );
-
 
     document.addEventListener(
         'gesturechange',
-        function (event) {
-
-            event.preventDefault();
-
-        },
-        {
-            passive: false
-        }
+        event => event.preventDefault(),
+        { passive: false }
     );
-
 
     document.addEventListener(
         'gestureend',
-        function (event) {
-
-            event.preventDefault();
-
-        },
-        {
-            passive: false
-        }
+        event => event.preventDefault(),
+        { passive: false }
     );
 
 
-
-    /*
-     * ダブルタップズーム防止
-     */
-
     let lastTouchEnd = 0;
-
 
     document.addEventListener(
         'touchend',
+        event => {
 
-        function (event) {
-
-            const now =
-                Date.now();
-
+            const now = Date.now();
 
             if (
                 now - lastTouchEnd <= 300
             ) {
-
                 event.preventDefault();
-
             }
 
-
-            lastTouchEnd =
-                now;
-
+            lastTouchEnd = now;
         },
-
-        {
-            passive: false
-        }
-
+        { passive: false }
     );
 
-
-
-    /*
-     * ダブルクリックズーム防止
-     */
 
     document.addEventListener(
         'dblclick',
-
-        function (event) {
-
-            event.preventDefault();
-
-        },
-
-        {
-            passive: false
-        }
-
+        event => event.preventDefault(),
+        { passive: false }
     );
 
 
-
-    /* =============================
-       UIステータス
-    ============================== */
-
+    /* UI */
     function setStatus(
         text,
         type = 'normal'
@@ -1444,103 +877,63 @@
                 'syncStatus'
             );
 
+        if (!el) return;
 
-        if (!el) {
-            return;
-        }
-
-
-        el.textContent =
-            text;
-
+        el.textContent = text;
 
         if (
             type === 'success'
         ) {
-
             el.className =
                 'text-[10px] text-emerald-600 font-semibold text-right';
-
         }
-
         else if (
             type === 'error'
         ) {
-
             el.className =
                 'text-[10px] text-rose-600 font-semibold text-right';
-
         }
-
         else {
-
             el.className =
                 'text-[10px] text-amber-500 font-semibold text-right';
-
         }
-
     }
-
 
 
     function showDebug(error) {
 
-        console.error(
-            error
-        );
-
+        console.error(error);
 
         const area =
             document.getElementById(
                 'debugArea'
             );
 
-
-        if (!area) {
-            return;
-        }
-
+        if (!area) return;
 
         area.classList.remove(
             'hidden'
         );
 
-
         const code =
             error?.code ||
             'unknown-error';
-
 
         const message =
             error?.message ||
             String(error);
 
-
         area.innerHTML = `
-
-            <strong>
-                Firebaseエラー
-            </strong>
-
+            <strong>Firebaseエラー</strong>
             <br>
-
-            code:
-            ${escapeHtml(code)}
-
+            code: ${escapeHtml(code)}
             <br><br>
-
             ${escapeHtml(message)}
-
         `;
-
     }
 
 
-
-    /* =============================
-       Firebase開始
-    ============================== */
-
+    /* Firebase開始 */
     async function initializeFirebase() {
 
         try {
@@ -1549,75 +942,53 @@
                 '🔄 Firebase初期化中...'
             );
 
-
             const app =
                 initializeApp(
                     firebaseConfig
                 );
-
 
             auth =
                 getAuth(
                     app
                 );
 
-
             db =
                 getFirestore(
                     app
                 );
-
-
 
             await setPersistence(
                 auth,
                 browserLocalPersistence
             );
 
-
-
             setStatus(
                 '🔄 匿名認証中...'
             );
 
-
-
             if (
                 !auth.currentUser
             ) {
-
                 await signInAnonymously(
                     auth
                 );
-
             }
-
-
 
             onAuthStateChanged(
                 auth,
-
                 user => {
 
                     if (
                         user
                     ) {
 
-                        console.log(
-                            'Firebase UID:',
-                            user.uid
-                        );
-
-
                         setStatus(
                             '🔄 Firestore接続中...'
                         );
 
-
                         startFirestoreListeners();
 
                     }
-
                     else {
 
                         setStatus(
@@ -1626,13 +997,10 @@
                         );
 
                     }
-
                 }
-
             );
 
         }
-
         catch (error) {
 
             setStatus(
@@ -1640,45 +1008,30 @@
                 'error'
             );
 
-
             showDebug(
                 error
             );
 
         }
-
     }
 
 
-
-    /* =============================
-       Firestoreリアルタイム同期
-    ============================== */
-
+    /* Firestore同期 */
     function startFirestoreListeners() {
-
 
         if (
             unsubscribeTransactions
         ) {
-
             unsubscribeTransactions();
-
         }
-
 
         if (
             unsubscribeFixedCosts
         ) {
-
             unsubscribeFixedCosts();
-
         }
 
-
-
         try {
-
 
             const txColRef =
                 collection(
@@ -1689,7 +1042,6 @@
                     'data',
                     `family_tx_${familyId}`
                 );
-
 
             const fcColRef =
                 collection(
@@ -1702,7 +1054,6 @@
                 );
 
 
-
             unsubscribeTransactions =
                 onSnapshot(
 
@@ -1710,30 +1061,20 @@
 
                     snapshot => {
 
-
-                        transactions =
-                            [];
-
+                        transactions = [];
 
                         snapshot.forEach(
                             docSnap => {
 
                                 transactions.push({
-
-                                    id:
-                                        docSnap.id,
-
+                                    id: docSnap.id,
                                     ...docSnap.data()
-
                                 });
 
                             }
                         );
 
-
-
                         transactions.sort(
-
                             (a, b) => {
 
                                 const dateDiff =
@@ -1744,15 +1085,11 @@
                                         a.date
                                     );
 
-
                                 if (
                                     dateDiff !== 0
                                 ) {
-
                                     return dateDiff;
-
                                 }
-
 
                                 return (
                                     Number(
@@ -1763,23 +1100,16 @@
                                         a.createdAt || 0
                                     )
                                 );
-
                             }
-
                         );
 
-
-
                         renderApp();
-
 
                         setStatus(
                             '☁️ クラウド自動保存中',
                             'success'
                         );
-
                     },
-
 
                     error => {
 
@@ -1788,15 +1118,11 @@
                             'error'
                         );
 
-
                         showDebug(
                             error
                         );
-
                     }
-
                 );
-
 
 
             unsubscribeFixedCosts =
@@ -1806,44 +1132,31 @@
 
                     snapshot => {
 
-
-                        fixedCosts =
-                            [];
-
+                        fixedCosts = [];
 
                         snapshot.forEach(
                             docSnap => {
 
                                 fixedCosts.push({
-
-                                    id:
-                                        docSnap.id,
-
+                                    id: docSnap.id,
                                     ...docSnap.data()
-
                                 });
 
                             }
                         );
 
-
                         renderFixedList();
-
                     },
-
 
                     error => {
 
                         showDebug(
                             error
                         );
-
                     }
-
                 );
 
         }
-
         catch (error) {
 
             setStatus(
@@ -1851,42 +1164,29 @@
                 'error'
             );
 
-
             showDebug(
                 error
             );
-
         }
-
     }
 
 
-
-    /* =============================
-       DOM開始
-    ============================== */
-
+    /* DOM開始 */
     document.addEventListener(
         'DOMContentLoaded',
-
         () => {
-
 
             const dateInput =
                 document.getElementById(
                     'date'
                 );
 
-
             dateInput.valueAsDate =
                 new Date();
 
-
-
             updateCategoryOptions();
-
             renderApp();
-
+            renderFixedList();
 
 
             document
@@ -1895,19 +1195,15 @@
                 )
                 .addEventListener(
                     'click',
-
                     () => {
 
                         selectedDate.setMonth(
                             selectedDate.getMonth() - 1
                         );
 
-
                         renderApp();
-
                     }
                 );
-
 
 
             document
@@ -1916,19 +1212,15 @@
                 )
                 .addEventListener(
                     'click',
-
                     () => {
 
                         selectedDate.setMonth(
                             selectedDate.getMonth() + 1
                         );
 
-
                         renderApp();
-
                     }
                 );
-
 
 
             document
@@ -1937,13 +1229,11 @@
                 )
                 .addEventListener(
                     'click',
-
                     () =>
                         switchType(
                             'expense'
                         )
                 );
-
 
 
             document
@@ -1952,13 +1242,11 @@
                 )
                 .addEventListener(
                     'click',
-
                     () =>
                         switchType(
                             'income'
                         )
                 );
-
 
 
             document
@@ -1967,7 +1255,6 @@
                 )
                 .addEventListener(
                     'click',
-
                     () => {
 
                         const modal =
@@ -1975,22 +1262,17 @@
                                 'fixedModal'
                             );
 
-
                         modal.classList.remove(
                             'hidden'
                         );
-
 
                         modal.classList.add(
                             'flex'
                         );
 
-
                         renderFixedList();
-
                     }
                 );
-
 
 
             document
@@ -1999,11 +1281,9 @@
                 )
                 .addEventListener(
                     'click',
-
                     () =>
                         closeFixedModal()
                 );
-
 
 
             document
@@ -2012,36 +1292,24 @@
                 )
                 .addEventListener(
                     'click',
-
                     async () => {
-
 
                         const shareUrl =
                             window.location.href;
 
-
                         try {
-
 
                             if (
                                 navigator.share
                             ) {
 
                                 await navigator.share({
-
-                                    title:
-                                        '家計簿',
-
-                                    url:
-                                        shareUrl
-
+                                    title: '家計簿',
+                                    url: shareUrl
                                 });
 
-
                                 return;
-
                             }
-
 
                             await navigator
                                 .clipboard
@@ -2049,25 +1317,19 @@
                                     shareUrl
                                 );
 
-
                             alert(
                                 '共有リンクをコピーしました！'
                             );
 
                         }
-
                         catch (error) {
-
 
                             if (
                                 error?.name ===
                                 'AbortError'
                             ) {
-
                                 return;
-
                             }
-
 
                             try {
 
@@ -2077,13 +1339,11 @@
                                         shareUrl
                                     );
 
-
                                 alert(
                                     '共有リンクをコピーしました！'
                                 );
 
                             }
-
                             catch {
 
                                 prompt(
@@ -2092,152 +1352,102 @@
                                 );
 
                             }
-
                         }
-
                     }
                 );
 
 
-
             initializeFirebase();
-
         }
-
     );
 
 
-
-    /* =============================
-       支出 / 収入切替
-    ============================== */
-
+    /* 支出 / 収入切替 */
     function switchType(type) {
 
-
-        currentType =
-            type;
-
+        currentType = type;
 
         const expBtn =
             document.getElementById(
                 'typeExpense'
             );
 
-
         const incBtn =
             document.getElementById(
                 'typeIncome'
             );
 
-
-
         if (
             type === 'expense'
         ) {
 
-
             expBtn.className =
                 "py-1.5 rounded-xl font-medium text-xs transition bg-rose-500 text-white shadow-sm";
-
 
             incBtn.className =
                 "py-1.5 rounded-xl font-medium text-xs transition bg-slate-100 text-slate-600";
 
         }
-
         else {
-
 
             expBtn.className =
                 "py-1.5 rounded-xl font-medium text-xs transition bg-slate-100 text-slate-600";
-
 
             incBtn.className =
                 "py-1.5 rounded-xl font-medium text-xs transition bg-emerald-500 text-white shadow-sm";
 
         }
 
-
         updateCategoryOptions();
-
     }
 
 
-
-    /* =============================
-       カテゴリ
-    ============================== */
-
+    /* カテゴリ */
     function updateCategoryOptions() {
-
 
         const select =
             document.getElementById(
                 'category'
             );
 
+        if (!select) return;
 
-        if (!select) {
-            return;
-        }
-
-
-        select.innerHTML =
-            '';
-
+        select.innerHTML = '';
 
         categories[
             currentType
         ].forEach(
-
             cat => {
-
 
                 const option =
                     document.createElement(
                         'option'
                     );
 
-
                 option.value =
                     cat;
-
 
                 option.textContent =
                     cat;
 
-
                 select.appendChild(
                     option
                 );
-
             }
-
         );
-
     }
 
 
-
-    /* =============================
-       通常取引追加
-    ============================== */
-
+    /* 取引追加 */
     document
         .getElementById(
             'transactionForm'
         )
         .addEventListener(
-
             'submit',
-
             async event => {
 
-
                 event.preventDefault();
-
-
 
                 if (
                     !db ||
@@ -2249,10 +1459,7 @@
                     );
 
                     return;
-
                 }
-
-
 
                 const amount =
                     Number(
@@ -2263,14 +1470,12 @@
                             .value
                     );
 
-
                 const category =
                     document
                         .getElementById(
                             'category'
                         )
                         .value;
-
 
                 const memo =
                     document
@@ -2280,7 +1485,6 @@
                         .value
                         .trim();
 
-
                 const date =
                     document
                         .getElementById(
@@ -2288,22 +1492,15 @@
                         )
                         .value;
 
-
-
                 if (
                     !Number.isFinite(amount) ||
                     amount <= 0 ||
                     !date
                 ) {
-
                     return;
-
                 }
 
-
-
                 try {
-
 
                     const txColRef =
                         collection(
@@ -2315,32 +1512,17 @@
                             `family_tx_${familyId}`
                         );
 
-
-
                     await addDoc(
                         txColRef,
                         {
-
-                            type:
-                                currentType,
-
+                            type: currentType,
                             amount,
-
                             category,
-
-                            memo:
-                                memo ||
-                                category,
-
+                            memo: memo || category,
                             date,
-
-                            createdAt:
-                                Date.now()
-
+                            createdAt: Date.now()
                         }
                     );
-
-
 
                     document
                         .getElementById(
@@ -2349,14 +1531,12 @@
                         .value =
                         '';
 
-
                     document
                         .getElementById(
                             'memo'
                         )
                         .value =
                         '';
-
 
                     document
                         .getElementById(
@@ -2366,51 +1546,34 @@
                         new Date();
 
                 }
-
                 catch (error) {
-
 
                     showDebug(
                         error
                     );
 
-
                     alert(
                         `保存に失敗しました。\n${error.code || error.message}`
                     );
-
                 }
-
             }
-
         );
 
 
-
-    /* =============================
-       取引削除
-    ============================== */
-
+    /* 取引削除 */
     window.deleteTransaction =
         async function (id) {
-
 
             if (
                 !db ||
                 !auth?.currentUser
             ) {
-
                 return;
-
             }
-
-
 
             try {
 
-
                 await deleteDoc(
-
                     doc(
                         db,
                         'artifacts',
@@ -2420,51 +1583,35 @@
                         `family_tx_${familyId}`,
                         id
                     )
-
                 );
 
             }
-
             catch (error) {
 
                 showDebug(
                     error
                 );
-
             }
-
         };
 
 
-
-    /* =============================
-       固定費追加
-    ============================== */
-
+    /* 固定費追加 */
     document
         .getElementById(
             'fixedForm'
         )
         .addEventListener(
-
             'submit',
-
             async event => {
 
-
                 event.preventDefault();
-
 
                 if (
                     !db ||
                     !auth?.currentUser
                 ) {
-
                     return;
-
                 }
-
-
 
                 const memo =
                     document
@@ -2473,7 +1620,6 @@
                         )
                         .value
                         .trim();
-
 
                 const amount =
                     Number(
@@ -2484,14 +1630,12 @@
                             .value
                     );
 
-
                 const category =
                     document
                         .getElementById(
                             'fixedCategory'
                         )
                         .value;
-
 
                 const day =
                     Number(
@@ -2502,8 +1646,6 @@
                             .value
                     );
 
-
-
                 if (
                     !memo ||
                     !Number.isFinite(amount) ||
@@ -2512,15 +1654,10 @@
                     day < 1 ||
                     day > 31
                 ) {
-
                     return;
-
                 }
 
-
-
                 try {
-
 
                     const fcColRef =
                         collection(
@@ -2532,24 +1669,15 @@
                             `family_fc_${familyId}`
                         );
 
-
-
                     await addDoc(
                         fcColRef,
                         {
-
                             memo,
-
                             amount,
-
                             category,
-
                             day
-
                         }
                     );
-
-
 
                     document
                         .getElementById(
@@ -2557,7 +1685,6 @@
                         )
                         .value =
                         '';
-
 
                     document
                         .getElementById(
@@ -2567,45 +1694,30 @@
                         '';
 
                 }
-
                 catch (error) {
 
                     showDebug(
                         error
                     );
-
                 }
-
             }
-
         );
 
 
-
-    /* =============================
-       固定費削除
-    ============================== */
-
+    /* 固定費削除 */
     window.deleteFixedCost =
         async function (id) {
-
 
             if (
                 !db ||
                 !auth?.currentUser
             ) {
-
                 return;
-
             }
-
-
 
             try {
 
-
                 await deleteDoc(
-
                     doc(
                         db,
                         'artifacts',
@@ -2615,37 +1727,26 @@
                         `family_fc_${familyId}`,
                         id
                     )
-
                 );
 
             }
-
             catch (error) {
 
                 showDebug(
                     error
                 );
-
             }
-
         };
 
 
-
-    /* =============================
-       固定費反映
-    ============================== */
-
+    /* 固定費反映 */
     document
         .getElementById(
             'applyFixedBtn'
         )
         .addEventListener(
-
             'click',
-
             async () => {
-
 
                 if (
                     !db ||
@@ -2657,10 +1758,7 @@
                     );
 
                     return;
-
                 }
-
-
 
                 if (
                     fixedCosts.length === 0
@@ -2671,20 +1769,15 @@
                     );
 
                     return;
-
                 }
-
-
 
                 const year =
                     selectedDate
                         .getFullYear();
 
-
                 const monthIndex =
                     selectedDate
                         .getMonth();
-
 
                 const month =
                     String(
@@ -2695,7 +1788,6 @@
                         '0'
                     );
 
-
                 const lastDay =
                     new Date(
                         year,
@@ -2704,12 +1796,7 @@
                     )
                     .getDate();
 
-
-
-                let addedCount =
-                    0;
-
-
+                let addedCount = 0;
 
                 const txColRef =
                     collection(
@@ -2721,13 +1808,9 @@
                         `family_tx_${familyId}`
                     );
 
-
-
                 for (
-                    const fixed of
-                    fixedCosts
+                    const fixed of fixedCosts
                 ) {
-
 
                     const actualDay =
                         Math.min(
@@ -2736,7 +1819,6 @@
                             ),
                             lastDay
                         );
-
 
                     const day =
                         String(
@@ -2747,15 +1829,11 @@
                             '0'
                         );
 
-
                     const targetDate =
                         `${year}-${month}-${day}`;
 
-
-
                     const exists =
                         transactions.some(
-
                             transaction =>
 
                                 transaction.date
@@ -2776,127 +1854,87 @@
                                     Number(
                                         fixed.amount
                                     )
-
                         );
-
-
 
                     if (
                         exists
                     ) {
-
                         continue;
-
                     }
 
-
-
                     try {
-
 
                         await addDoc(
                             txColRef,
                             {
-
-                                type:
-                                    'expense',
-
+                                type: 'expense',
                                 amount:
                                     Number(
                                         fixed.amount
                                     ),
-
                                 category:
                                     fixed.category,
-
                                 memo:
                                     fixed.memo,
-
                                 date:
                                     targetDate,
-
                                 createdAt:
                                     Date.now()
-
                             }
                         );
-
 
                         addedCount++;
 
                     }
-
                     catch (error) {
 
                         showDebug(
                             error
                         );
-
                     }
-
                 }
 
-
-
                 closeFixedModal();
-
-
 
                 alert(
                     `${addedCount}件の固定費を反映しました！`
                 );
-
             }
-
         );
 
 
-
     function closeFixedModal() {
-
 
         const modal =
             document.getElementById(
                 'fixedModal'
             );
 
-
         modal.classList.add(
             'hidden'
         );
 
-
         modal.classList.remove(
             'flex'
         );
-
     }
 
 
-
-    /* =============================
-       メイン描画
-    ============================== */
-
+    /* メイン描画 */
     function renderApp() {
-
 
         const year =
             selectedDate
                 .getFullYear();
 
-
         const month =
             selectedDate
                 .getMonth() + 1;
-
-
 
         const monthLabel =
             document.getElementById(
                 'currentMonthLabel'
             );
-
 
         if (
             monthLabel
@@ -2904,42 +1942,25 @@
 
             monthLabel.textContent =
                 `${year}年 ${month}月`;
-
         }
-
-
 
         const prefix =
             `${year}-${String(month).padStart(2, '0')}`;
 
-
-
         const filtered =
             transactions.filter(
-
                 transaction =>
                     transaction.date &&
                     transaction.date.startsWith(
                         prefix
                     )
-
             );
 
-
-
-        let income =
-            0;
-
-
-        let expense =
-            0;
-
-
+        let income = 0;
+        let expense = 0;
 
         filtered.forEach(
-
             transaction => {
-
 
                 if (
                     transaction.type ===
@@ -2950,23 +1971,16 @@
                         Number(
                             transaction.amount
                         );
-
                 }
-
                 else {
 
                     expense +=
                         Number(
                             transaction.amount
                         );
-
                 }
-
             }
-
         );
-
-
 
         document
             .getElementById(
@@ -2974,11 +1988,8 @@
             )
             .textContent =
             `¥${(
-                income -
-                expense
+                income - expense
             ).toLocaleString()}`;
-
-
 
         document
             .getElementById(
@@ -2987,8 +1998,6 @@
             .textContent =
             `¥${income.toLocaleString()}`;
 
-
-
         document
             .getElementById(
                 'totalExpense'
@@ -2996,44 +2005,27 @@
             .textContent =
             `¥${expense.toLocaleString()}`;
 
-
-
         const listEl =
             document.getElementById(
                 'transactionList'
             );
-
-
 
         if (
             filtered.length === 0
         ) {
 
             listEl.innerHTML = `
-
-                <p class="
-                    text-center
-                    text-slate-400
-                    text-xs
-                    py-6
-                ">
+                <p class="text-center text-slate-400 text-xs py-6">
                     この月のデータはまだありません
                 </p>
-
             `;
 
-
             return;
-
         }
-
-
 
         listEl.innerHTML =
             filtered.map(
-
                 transaction => `
-
 
                     <div
                         class="
@@ -3050,16 +2042,7 @@
                         "
                     >
 
-
-                        <div
-                            class="
-                                flex
-                                items-center
-                                gap-2.5
-                                min-w-0
-                            "
-                        >
-
+                        <div class="flex items-center gap-2.5 min-w-0">
 
                             <div
                                 class="
@@ -3072,7 +2055,6 @@
                                     font-bold
                                     text-xs
                                     shrink-0
-
                                     ${
                                         transaction.type === 'income'
                                             ? 'bg-emerald-100 text-emerald-600'
@@ -3080,86 +2062,47 @@
                                     }
                                 "
                             >
-
                                 ${
                                     transaction.type === 'income'
                                         ? '収'
                                         : '支'
                                 }
-
                             </div>
-
-
 
                             <div class="min-w-0">
 
-
-                                <p
-                                    class="
-                                        font-semibold
-                                        text-xs
-                                        text-slate-800
-                                        truncate
-                                    "
-                                >
-
+                                <p class="font-semibold text-xs text-slate-800 truncate">
                                     ${
                                         escapeHtml(
                                             transaction.memo
                                         )
                                     }
-
                                 </p>
 
-
-
-                                <p
-                                    class="
-                                        text-[10px]
-                                        text-slate-400
-                                        truncate
-                                    "
-                                >
-
+                                <p class="text-[10px] text-slate-400 truncate">
                                     ${
                                         escapeHtml(
                                             transaction.date
                                         )
                                     }
-
                                     ·
-
                                     ${
                                         escapeHtml(
                                             transaction.category
                                         )
                                     }
-
                                 </p>
-
 
                             </div>
 
-
                         </div>
 
-
-
-                        <div
-                            class="
-                                flex
-                                items-center
-                                gap-2
-                                shrink-0
-                            "
-                        >
-
+                        <div class="flex items-center gap-2 shrink-0">
 
                             <span
                                 class="
                                     font-bold
                                     text-xs
-
                                     ${
                                         transaction.type === 'income'
                                             ? 'text-emerald-600'
@@ -3167,67 +2110,90 @@
                                     }
                                 "
                             >
-
                                 ${
                                     transaction.type === 'income'
                                         ? '+'
                                         : '-'
                                 }
-
                                 ¥${Number(
                                     transaction.amount
                                 ).toLocaleString()}
-
                             </span>
-
-
 
                             <button
                                 type="button"
                                 onclick="deleteTransaction('${transaction.id}')"
-                                class="
-                                    text-slate-300
-                                    hover:text-rose-500
-                                    transition
-                                    text-xs
-                                    px-1
-                                "
+                                class="text-slate-300 hover:text-rose-500 transition text-xs px-1"
                             >
                                 ×
                             </button>
 
-
                         </div>
 
-
                     </div>
-
-
                 `
-
             ).join('');
-
     }
 
 
-
-    /* =============================
-       固定費描画
-    ============================== */
-
+    /* 固定費描画 */
     function renderFixedList() {
-
 
         const listEl =
             document.getElementById(
                 'fixedList'
             );
 
+        const countEl =
+            document.getElementById(
+                'fixedCount'
+            );
 
-        if (!listEl) {
-            return;
+        const totalEl =
+            document.getElementById(
+                'fixedTotal'
+            );
+
+
+        const totalAmount =
+            fixedCosts.reduce(
+                (sum, fixed) => {
+
+                    return (
+                        sum +
+                        Number(
+                            fixed.amount || 0
+                        )
+                    );
+
+                },
+                0
+            );
+
+
+        if (
+            countEl
+        ) {
+
+            countEl.textContent =
+                `${fixedCosts.length}件`;
         }
 
+
+        if (
+            totalEl
+        ) {
+
+            totalEl.textContent =
+                `¥${totalAmount.toLocaleString()}`;
+        }
+
+
+        if (
+            !listEl
+        ) {
+            return;
+        }
 
 
         if (
@@ -3235,7 +2201,6 @@
         ) {
 
             listEl.innerHTML = `
-
                 <p
                     class="
                         text-center
@@ -3246,21 +2211,15 @@
                 >
                     登録されている固定費はありません
                 </p>
-
             `;
 
-
             return;
-
         }
-
 
 
         listEl.innerHTML =
             fixedCosts.map(
-
                 fixed => `
-
 
                     <div
                         class="
@@ -3277,17 +2236,9 @@
                         "
                     >
 
-
                         <div class="min-w-0">
 
-
-                            <p
-                                class="
-                                    font-semibold
-                                    text-slate-800
-                                    truncate
-                                "
-                            >
+                            <p class="font-semibold text-slate-800 truncate">
 
                                 ${
                                     escapeHtml(
@@ -3295,49 +2246,27 @@
                                     )
                                 }
 
-                                <span
-                                    class="
-                                        text-xs
-                                        font-normal
-                                        text-slate-400
-                                    "
-                                >
-
+                                <span class="text-xs font-normal text-slate-400">
                                     (${
                                         escapeHtml(
                                             fixed.category
                                         )
                                     })
-
                                 </span>
 
                             </p>
 
-
-
-                            <p
-                                class="
-                                    text-xs
-                                    text-indigo-600
-                                "
-                            >
-
+                            <p class="text-xs text-indigo-600">
                                 毎月
                                 ${Number(fixed.day)}
                                 日
-
                                 ·
-
                                 ¥${Number(
                                     fixed.amount
                                 ).toLocaleString()}
-
                             </p>
 
-
                         </div>
-
-
 
                         <button
                             type="button"
@@ -3354,67 +2283,36 @@
                             ×
                         </button>
 
-
                     </div>
-
-
                 `
-
             ).join('');
-
     }
 
 
-
-    /* =============================
-       HTML Escape
-    ============================== */
-
+    /* HTML Escape */
     function escapeHtml(value) {
-
 
         if (
             value === null ||
             value === undefined
         ) {
-
             return '';
-
         }
-
-
 
         return String(value)
             .replace(
-
                 /[&<>'"]/g,
-
                 char => ({
-
-                    '&':
-                        '&amp;',
-
-                    '<':
-                        '&lt;',
-
-                    '>':
-                        '&gt;',
-
-                    "'":
-                        '&#39;',
-
-                    '"':
-                        '&quot;'
-
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
                 }[char])
-
             );
-
     }
 
-
 </script>
-
 
 </body>
 </html>
