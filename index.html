@@ -47,7 +47,7 @@
             border-radius: 3px;
         }
         .ios-shadow {
-            box-shadow: 0 -8px 25px -4px rgba(40, 35, 30, 0.06), 0 4px 16px -2px rgba(0, 0, 0, 0.03);
+            box-shadow: 0 -8px 25px -4px rgba(40, 35, 30, 0.05), 0 4px 16px -2px rgba(0, 0, 0, 0.02);
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(6px); }
@@ -88,11 +88,11 @@
     </header>
 
     <!-- メインコンテンツエリア（下部入力バーのために下部に十分な余白を確保） -->
-    <main class="flex-1 overflow-y-auto px-5 py-4 pb-44 max-w-md mx-auto w-full flex flex-col space-y-4">
+    <main class="flex-1 overflow-y-auto px-5 py-4 pb-48 max-w-md mx-auto w-full flex flex-col space-y-4">
         
         <!-- サマリーカード -->
-        <div class="bg-stone-50/80 rounded-3xl p-5 border border-line shadow-xs relative overflow-hidden">
-            <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-stone-100/60 rounded-full pointer-events-none"></div>
+        <div class="bg-cardbg rounded-3xl p-5 border border-line shadow-2xs relative overflow-hidden">
+            <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-stone-100/50 rounded-full pointer-events-none"></div>
             <div class="text-[11px] text-subtext font-medium mb-0.5">今月の残高</div>
             <div class="flex items-baseline space-x-2">
                 <span id="totalBalance" class="text-3xl font-bold tracking-tight text-accent">¥0</span>
@@ -145,8 +145,8 @@
         </div>
     </main>
 
-    <!-- 画面下部の固定入力バー -->
-    <div class="fixed bottom-16 left-3 right-3 sm:left-auto sm:right-auto sm:w-full sm:max-w-md sm:translate-x-[-50%] sm:left-[50%] bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-3xl ios-shadow p-3.5 z-20">
+    <!-- 画面下部の固定入力バー（位置を少し上に調整） -->
+    <div class="fixed bottom-20 left-3 right-3 sm:left-auto sm:right-auto sm:w-full sm:max-w-md sm:translate-x-[-50%] sm:left-[50%] bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-3xl ios-shadow p-3.5 z-20">
         <form id="transactionForm" onsubmit="addTransaction(event)" class="flex flex-col space-y-2.5">
             <!-- 収支切替・カテゴリ・日付 -->
             <div class="flex items-center justify-between space-x-2">
@@ -155,21 +155,21 @@
                     <button type="button" onclick="setType('income')" id="typeIncomeBtn" class="px-3 py-1.5 rounded-lg text-subtext font-medium transition-all">収入</button>
                 </div>
                 <!-- カテゴリ選択 -->
-                <select id="categorySelect" class="flex-1 bg-stone-50 border border-line rounded-xl px-2.5 py-1.5 text-xs text-accent focus:outline-none focus:border-accent">
+                <select id="categorySelect" class="flex-1 bg-cardbg border border-line rounded-xl px-2.5 py-1.5 text-xs text-accent focus:outline-none focus:border-accent">
                     <!-- JSにより動的挿入 -->
                 </select>
                 <!-- 日付選択 -->
-                <input type="date" id="txDate" class="bg-stone-50 border border-line rounded-xl px-2 py-1.5 text-xs text-accent w-28 focus:outline-none focus:border-accent">
+                <input type="date" id="txDate" class="bg-cardbg border border-line rounded-xl px-2 py-1.5 text-xs text-accent w-28 focus:outline-none focus:border-accent">
             </div>
 
             <!-- 金額・メモ・追加ボタン -->
             <div class="flex items-center space-x-2">
                 <div class="relative w-28 shrink-0">
                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-subtext">¥</span>
-                    <input type="number" id="txAmount" placeholder="金額" required min="1" class="w-full bg-stone-50 border border-line rounded-xl pl-7 pr-3 py-2 text-sm font-semibold text-accent focus:outline-none focus:border-accent placeholder:text-stone-300 placeholder:font-normal">
+                    <input type="number" id="txAmount" placeholder="金額" required min="1" class="w-full bg-cardbg border border-line rounded-xl pl-7 pr-3 py-2 text-sm font-semibold text-accent focus:outline-none focus:border-accent placeholder:text-stone-300 placeholder:font-normal">
                 </div>
                 <div class="flex-1">
-                    <input type="text" id="txMemo" placeholder="メモ（例：ランチ、スーパーなど）" class="w-full bg-stone-50 border border-line rounded-xl px-3 py-2 text-xs text-accent focus:outline-none focus:border-accent placeholder:text-stone-300">
+                    <input type="text" id="txMemo" placeholder="メモ（例：ランチ、スーパーなど）" class="w-full bg-cardbg border border-line rounded-xl px-3 py-2 text-xs text-accent focus:outline-none focus:border-accent placeholder:text-stone-300">
                 </div>
                 <button type="submit" class="bg-accent text-white px-4 py-2 rounded-xl text-xs font-medium hover:bg-stone-700 transition-all shrink-0 flex items-center justify-center">
                     追加
@@ -178,7 +178,7 @@
         </form>
     </div>
 
-    <!-- AIアドバイザーモーダル -->
+    <!-- AIアドバイザーモーダル（確認画面なしで即時実行対応） -->
     <div id="aiModal" class="fixed inset-0 bg-black/30 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-cardbg rounded-3xl max-w-md w-full p-6 border border-line shadow-xl animate-fade-in flex flex-col max-h-[85vh]">
             <div class="flex items-center justify-between pb-3 border-b border-stone-100">
@@ -192,13 +192,13 @@
             </div>
             
             <div id="aiContent" class="py-4 flex-1 overflow-y-auto text-xs text-accent leading-relaxed space-y-3">
-                <p class="text-subtext leading-relaxed">「分析をはじめる」ボタンを押すと、現在の期間の収支データをAIが丁寧に分析し、上品で客観的なアドバイスを生成します。</p>
+                <!-- AIアドバイス結果がここに直接表示されます -->
             </div>
 
             <div class="pt-3 border-t border-stone-100 flex justify-end">
-                <button onclick="requestAIAdvice()" id="aiBtn" class="px-4 py-2 bg-accent text-white rounded-xl text-xs font-medium hover:bg-stone-700 transition-all flex items-center space-x-1.5">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    <span>分析をはじめる</span>
+                <button onclick="requestAIAdvice()" id="aiRefreshBtn" class="px-4 py-2 bg-stone-100 text-accent rounded-xl text-xs font-medium hover:bg-stone-200 transition-all flex items-center space-x-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    <span>再分析する</span>
                 </button>
             </div>
         </div>
@@ -415,8 +415,10 @@
             renderSummary();
         }
 
+        // AIアドバイスボタンを押した瞬間にモーダルを開きつつ、そのまま実行する
         function openAIModal() {
             document.getElementById('aiModal').classList.remove('hidden');
+            requestAIAdvice();
         }
 
         function closeAIModal() {
@@ -500,7 +502,7 @@
 
             filtered.forEach(t => {
                 const item = document.createElement('div');
-                item.className = 'bg-stone-50/60 rounded-2xl p-3.5 border border-line flex items-center justify-between shadow-2xs hover:border-stone-300 transition-all';
+                item.className = 'bg-cardbg rounded-2xl p-3.5 border border-line flex items-center justify-between shadow-2xs hover:border-stone-300 transition-all';
                 
                 const isIncome = t.type === 'income';
                 const sign = isIncome ? '+' : '-';
@@ -536,12 +538,11 @@
 
         async function requestAIAdvice() {
             const aiContent = document.getElementById('aiContent');
-            const aiBtn = document.getElementById('aiBtn');
-            aiBtn.disabled = true;
-            aiBtn.textContent = '分析中...';
+            const aiRefreshBtn = document.getElementById('aiRefreshBtn');
+            aiRefreshBtn.disabled = true;
             
             aiContent.innerHTML = `
-                <div class="flex flex-col items-center justify-center py-6 space-y-3">
+                <div class="flex flex-col items-center justify-center py-8 space-y-3">
                     <div class="w-6 h-6 border-2 border-stone-300 border-t-accent rounded-full animate-spin"></div>
                     <p class="text-xs text-subtext">家計データを丁寧に分析しています...</p>
                 </div>
@@ -555,8 +556,7 @@
                         <p class="text-[11px] text-subtext">右上の設定アイコンからAPIキーをご入力ください。</p>
                     </div>
                 `;
-                aiBtn.disabled = false;
-                aiBtn.textContent = '分析をはじめる';
+                aiRefreshBtn.disabled = false;
                 return;
             }
 
@@ -636,8 +636,7 @@
                     </div>
                 `;
             } finally {
-                aiBtn.disabled = false;
-                aiBtn.textContent = '分析をはじめる';
+                aiRefreshBtn.disabled = false;
             }
         }
     </script>
