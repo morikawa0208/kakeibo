@@ -2,748 +2,230 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-
     <meta
         name="viewport"
-        content="width=device-width,
-                 initial-scale=1.0,
-                 maximum-scale=1.0,
-                 minimum-scale=1.0,
-                 user-scalable=no,
-                 viewport-fit=cover"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover"
     >
-
     <title>簡単家計簿アプリ</title>
-
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        html {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            touch-action: manipulation;
-            overscroll-behavior: none;
-        }
-
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html { width: 100%; height: 100%; overflow: hidden; touch-action: manipulation; overscroll-behavior: none; }
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            width: 100%;
-            height: 100%;
-            min-height: 100dvh;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            touch-action: manipulation;
-            overscroll-behavior: none;
+            width: 100%; height: 100%; min-height: 100dvh;
+            margin: 0; padding: 0; overflow: hidden;
+            touch-action: manipulation; overscroll-behavior: none;
             -webkit-text-size-adjust: 100%;
         }
-
-        .safe-area-top {
-            padding-top: max(
-                0.75rem,
-                calc(env(safe-area-inset-top) + 0.35rem)
-            );
-        }
-
-        .safe-area-bottom {
-            padding-bottom: max(
-                1rem,
-                calc(env(safe-area-inset-bottom) + 0.5rem)
-            );
-        }
-
-        .app-container {
-            height: 100vh;
-            height: 100dvh;
-            max-height: 100dvh;
-        }
-
-        .form-grid > div {
-            min-width: 0;
-        }
-
-        input,
-        select,
-        button {
-            max-width: 100%;
-        }
-
-        input[type="date"] {
-            display: block;
-            width: 100%;
-            min-width: 0;
-            max-width: 100%;
-            -webkit-appearance: none;
-            appearance: none;
-            overflow: hidden;
-        }
-
-        input[type="date"]::-webkit-date-and-time-value {
-            text-align: left;
-            min-width: 0;
-        }
-
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            margin: 0;
-            padding: 0;
-        }
-
-        ::-webkit-scrollbar {
-            width: 0;
-            height: 0;
-            background: transparent;
-        }
+        .safe-area-top { padding-top: max(0.75rem, calc(env(safe-area-inset-top) + 0.35rem)); }
+        .safe-area-bottom { padding-bottom: max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem)); }
+        .app-container { height: 100vh; height: 100dvh; max-height: 100dvh; }
+        .form-grid > div { min-width: 0; }
+        input, select, button { max-width: 100%; }
+        input[type="date"] { display:block; width:100%; min-width:0; max-width:100%; -webkit-appearance:none; appearance:none; overflow:hidden; }
+        input[type="date"]::-webkit-date-and-time-value { text-align:left; min-width:0; }
+        input[type="date"]::-webkit-calendar-picker-indicator { margin:0; padding:0; }
+        ::-webkit-scrollbar { width:0; height:0; background:transparent; }
     </style>
 </head>
-
 <body class="bg-slate-50 text-slate-800">
 
-<div
-    class="
-        app-container
-        max-w-md
-        mx-auto
-        bg-white
-        shadow-xl
-        flex
-        flex-col
-        overflow-hidden
-        relative
-    "
->
+<div class="app-container max-w-md mx-auto bg-white shadow-xl flex flex-col overflow-hidden relative">
 
-    <!-- ヘッダー -->
-    <header
-        class="
-            bg-indigo-600
-            text-white
-            px-4
-            pb-4
-            rounded-b-2xl
-            shadow-md
-            space-y-3
-            shrink-0
-            safe-area-top
-        "
-    >
-
+    <header class="bg-indigo-600 text-white px-4 pb-4 rounded-b-2xl shadow-md space-y-3 shrink-0 safe-area-top">
         <div class="flex justify-between items-center gap-2">
-
             <div class="flex items-center gap-1 min-w-0">
-
-                <button
-                    id="prevMonthBtn"
-                    type="button"
-                    class="
-                        p-1.5
-                        hover:bg-indigo-700
-                        rounded-lg
-                        transition
-                        text-indigo-200
-                        hover:text-white
-                        shrink-0
-                    "
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M15 19l-7-7 7-7"
-                        ></path>
-                    </svg>
+                <button id="prevPeriodBtn" type="button" class="p-1.5 hover:bg-indigo-700 rounded-lg transition text-indigo-200 hover:text-white shrink-0" aria-label="前の給与期間">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                 </button>
-
-                <span
-                    id="currentMonthLabel"
-                    class="
-                        font-bold
-                        text-sm
-                        tracking-wide
-                        whitespace-nowrap
-                    "
-                >
-                    2026年 8月
-                </span>
-
-                <button
-                    id="nextMonthBtn"
-                    type="button"
-                    class="
-                        p-1.5
-                        hover:bg-indigo-700
-                        rounded-lg
-                        transition
-                        text-indigo-200
-                        hover:text-white
-                        shrink-0
-                    "
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M9 5l7 7-7 7"
-                        ></path>
-                    </svg>
+                <div class="min-w-0">
+                    <div id="currentPeriodLabel" class="font-bold text-sm tracking-wide whitespace-nowrap">給与期間を登録してください</div>
+                    <div id="currentPeriodRange" class="text-[10px] text-indigo-200 whitespace-nowrap mt-0.5">給与（開始日）を登録すると開始します</div>
+                </div>
+                <button id="nextPeriodBtn" type="button" class="p-1.5 hover:bg-indigo-700 rounded-lg transition text-indigo-200 hover:text-white shrink-0" aria-label="次の給与期間">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                 </button>
-
             </div>
 
             <div class="flex items-center gap-1.5 shrink-0">
-
-                <button
-                    id="openFixedBtn"
-                    type="button"
-                    class="
-                        bg-indigo-700/80
-                        hover:bg-indigo-700
-                        text-xs
-                        px-2.5
-                        py-1.5
-                        rounded-xl
-                        border
-                        border-indigo-500/40
-                        transition
-                        font-medium
-                        whitespace-nowrap
-                    "
-                >
-                    固定費
-                </button>
-
-                <button
-                    id="shareLinkBtn"
-                    type="button"
-                    class="
-                        bg-white
-                        text-indigo-600
-                        hover:bg-indigo-50
-                        text-[10px]
-                        font-bold
-                        px-2.5
-                        py-1.5
-                        rounded-xl
-                        shadow-sm
-                        transition
-                        whitespace-nowrap
-                    "
-                >
-                    家族共有リンク
-                </button>
-
+                <button id="openFixedBtn" type="button" class="bg-indigo-700/80 hover:bg-indigo-700 text-xs px-2.5 py-1.5 rounded-xl border border-indigo-500/40 transition font-medium whitespace-nowrap">固定費</button>
+                <button id="shareLinkBtn" type="button" class="bg-white text-indigo-600 hover:bg-indigo-50 text-[10px] font-bold px-2.5 py-1.5 rounded-xl shadow-sm transition whitespace-nowrap">家族共有リンク</button>
             </div>
-
         </div>
 
-        <!-- サマリー -->
         <div class="grid grid-cols-3 gap-2">
-
-            <div class="bg-indigo-700/60 px-2 py-1.5 rounded-xl border border-indigo-500/30 text-center min-w-0">
-                <p class="text-[10px] text-indigo-200">月間収支</p>
-                <p id="totalBalance" class="text-xs sm:text-sm font-bold truncate">¥0</p>
+            <div id="remainingSummaryCard" class="bg-indigo-700/60 px-2 py-1.5 rounded-xl border border-indigo-500/30 text-center min-w-0">
+                <p class="text-[10px] text-indigo-200">残る予定</p>
+                <p id="projectedRemaining" class="text-xs sm:text-sm font-bold truncate">¥0</p>
             </div>
-
             <div class="bg-indigo-700/60 px-2 py-1.5 rounded-xl border border-indigo-500/30 text-center min-w-0">
                 <p class="text-[10px] text-emerald-200">収入</p>
                 <p id="totalIncome" class="text-xs sm:text-sm font-bold text-emerald-300 truncate">¥0</p>
             </div>
-
             <div class="bg-indigo-700/60 px-2 py-1.5 rounded-xl border border-indigo-500/30 text-center min-w-0">
-                <p class="text-[10px] text-rose-200">支出</p>
-                <p id="totalExpense" class="text-xs sm:text-sm font-bold text-rose-300 truncate">¥0</p>
+                <p class="text-[10px] text-rose-200">支出見込</p>
+                <p id="totalExpenseForecast" class="text-xs sm:text-sm font-bold text-rose-300 truncate">¥0</p>
             </div>
-
         </div>
-
+        <p id="shortageMessage" class="hidden text-[10px] font-semibold text-rose-100 text-center -mt-1"></p>
     </header>
 
-    <!-- 履歴 -->
     <main class="flex-1 min-h-0 px-4 py-3 overflow-y-auto overscroll-contain">
-
         <section class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100">
-
             <div class="flex justify-between items-center gap-2 mb-2">
-                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider shrink-0">
-                    今月の履歴
-                </h3>
+                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider shrink-0">今回の履歴</h3>
+                <span id="syncStatus" class="text-[10px] text-amber-500 font-semibold text-right">🔄 Firebase接続中...</span>
+            </div>
 
-                <span
-                    id="syncStatus"
-                    class="text-[10px] text-amber-500 font-semibold text-right"
-                >
-                    🔄 Firebase接続中...
-                </span>
+            <div id="cashFlowBreakdown" class="grid grid-cols-2 gap-2 mb-2">
+                <div class="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 min-w-0">
+                    <p class="text-[9px] text-slate-400 font-semibold">現金・口座</p>
+                    <p id="directExpense" class="text-xs font-bold text-slate-700 truncate">¥0</p>
+                </div>
+                <div class="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 min-w-0">
+                    <p class="text-[9px] text-slate-400 font-semibold">引落・固定費予定</p>
+                    <p id="plannedExpense" class="text-xs font-bold text-slate-700 truncate">¥0</p>
+                </div>
+            </div>
+
+            <div id="creditSummary" class="hidden mb-2 bg-indigo-50/70 border border-indigo-100 rounded-xl px-3 py-2">
+                <div class="flex items-center justify-between gap-2">
+                    <p class="text-[10px] font-semibold text-indigo-500">クレカ未引落</p>
+                    <p id="creditOutstanding" class="text-xs font-bold text-indigo-700">¥0</p>
+                </div>
+                <div id="creditNextInfo" class="text-[10px] text-slate-500 mt-0.5"></div>
+                <div id="creditPeriodList" class="mt-1 space-y-1"></div>
             </div>
 
             <div id="transactionList" class="space-y-2"></div>
-
-            <div
-                id="debugArea"
-                class="
-                    hidden
-                    mt-3
-                    p-3
-                    bg-rose-50
-                    border
-                    border-rose-200
-                    rounded-xl
-                    text-[10px]
-                    text-rose-700
-                    break-all
-                "
-            ></div>
-
+            <div id="debugArea" class="hidden mt-3 p-3 bg-rose-50 border border-rose-200 rounded-xl text-[10px] text-rose-700 break-all"></div>
         </section>
-
     </main>
 
-    <!-- 登録フォーム -->
-    <footer
-        class="
-            bg-white
-            border-t
-            border-slate-100
-            px-4
-            pt-3
-            shadow-lg
-            shrink-0
-            rounded-t-3xl
-            safe-area-bottom
-        "
-    >
-
+    <footer class="bg-white border-t border-slate-100 px-4 pt-3 shadow-lg shrink-0 rounded-t-3xl safe-area-bottom">
         <form id="transactionForm" class="space-y-2.5 overflow-hidden">
-
             <div class="grid grid-cols-2 gap-2">
-
-                <button
-                    type="button"
-                    id="typeExpense"
-                    class="py-1.5 rounded-xl font-medium text-xs transition bg-rose-500 text-white shadow-sm"
-                >
-                    支出
-                </button>
-
-                <button
-                    type="button"
-                    id="typeIncome"
-                    class="py-1.5 rounded-xl font-medium text-xs transition bg-slate-100 text-slate-600"
-                >
-                    収入
-                </button>
-
+                <button type="button" id="typeExpense" class="py-1.5 rounded-xl font-medium text-xs transition bg-rose-500 text-white shadow-sm">支出</button>
+                <button type="button" id="typeIncome" class="py-1.5 rounded-xl font-medium text-xs transition bg-slate-100 text-slate-600">収入</button>
             </div>
 
             <div class="form-grid grid grid-cols-2 gap-2 min-w-0">
-
                 <div class="min-w-0">
-                    <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
-                        金額 (円)
-                    </label>
-
-                    <input
-                        type="number"
-                        inputmode="numeric"
-                        id="amount"
-                        required
-                        placeholder="例: 1500"
-                        class="
-                            block
-                            w-full
-                            min-w-0
-                            px-3
-                            py-2
-                            rounded-xl
-                            border
-                            border-slate-200
-                            focus:outline-none
-                            focus:ring-2
-                            focus:ring-indigo-500
-                            text-sm
-                        "
-                    >
+                    <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">金額 (円)</label>
+                    <input type="number" inputmode="numeric" id="amount" required placeholder="例: 1500" class="block w-full min-w-0 px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
                 </div>
-
                 <div class="min-w-0">
-                    <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
-                        カテゴリ
-                    </label>
-
-                    <select
-                        id="category"
-                        class="
-                            block
-                            w-full
-                            min-w-0
-                            px-3
-                            py-2
-                            rounded-xl
-                            border
-                            border-slate-200
-                            focus:outline-none
-                            focus:ring-2
-                            focus:ring-indigo-500
-                            bg-white
-                            text-sm
-                        "
-                    ></select>
+                    <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">カテゴリ</label>
+                    <select id="category" class="block w-full min-w-0 px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"></select>
                 </div>
-
             </div>
 
             <div class="form-grid grid grid-cols-2 gap-2 min-w-0">
-
                 <div class="min-w-0">
-                    <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
-                        メモ (任意)
-                    </label>
-
-                    <input
-                        type="text"
-                        id="memo"
-                        placeholder="例: ランチ"
-                        class="
-                            block
-                            w-full
-                            min-w-0
-                            px-3
-                            py-2
-                            rounded-xl
-                            border
-                            border-slate-200
-                            focus:outline-none
-                            focus:ring-2
-                            focus:ring-indigo-500
-                            text-sm
-                        "
-                    >
+                    <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">メモ (任意)</label>
+                    <input type="text" id="memo" placeholder="例: ランチ" class="block w-full min-w-0 px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
                 </div>
-
                 <div class="min-w-0 overflow-hidden">
-                    <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
-                        日付
-                    </label>
-
-                    <input
-                        type="date"
-                        id="date"
-                        required
-                        class="
-                            block
-                            w-full
-                            min-w-0
-                            max-w-full
-                            px-2
-                            py-2
-                            rounded-xl
-                            border
-                            border-slate-200
-                            focus:outline-none
-                            focus:ring-2
-                            focus:ring-indigo-500
-                            text-[11px]
-                            bg-white
-                        "
-                    >
+                    <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">日付</label>
+                    <input type="date" id="date" required class="block w-full min-w-0 max-w-full px-2 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-[11px] bg-white">
                 </div>
-
             </div>
 
-            <button
-                type="submit"
-                id="submitBtn"
-                class="
-                    w-full
-                    bg-indigo-600
-                    hover:bg-indigo-700
-                    text-white
-                    font-semibold
-                    py-2.5
-                    rounded-xl
-                    text-sm
-                    shadow-md
-                    transition
-                    active:scale-[0.98]
-                "
-            >
-                追加する
-            </button>
-
-        </form>
-
-    </footer>
-
-</div>
-
-<!-- 固定費モーダル -->
-<div
-    id="fixedModal"
-    class="
-        fixed
-        inset-0
-        bg-slate-900/50
-        backdrop-blur-xs
-        hidden
-        items-center
-        justify-center
-        px-4
-        z-50
-    "
-    style="
-        padding-top: max(1rem, env(safe-area-inset-top));
-        padding-bottom: max(1rem, env(safe-area-inset-bottom));
-    "
->
-
-    <div
-        class="
-            bg-white
-            w-full
-            max-w-md
-            rounded-3xl
-            p-5
-            shadow-2xl
-            space-y-4
-            max-h-[90dvh]
-            flex
-            flex-col
-        "
-    >
-
-        <div class="flex justify-between items-center">
-
-            <h3 class="text-lg font-bold text-slate-800">
-                月額固定費の管理
-            </h3>
-
-            <button
-                id="closeFixedModalBtn"
-                type="button"
-                class="text-slate-400 hover:text-slate-600 text-lg font-bold p-2"
-            >
-                ×
-            </button>
-
-        </div>
-
-        <p class="text-xs text-slate-500">
-            毎月の固定費を登録しておくと、ボタン一つで今月の履歴に反映できます。
-        </p>
-
-        <!-- 固定費サマリー -->
-        <div
-            class="
-                bg-indigo-50
-                border
-                border-indigo-100
-                rounded-2xl
-                px-4
-                py-3
-                flex
-                items-center
-                justify-between
-                gap-4
-            "
-        >
-
-            <div>
-                <p class="text-[10px] font-semibold text-indigo-400 uppercase tracking-wider">
-                    登録済み固定費
-                </p>
-
-                <p
-                    id="fixedCount"
-                    class="text-xs text-slate-500 mt-0.5"
-                >
-                    0件
-                </p>
-            </div>
-
-            <div class="text-right">
-                <p class="text-[10px] font-semibold text-indigo-400 uppercase tracking-wider">
-                    月額合計
-                </p>
-
-                <p
-                    id="fixedTotal"
-                    class="text-lg font-bold text-indigo-700 mt-0.5"
-                >
-                    ¥0
-                </p>
-            </div>
-
-        </div>
-
-        <!-- 固定費登録 -->
-        <form
-            id="fixedForm"
-            class="
-                space-y-3
-                bg-slate-50
-                p-4
-                rounded-2xl
-                border
-                border-slate-100
-            "
-        >
-
-            <div class="form-grid grid grid-cols-2 gap-2 min-w-0">
-
-                <div class="min-w-0">
-                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                        名称 / メモ
-                    </label>
-
-                    <input
-                        type="text"
-                        id="fixedMemo"
-                        required
-                        placeholder="例: 家賃"
-                        class="w-full min-w-0 px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white"
-                    >
-                </div>
-
-                <div class="min-w-0">
-                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                        金額 (円)
-                    </label>
-
-                    <input
-                        type="number"
-                        inputmode="numeric"
-                        id="fixedAmount"
-                        required
-                        placeholder="例: 80000"
-                        class="w-full min-w-0 px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white"
-                    >
-                </div>
-
-            </div>
-
-            <div class="form-grid grid grid-cols-2 gap-2 min-w-0">
-
-                <div class="min-w-0">
-                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                        カテゴリ
-                    </label>
-
-                    <select
-                        id="fixedCategory"
-                        class="w-full min-w-0 px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white"
-                    >
-                        <option value="家賃">家賃</option>
-                        <option value="光熱費">光熱費</option>
-                        <option value="通信費">通信費</option>
-                        <option value="その他">その他</option>
+            <div id="expenseFields" class="space-y-2">
+                <div class="flex items-center gap-2 min-w-0">
+                    <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider shrink-0">支払方法</label>
+                    <select id="paymentMethod" class="flex-1 min-w-0 px-3 py-1.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-xs">
+                        <option value="cash">現金</option>
+                        <option value="account">口座・振込</option>
+                        <option value="credit">クレジットカード</option>
                     </select>
                 </div>
 
-                <div class="min-w-0">
-                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                        適用日
-                    </label>
-
-                    <input
-                        type="number"
-                        inputmode="numeric"
-                        id="fixedDay"
-                        min="1"
-                        max="31"
-                        value="1"
-                        required
-                        class="w-full min-w-0 px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white"
-                    >
+                <div id="creditFields" class="hidden form-grid grid grid-cols-2 gap-2 min-w-0">
+                    <div class="min-w-0">
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">カード名</label>
+                        <input type="text" id="cardName" value="クレジットカード" placeholder="例: 楽天カード" class="block w-full min-w-0 px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                    </div>
+                    <div class="min-w-0 overflow-hidden">
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">引落予定日</label>
+                        <input type="date" id="withdrawalDate" class="block w-full min-w-0 max-w-full px-2 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-[11px] bg-white">
+                    </div>
                 </div>
-
             </div>
 
-            <button
-                type="submit"
-                class="
-                    w-full
-                    bg-slate-800
-                    hover:bg-slate-900
-                    text-white
-                    font-medium
-                    py-2
-                    rounded-xl
-                    text-sm
-                    transition
-                "
-            >
-                固定費を追加する
-            </button>
+            <div id="periodStartFields" class="hidden bg-indigo-50 border border-indigo-100 rounded-xl px-3 py-2">
+                <div class="flex items-center gap-2 min-w-0">
+                    <label class="text-[10px] font-semibold text-indigo-500 uppercase tracking-wider shrink-0">次回給与予定日</label>
+                    <input type="date" id="nextSalaryDate" class="flex-1 min-w-0 max-w-full px-2 py-1.5 rounded-xl border border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-[11px] bg-white">
+                </div>
+                <p class="text-[9px] text-slate-500 mt-1">この日の前日までを今回の給与期間として計算します。</p>
+            </div>
 
+            <button type="submit" id="submitBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl text-sm shadow-md transition active:scale-[0.98]">追加する</button>
+        </form>
+    </footer>
+</div>
+
+<!-- 固定費モーダル -->
+<div id="fixedModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center px-4 z-50" style="padding-top:max(1rem, env(safe-area-inset-top)); padding-bottom:max(1rem, env(safe-area-inset-bottom));">
+    <div class="bg-white w-full max-w-md rounded-3xl p-5 shadow-2xl space-y-4 max-h-[90dvh] flex flex-col">
+        <div class="flex justify-between items-center">
+            <h3 class="text-lg font-bold text-slate-800">月額固定費の管理</h3>
+            <button id="closeFixedModalBtn" type="button" class="text-slate-400 hover:text-slate-600 text-lg font-bold p-2">×</button>
+        </div>
+        <p class="text-xs text-slate-500">登録した固定費は、該当する給与期間の支出見込に自動で含まれます。</p>
+
+        <div class="bg-indigo-50 border border-indigo-100 rounded-2xl px-4 py-3 flex items-center justify-between gap-4">
+            <div>
+                <p class="text-[10px] font-semibold text-indigo-400 uppercase tracking-wider">登録済み固定費</p>
+                <p id="fixedCount" class="text-xs text-slate-500 mt-0.5">0件</p>
+            </div>
+            <div class="text-right">
+                <p class="text-[10px] font-semibold text-indigo-400 uppercase tracking-wider">月額合計</p>
+                <p id="fixedTotal" class="text-lg font-bold text-indigo-700 mt-0.5">¥0</p>
+            </div>
+        </div>
+
+        <form id="fixedForm" class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+            <div class="form-grid grid grid-cols-2 gap-2 min-w-0">
+                <div class="min-w-0">
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">名称 / メモ</label>
+                    <input type="text" id="fixedMemo" required placeholder="例: 家賃" class="w-full min-w-0 px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+                </div>
+                <div class="min-w-0">
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">金額 (円)</label>
+                    <input type="number" inputmode="numeric" id="fixedAmount" required placeholder="例: 80000" class="w-full min-w-0 px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+                </div>
+            </div>
+            <div class="form-grid grid grid-cols-2 gap-2 min-w-0">
+                <div class="min-w-0">
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">カテゴリ</label>
+                    <select id="fixedCategory" class="w-full min-w-0 px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+                        <option value="家賃">家賃</option>
+                        <option value="光熱費">光熱費</option>
+                        <option value="通信費">通信費</option>
+                        <option value="交通費">交通費</option>
+                        <option value="その他">その他</option>
+                    </select>
+                </div>
+                <div class="min-w-0">
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">毎月の引落日</label>
+                    <input type="number" inputmode="numeric" id="fixedDay" min="1" max="31" value="1" required class="w-full min-w-0 px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+                </div>
+            </div>
+            <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-medium py-2 rounded-xl text-sm transition">固定費を追加する</button>
         </form>
 
-        <!-- 固定費一覧 -->
-        <div
-            id="fixedList"
-            class="
-                flex-1
-                min-h-0
-                overflow-y-auto
-                space-y-2
-                pr-1
-            "
-        ></div>
-
-        <button
-            id="applyFixedBtn"
-            type="button"
-            class="
-                w-full
-                bg-indigo-600
-                hover:bg-indigo-700
-                text-white
-                font-semibold
-                py-2.5
-                rounded-xl
-                text-sm
-                transition
-                shadow-sm
-            "
-        >
-            今月分の固定費を反映する
-        </button>
-
+        <div id="fixedList" class="flex-1 min-h-0 overflow-y-auto space-y-2 pr-1"></div>
     </div>
-
 </div>
 
 <script type="module">
-
-    import {
-        initializeApp
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-
-    import {
-        getAuth,
-        signInAnonymously,
-        onAuthStateChanged,
-        setPersistence,
-        browserLocalPersistence
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-
-    import {
-        getFirestore,
-        collection,
-        addDoc,
-        deleteDoc,
-        doc,
-        onSnapshot
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBnc3RBpaLeXBninYx9dXAAKBLvVenFK3I",
@@ -755,1564 +237,730 @@
         measurementId: "G-ECNJ536EDT"
     };
 
-
     const categories = {
-        expense: [
-            '食費',
-            '日用品',
-            '交通費',
-            '娯楽',
-            '家賃',
-            '光熱費',
-            'その他'
-        ],
-        income: [
-            '給与',
-            '副業',
-            'お小遣い',
-            '一時所得',
-            'その他'
-        ]
+        expense: ['食費', '日用品', '交通費', '娯楽', '家賃', '光熱費', '通信費', '贈り物', 'その他'],
+        income: ['給与（開始日）', '給与', '副業', 'お小遣い', '一時所得', 'その他']
     };
 
+    const paymentLabels = {
+        cash: '現金',
+        account: '口座・振込',
+        credit: 'クレカ'
+    };
 
     let currentType = 'expense';
     let transactions = [];
     let fixedCosts = [];
-    let selectedDate = new Date();
+    let periods = [];
+    let selectedPeriodIndex = -1;
+    let selectedPeriodStartKey = null;
 
     let db = null;
     let auth = null;
-
     let unsubscribeTransactions = null;
     let unsubscribeFixedCosts = null;
 
-
-    /* 家族ID */
-    let familyId =
-        new URLSearchParams(
-            window.location.search
-        ).get('uid');
-
-
+    let familyId = new URLSearchParams(window.location.search).get('uid');
     if (!familyId) {
-
-        familyId =
-            'fam_' +
-            crypto.randomUUID()
-                .replaceAll('-', '')
-                .slice(0, 20);
-
-        const newUrl =
-            window.location.protocol +
-            "//" +
-            window.location.host +
-            window.location.pathname +
-            '?uid=' +
-            encodeURIComponent(familyId);
-
-        window.history.replaceState(
-            {},
-            '',
-            newUrl
-        );
+        familyId = 'fam_' + crypto.randomUUID().replaceAll('-', '').slice(0, 20);
+        const newUrl = window.location.protocol + '//' + window.location.host + window.location.pathname + '?uid=' + encodeURIComponent(familyId);
+        window.history.replaceState({}, '', newUrl);
     }
 
-
-    /* ズーム防止 */
-    document.addEventListener(
-        'gesturestart',
-        event => event.preventDefault(),
-        { passive: false }
-    );
-
-    document.addEventListener(
-        'gesturechange',
-        event => event.preventDefault(),
-        { passive: false }
-    );
-
-    document.addEventListener(
-        'gestureend',
-        event => event.preventDefault(),
-        { passive: false }
-    );
-
-
+    document.addEventListener('gesturestart', event => event.preventDefault(), { passive: false });
+    document.addEventListener('gesturechange', event => event.preventDefault(), { passive: false });
+    document.addEventListener('gestureend', event => event.preventDefault(), { passive: false });
     let lastTouchEnd = 0;
+    document.addEventListener('touchend', event => {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) event.preventDefault();
+        lastTouchEnd = now;
+    }, { passive: false });
+    document.addEventListener('dblclick', event => event.preventDefault(), { passive: false });
 
-    document.addEventListener(
-        'touchend',
-        event => {
-
-            const now = Date.now();
-
-            if (
-                now - lastTouchEnd <= 300
-            ) {
-                event.preventDefault();
-            }
-
-            lastTouchEnd = now;
-        },
-        { passive: false }
-    );
-
-
-    document.addEventListener(
-        'dblclick',
-        event => event.preventDefault(),
-        { passive: false }
-    );
-
-
-    /* UI */
-    function setStatus(
-        text,
-        type = 'normal'
-    ) {
-
-        const el =
-            document.getElementById(
-                'syncStatus'
-            );
-
+    function setStatus(text, type = 'normal') {
+        const el = document.getElementById('syncStatus');
         if (!el) return;
-
         el.textContent = text;
-
-        if (
-            type === 'success'
-        ) {
-            el.className =
-                'text-[10px] text-emerald-600 font-semibold text-right';
-        }
-        else if (
-            type === 'error'
-        ) {
-            el.className =
-                'text-[10px] text-rose-600 font-semibold text-right';
-        }
-        else {
-            el.className =
-                'text-[10px] text-amber-500 font-semibold text-right';
-        }
+        if (type === 'success') el.className = 'text-[10px] text-emerald-600 font-semibold text-right';
+        else if (type === 'error') el.className = 'text-[10px] text-rose-600 font-semibold text-right';
+        else el.className = 'text-[10px] text-amber-500 font-semibold text-right';
     }
-
 
     function showDebug(error) {
-
         console.error(error);
-
-        const area =
-            document.getElementById(
-                'debugArea'
-            );
-
+        const area = document.getElementById('debugArea');
         if (!area) return;
-
-        area.classList.remove(
-            'hidden'
-        );
-
-        const code =
-            error?.code ||
-            'unknown-error';
-
-        const message =
-            error?.message ||
-            String(error);
-
-        area.innerHTML = `
-            <strong>Firebaseエラー</strong>
-            <br>
-            code: ${escapeHtml(code)}
-            <br><br>
-            ${escapeHtml(message)}
-        `;
+        area.classList.remove('hidden');
+        const code = error?.code || 'unknown-error';
+        const message = error?.message || String(error);
+        area.innerHTML = `<strong>Firebaseエラー</strong><br>code: ${escapeHtml(code)}<br><br>${escapeHtml(message)}`;
     }
 
+    function toLocalDateString(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
 
-    /* Firebase開始 */
-    async function initializeFirebase() {
+    function parseLocalDate(value) {
+        if (!value) return null;
+        const [y, m, d] = value.split('-').map(Number);
+        if (!y || !m || !d) return null;
+        return new Date(y, m - 1, d);
+    }
 
-        try {
+    function addDays(value, days) {
+        const date = typeof value === 'string' ? parseLocalDate(value) : new Date(value);
+        if (!date) return null;
+        date.setDate(date.getDate() + days);
+        return date;
+    }
 
-            setStatus(
-                '🔄 Firebase初期化中...'
-            );
+    function formatShortDate(value) {
+        const date = parseLocalDate(value);
+        if (!date) return '-';
+        return `${date.getMonth() + 1}/${date.getDate()}`;
+    }
 
-            const app =
-                initializeApp(
-                    firebaseConfig
-                );
+    function formatMoney(value) {
+        return `¥${Number(value || 0).toLocaleString()}`;
+    }
 
-            auth =
-                getAuth(
-                    app
-                );
+    function isPeriodStartTransaction(tx) {
+        return tx?.type === 'income' && (tx?.isPeriodStart === true || tx?.category === '給与（開始日）');
+    }
 
-            db =
-                getFirestore(
-                    app
-                );
+    function buildPeriods() {
+        const starts = transactions
+            .filter(tx => isPeriodStartTransaction(tx) && tx.date)
+            .sort((a, b) => a.date.localeCompare(b.date) || Number(a.createdAt || 0) - Number(b.createdAt || 0));
 
-            await setPersistence(
-                auth,
-                browserLocalPersistence
-            );
+        periods = starts.map((startTx, index) => {
+            const nextActual = starts[index + 1];
+            let end = null;
+            let endSource = 'planned';
 
-            setStatus(
-                '🔄 匿名認証中...'
-            );
-
-            if (
-                !auth.currentUser
-            ) {
-                await signInAnonymously(
-                    auth
-                );
+            if (nextActual?.date) {
+                end = toLocalDateString(addDays(nextActual.date, -1));
+                endSource = 'actual';
+            } else if (startTx.nextSalaryDate) {
+                end = toLocalDateString(addDays(startTx.nextSalaryDate, -1));
             }
 
-            onAuthStateChanged(
-                auth,
-                user => {
+            const startDate = parseLocalDate(startTx.date);
+            const label = startDate ? `${startDate.getFullYear()}年${startDate.getMonth() + 1}月給与分` : '給与期間';
 
-                    if (
-                        user
-                    ) {
+            return {
+                id: startTx.id,
+                start: startTx.date,
+                end,
+                nextSalaryDate: nextActual?.date || startTx.nextSalaryDate || null,
+                endSource,
+                label,
+                startTransaction: startTx
+            };
+        });
+    }
 
-                        setStatus(
-                            '🔄 Firestore接続中...'
-                        );
+    function resolveSelectedPeriod() {
+        if (!periods.length) {
+            selectedPeriodIndex = -1;
+            selectedPeriodStartKey = null;
+            return null;
+        }
 
-                        startFirestoreListeners();
+        if (selectedPeriodStartKey) {
+            const foundIndex = periods.findIndex(period => period.start === selectedPeriodStartKey);
+            if (foundIndex >= 0) selectedPeriodIndex = foundIndex;
+        }
 
-                    }
-                    else {
+        if (selectedPeriodIndex < 0 || selectedPeriodIndex >= periods.length) {
+            const today = toLocalDateString(new Date());
+            const currentIndex = periods.findIndex(period => period.end && today >= period.start && today <= period.end);
+            selectedPeriodIndex = currentIndex >= 0 ? currentIndex : periods.length - 1;
+        }
 
-                        setStatus(
-                            '⚠️ Firebase未認証',
-                            'error'
-                        );
+        const selected = periods[selectedPeriodIndex];
+        selectedPeriodStartKey = selected.start;
+        return selected;
+    }
 
+    function dateInPeriod(date, period) {
+        return Boolean(date && period?.start && period?.end && date >= period.start && date <= period.end);
+    }
+
+    function getFixedOccurrences(period) {
+        if (!period?.start || !period?.end) return [];
+        const start = parseLocalDate(period.start);
+        const end = parseLocalDate(period.end);
+        if (!start || !end) return [];
+
+        const result = [];
+        let cursor = new Date(start.getFullYear(), start.getMonth(), 1);
+        const lastMonth = new Date(end.getFullYear(), end.getMonth(), 1);
+
+        while (cursor <= lastMonth) {
+            const year = cursor.getFullYear();
+            const monthIndex = cursor.getMonth();
+            const lastDay = new Date(year, monthIndex + 1, 0).getDate();
+
+            fixedCosts.forEach(fixed => {
+                const requestedDay = Math.max(1, Math.min(31, Number(fixed.day || 1)));
+                const actualDay = Math.min(requestedDay, lastDay);
+                const occurrenceDate = toLocalDateString(new Date(year, monthIndex, actualDay));
+                if (dateInPeriod(occurrenceDate, period)) {
+                    const amount = Number(fixed.amount || 0);
+                    const memo = fixed.memo || fixed.category || '固定費';
+
+                    // 旧版の「固定費を反映する」で作られた通常支出や、
+                    // 同額・同名・同日の実支出がある場合は予定を重ねない。
+                    const coveredByTransaction = transactions.some(tx =>
+                        tx.type === 'expense' &&
+                        tx.paymentMethod !== 'credit' &&
+                        tx.date === occurrenceDate &&
+                        Number(tx.amount || 0) === amount &&
+                        String(tx.memo || '') === String(memo)
+                    );
+
+                    if (!coveredByTransaction) {
+                        result.push({
+                            fixedId: fixed.id,
+                            memo,
+                            category: fixed.category || 'その他',
+                            amount,
+                            date: occurrenceDate
+                        });
                     }
                 }
-            );
+            });
 
+            cursor = new Date(year, monthIndex + 1, 1);
         }
-        catch (error) {
 
-            setStatus(
-                `⚠️ ${error.code || 'Firebaseエラー'}`,
-                'error'
-            );
+        return result.sort((a, b) => a.date.localeCompare(b.date));
+    }
 
-            showDebug(
-                error
-            );
+    function getCreditTransactions() {
+        return transactions.filter(tx => tx.type === 'expense' && tx.paymentMethod === 'credit' && tx.withdrawalDate);
+    }
 
+    function groupCreditByWithdrawal(items) {
+        const map = new Map();
+        items.forEach(tx => {
+            const key = `${tx.withdrawalDate}__${tx.cardName || 'クレジットカード'}`;
+            if (!map.has(key)) {
+                map.set(key, {
+                    withdrawalDate: tx.withdrawalDate,
+                    cardName: tx.cardName || 'クレジットカード',
+                    amount: 0,
+                    count: 0
+                });
+            }
+            const group = map.get(key);
+            group.amount += Number(tx.amount || 0);
+            group.count += 1;
+        });
+        return [...map.values()].sort((a, b) => a.withdrawalDate.localeCompare(b.withdrawalDate));
+    }
+
+    async function initializeFirebase() {
+        try {
+            setStatus('🔄 Firebase初期化中...');
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            await setPersistence(auth, browserLocalPersistence);
+            setStatus('🔄 匿名認証中...');
+            if (!auth.currentUser) await signInAnonymously(auth);
+            onAuthStateChanged(auth, user => {
+                if (user) {
+                    setStatus('🔄 Firestore接続中...');
+                    startFirestoreListeners();
+                } else {
+                    setStatus('⚠️ Firebase未認証', 'error');
+                }
+            });
+        } catch (error) {
+            setStatus(`⚠️ ${error.code || 'Firebaseエラー'}`, 'error');
+            showDebug(error);
         }
     }
 
-
-    /* Firestore同期 */
     function startFirestoreListeners() {
-
-        if (
-            unsubscribeTransactions
-        ) {
-            unsubscribeTransactions();
-        }
-
-        if (
-            unsubscribeFixedCosts
-        ) {
-            unsubscribeFixedCosts();
-        }
+        if (unsubscribeTransactions) unsubscribeTransactions();
+        if (unsubscribeFixedCosts) unsubscribeFixedCosts();
 
         try {
+            const txColRef = collection(db, 'artifacts', 'github_pages_app', 'public', 'data', `family_tx_${familyId}`);
+            const fcColRef = collection(db, 'artifacts', 'github_pages_app', 'public', 'data', `family_fc_${familyId}`);
 
-            const txColRef =
-                collection(
-                    db,
-                    'artifacts',
-                    'github_pages_app',
-                    'public',
-                    'data',
-                    `family_tx_${familyId}`
-                );
+            unsubscribeTransactions = onSnapshot(txColRef, snapshot => {
+                transactions = [];
+                snapshot.forEach(docSnap => transactions.push({ id: docSnap.id, ...docSnap.data() }));
+                transactions.sort((a, b) => {
+                    const dateDiff = String(b.date || '').localeCompare(String(a.date || ''));
+                    if (dateDiff !== 0) return dateDiff;
+                    return Number(b.createdAt || 0) - Number(a.createdAt || 0);
+                });
+                buildPeriods();
+                renderApp();
+                setStatus('☁️ クラウド自動保存中', 'success');
+            }, error => {
+                setStatus(`⚠️ Firestore: ${error.code}`, 'error');
+                showDebug(error);
+            });
 
-            const fcColRef =
-                collection(
-                    db,
-                    'artifacts',
-                    'github_pages_app',
-                    'public',
-                    'data',
-                    `family_fc_${familyId}`
-                );
-
-
-            unsubscribeTransactions =
-                onSnapshot(
-
-                    txColRef,
-
-                    snapshot => {
-
-                        transactions = [];
-
-                        snapshot.forEach(
-                            docSnap => {
-
-                                transactions.push({
-                                    id: docSnap.id,
-                                    ...docSnap.data()
-                                });
-
-                            }
-                        );
-
-                        transactions.sort(
-                            (a, b) => {
-
-                                const dateDiff =
-                                    new Date(
-                                        b.date
-                                    ) -
-                                    new Date(
-                                        a.date
-                                    );
-
-                                if (
-                                    dateDiff !== 0
-                                ) {
-                                    return dateDiff;
-                                }
-
-                                return (
-                                    Number(
-                                        b.createdAt || 0
-                                    )
-                                    -
-                                    Number(
-                                        a.createdAt || 0
-                                    )
-                                );
-                            }
-                        );
-
-                        renderApp();
-
-                        setStatus(
-                            '☁️ クラウド自動保存中',
-                            'success'
-                        );
-                    },
-
-                    error => {
-
-                        setStatus(
-                            `⚠️ Firestore: ${error.code}`,
-                            'error'
-                        );
-
-                        showDebug(
-                            error
-                        );
-                    }
-                );
-
-
-            unsubscribeFixedCosts =
-                onSnapshot(
-
-                    fcColRef,
-
-                    snapshot => {
-
-                        fixedCosts = [];
-
-                        snapshot.forEach(
-                            docSnap => {
-
-                                fixedCosts.push({
-                                    id: docSnap.id,
-                                    ...docSnap.data()
-                                });
-
-                            }
-                        );
-
-                        renderFixedList();
-                    },
-
-                    error => {
-
-                        showDebug(
-                            error
-                        );
-                    }
-                );
-
-        }
-        catch (error) {
-
-            setStatus(
-                '⚠️ Firestore接続失敗',
-                'error'
-            );
-
-            showDebug(
-                error
-            );
+            unsubscribeFixedCosts = onSnapshot(fcColRef, snapshot => {
+                fixedCosts = [];
+                snapshot.forEach(docSnap => fixedCosts.push({ id: docSnap.id, ...docSnap.data() }));
+                renderFixedList();
+                renderApp();
+            }, error => showDebug(error));
+        } catch (error) {
+            setStatus('⚠️ Firestore接続失敗', 'error');
+            showDebug(error);
         }
     }
 
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('date').value = toLocalDateString(new Date());
+        updateCategoryOptions();
+        updateConditionalFields();
+        renderApp();
+        renderFixedList();
 
-    /* DOM開始 */
-    document.addEventListener(
-        'DOMContentLoaded',
-        () => {
+        document.getElementById('prevPeriodBtn').addEventListener('click', () => {
+            if (selectedPeriodIndex > 0) {
+                selectedPeriodIndex--;
+                selectedPeriodStartKey = periods[selectedPeriodIndex]?.start || null;
+                renderApp();
+            }
+        });
 
-            const dateInput =
-                document.getElementById(
-                    'date'
-                );
+        document.getElementById('nextPeriodBtn').addEventListener('click', () => {
+            if (selectedPeriodIndex >= 0 && selectedPeriodIndex < periods.length - 1) {
+                selectedPeriodIndex++;
+                selectedPeriodStartKey = periods[selectedPeriodIndex]?.start || null;
+                renderApp();
+            }
+        });
 
-            dateInput.valueAsDate =
-                new Date();
+        document.getElementById('typeExpense').addEventListener('click', () => switchType('expense'));
+        document.getElementById('typeIncome').addEventListener('click', () => switchType('income'));
+        document.getElementById('category').addEventListener('change', updateConditionalFields);
+        document.getElementById('paymentMethod').addEventListener('change', updateConditionalFields);
 
-            updateCategoryOptions();
-            renderApp();
+        document.getElementById('openFixedBtn').addEventListener('click', () => {
+            const modal = document.getElementById('fixedModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
             renderFixedList();
+        });
+        document.getElementById('closeFixedModalBtn').addEventListener('click', closeFixedModal);
 
+        document.getElementById('shareLinkBtn').addEventListener('click', async () => {
+            const shareUrl = window.location.href;
+            try {
+                if (navigator.share) {
+                    await navigator.share({ title: '家計簿', url: shareUrl });
+                    return;
+                }
+                await navigator.clipboard.writeText(shareUrl);
+                alert('共有リンクをコピーしました！');
+            } catch (error) {
+                if (error?.name === 'AbortError') return;
+                try {
+                    await navigator.clipboard.writeText(shareUrl);
+                    alert('共有リンクをコピーしました！');
+                } catch {
+                    prompt('以下のURLをコピーしてください', shareUrl);
+                }
+            }
+        });
 
-            document
-                .getElementById(
-                    'prevMonthBtn'
-                )
-                .addEventListener(
-                    'click',
-                    () => {
+        initializeFirebase();
+    });
 
-                        selectedDate.setMonth(
-                            selectedDate.getMonth() - 1
-                        );
-
-                        renderApp();
-                    }
-                );
-
-
-            document
-                .getElementById(
-                    'nextMonthBtn'
-                )
-                .addEventListener(
-                    'click',
-                    () => {
-
-                        selectedDate.setMonth(
-                            selectedDate.getMonth() + 1
-                        );
-
-                        renderApp();
-                    }
-                );
-
-
-            document
-                .getElementById(
-                    'typeExpense'
-                )
-                .addEventListener(
-                    'click',
-                    () =>
-                        switchType(
-                            'expense'
-                        )
-                );
-
-
-            document
-                .getElementById(
-                    'typeIncome'
-                )
-                .addEventListener(
-                    'click',
-                    () =>
-                        switchType(
-                            'income'
-                        )
-                );
-
-
-            document
-                .getElementById(
-                    'openFixedBtn'
-                )
-                .addEventListener(
-                    'click',
-                    () => {
-
-                        const modal =
-                            document.getElementById(
-                                'fixedModal'
-                            );
-
-                        modal.classList.remove(
-                            'hidden'
-                        );
-
-                        modal.classList.add(
-                            'flex'
-                        );
-
-                        renderFixedList();
-                    }
-                );
-
-
-            document
-                .getElementById(
-                    'closeFixedModalBtn'
-                )
-                .addEventListener(
-                    'click',
-                    () =>
-                        closeFixedModal()
-                );
-
-
-            document
-                .getElementById(
-                    'shareLinkBtn'
-                )
-                .addEventListener(
-                    'click',
-                    async () => {
-
-                        const shareUrl =
-                            window.location.href;
-
-                        try {
-
-                            if (
-                                navigator.share
-                            ) {
-
-                                await navigator.share({
-                                    title: '家計簿',
-                                    url: shareUrl
-                                });
-
-                                return;
-                            }
-
-                            await navigator
-                                .clipboard
-                                .writeText(
-                                    shareUrl
-                                );
-
-                            alert(
-                                '共有リンクをコピーしました！'
-                            );
-
-                        }
-                        catch (error) {
-
-                            if (
-                                error?.name ===
-                                'AbortError'
-                            ) {
-                                return;
-                            }
-
-                            try {
-
-                                await navigator
-                                    .clipboard
-                                    .writeText(
-                                        shareUrl
-                                    );
-
-                                alert(
-                                    '共有リンクをコピーしました！'
-                                );
-
-                            }
-                            catch {
-
-                                prompt(
-                                    '以下のURLをコピーしてください',
-                                    shareUrl
-                                );
-
-                            }
-                        }
-                    }
-                );
-
-
-            initializeFirebase();
-        }
-    );
-
-
-    /* 支出 / 収入切替 */
     function switchType(type) {
-
         currentType = type;
+        const expBtn = document.getElementById('typeExpense');
+        const incBtn = document.getElementById('typeIncome');
 
-        const expBtn =
-            document.getElementById(
-                'typeExpense'
-            );
-
-        const incBtn =
-            document.getElementById(
-                'typeIncome'
-            );
-
-        if (
-            type === 'expense'
-        ) {
-
-            expBtn.className =
-                "py-1.5 rounded-xl font-medium text-xs transition bg-rose-500 text-white shadow-sm";
-
-            incBtn.className =
-                "py-1.5 rounded-xl font-medium text-xs transition bg-slate-100 text-slate-600";
-
-        }
-        else {
-
-            expBtn.className =
-                "py-1.5 rounded-xl font-medium text-xs transition bg-slate-100 text-slate-600";
-
-            incBtn.className =
-                "py-1.5 rounded-xl font-medium text-xs transition bg-emerald-500 text-white shadow-sm";
-
+        if (type === 'expense') {
+            expBtn.className = 'py-1.5 rounded-xl font-medium text-xs transition bg-rose-500 text-white shadow-sm';
+            incBtn.className = 'py-1.5 rounded-xl font-medium text-xs transition bg-slate-100 text-slate-600';
+        } else {
+            expBtn.className = 'py-1.5 rounded-xl font-medium text-xs transition bg-slate-100 text-slate-600';
+            incBtn.className = 'py-1.5 rounded-xl font-medium text-xs transition bg-emerald-500 text-white shadow-sm';
         }
 
         updateCategoryOptions();
+        updateConditionalFields();
     }
 
-
-    /* カテゴリ */
     function updateCategoryOptions() {
-
-        const select =
-            document.getElementById(
-                'category'
-            );
-
+        const select = document.getElementById('category');
         if (!select) return;
-
         select.innerHTML = '';
-
-        categories[
-            currentType
-        ].forEach(
-            cat => {
-
-                const option =
-                    document.createElement(
-                        'option'
-                    );
-
-                option.value =
-                    cat;
-
-                option.textContent =
-                    cat;
-
-                select.appendChild(
-                    option
-                );
-            }
-        );
+        categories[currentType].forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat;
+            option.textContent = cat;
+            select.appendChild(option);
+        });
     }
 
+    function updateConditionalFields() {
+        const isExpense = currentType === 'expense';
+        const isCredit = isExpense && document.getElementById('paymentMethod')?.value === 'credit';
+        const isPeriodStart = currentType === 'income' && document.getElementById('category')?.value === '給与（開始日）';
 
-    /* 取引追加 */
-    document
-        .getElementById(
-            'transactionForm'
-        )
-        .addEventListener(
-            'submit',
-            async event => {
+        document.getElementById('expenseFields')?.classList.toggle('hidden', !isExpense);
+        document.getElementById('creditFields')?.classList.toggle('hidden', !isCredit);
+        document.getElementById('periodStartFields')?.classList.toggle('hidden', !isPeriodStart);
 
-                event.preventDefault();
+        const withdrawalDate = document.getElementById('withdrawalDate');
+        const nextSalaryDate = document.getElementById('nextSalaryDate');
+        if (withdrawalDate) withdrawalDate.required = isCredit;
+        if (nextSalaryDate) nextSalaryDate.required = isPeriodStart;
+    }
 
-                if (
-                    !db ||
-                    !auth?.currentUser
-                ) {
+    document.getElementById('transactionForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!db || !auth?.currentUser) {
+            alert('Firebase接続が完了していません。');
+            return;
+        }
 
-                    alert(
-                        'Firebase接続が完了していません。'
-                    );
+        const amount = Number(document.getElementById('amount').value);
+        const category = document.getElementById('category').value;
+        const memo = document.getElementById('memo').value.trim();
+        const date = document.getElementById('date').value;
 
-                    return;
-                }
+        if (!Number.isFinite(amount) || amount <= 0 || !date) return;
 
-                const amount =
-                    Number(
-                        document
-                            .getElementById(
-                                'amount'
-                            )
-                            .value
-                    );
-
-                const category =
-                    document
-                        .getElementById(
-                            'category'
-                        )
-                        .value;
-
-                const memo =
-                    document
-                        .getElementById(
-                            'memo'
-                        )
-                        .value
-                        .trim();
-
-                const date =
-                    document
-                        .getElementById(
-                            'date'
-                        )
-                        .value;
-
-                if (
-                    !Number.isFinite(amount) ||
-                    amount <= 0 ||
-                    !date
-                ) {
-                    return;
-                }
-
-                try {
-
-                    const txColRef =
-                        collection(
-                            db,
-                            'artifacts',
-                            'github_pages_app',
-                            'public',
-                            'data',
-                            `family_tx_${familyId}`
-                        );
-
-                    await addDoc(
-                        txColRef,
-                        {
-                            type: currentType,
-                            amount,
-                            category,
-                            memo: memo || category,
-                            date,
-                            createdAt: Date.now()
-                        }
-                    );
-
-                    document
-                        .getElementById(
-                            'amount'
-                        )
-                        .value =
-                        '';
-
-                    document
-                        .getElementById(
-                            'memo'
-                        )
-                        .value =
-                        '';
-
-                    document
-                        .getElementById(
-                            'date'
-                        )
-                        .valueAsDate =
-                        new Date();
-
-                }
-                catch (error) {
-
-                    showDebug(
-                        error
-                    );
-
-                    alert(
-                        `保存に失敗しました。\n${error.code || error.message}`
-                    );
-                }
-            }
-        );
-
-
-    /* 取引削除 */
-    window.deleteTransaction =
-        async function (id) {
-
-            if (
-                !db ||
-                !auth?.currentUser
-            ) {
-                return;
-            }
-
-            try {
-
-                await deleteDoc(
-                    doc(
-                        db,
-                        'artifacts',
-                        'github_pages_app',
-                        'public',
-                        'data',
-                        `family_tx_${familyId}`,
-                        id
-                    )
-                );
-
-            }
-            catch (error) {
-
-                showDebug(
-                    error
-                );
-            }
+        const data = {
+            type: currentType,
+            amount,
+            category,
+            memo: memo || category,
+            date,
+            createdAt: Date.now()
         };
 
+        if (currentType === 'expense') {
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            data.paymentMethod = paymentMethod;
 
-    /* 固定費追加 */
-    document
-        .getElementById(
-            'fixedForm'
-        )
-        .addEventListener(
-            'submit',
-            async event => {
-
-                event.preventDefault();
-
-                if (
-                    !db ||
-                    !auth?.currentUser
-                ) {
+            if (paymentMethod === 'credit') {
+                const cardName = document.getElementById('cardName').value.trim() || 'クレジットカード';
+                const withdrawalDate = document.getElementById('withdrawalDate').value;
+                if (!withdrawalDate) return;
+                if (withdrawalDate < date) {
+                    alert('引落予定日は利用日以降の日付を指定してください。');
                     return;
                 }
-
-                const memo =
-                    document
-                        .getElementById(
-                            'fixedMemo'
-                        )
-                        .value
-                        .trim();
-
-                const amount =
-                    Number(
-                        document
-                            .getElementById(
-                                'fixedAmount'
-                            )
-                            .value
-                    );
-
-                const category =
-                    document
-                        .getElementById(
-                            'fixedCategory'
-                        )
-                        .value;
-
-                const day =
-                    Number(
-                        document
-                            .getElementById(
-                                'fixedDay'
-                            )
-                            .value
-                    );
-
-                if (
-                    !memo ||
-                    !Number.isFinite(amount) ||
-                    amount <= 0 ||
-                    !Number.isInteger(day) ||
-                    day < 1 ||
-                    day > 31
-                ) {
-                    return;
-                }
-
-                try {
-
-                    const fcColRef =
-                        collection(
-                            db,
-                            'artifacts',
-                            'github_pages_app',
-                            'public',
-                            'data',
-                            `family_fc_${familyId}`
-                        );
-
-                    await addDoc(
-                        fcColRef,
-                        {
-                            memo,
-                            amount,
-                            category,
-                            day
-                        }
-                    );
-
-                    document
-                        .getElementById(
-                            'fixedMemo'
-                        )
-                        .value =
-                        '';
-
-                    document
-                        .getElementById(
-                            'fixedAmount'
-                        )
-                        .value =
-                        '';
-
-                }
-                catch (error) {
-
-                    showDebug(
-                        error
-                    );
-                }
+                data.cardName = cardName;
+                data.withdrawalDate = withdrawalDate;
             }
-        );
+        }
 
-
-    /* 固定費削除 */
-    window.deleteFixedCost =
-        async function (id) {
-
-            if (
-                !db ||
-                !auth?.currentUser
-            ) {
+        if (currentType === 'income' && category === '給与（開始日）') {
+            const nextSalaryDate = document.getElementById('nextSalaryDate').value;
+            if (!nextSalaryDate) return;
+            if (nextSalaryDate <= date) {
+                alert('次回給与予定日は開始日より後の日付を指定してください。');
                 return;
             }
+            data.isPeriodStart = true;
+            data.nextSalaryDate = nextSalaryDate;
+            selectedPeriodStartKey = date;
+        }
 
-            try {
+        try {
+            const txColRef = collection(db, 'artifacts', 'github_pages_app', 'public', 'data', `family_tx_${familyId}`);
+            await addDoc(txColRef, data);
 
-                await deleteDoc(
-                    doc(
-                        db,
-                        'artifacts',
-                        'github_pages_app',
-                        'public',
-                        'data',
-                        `family_fc_${familyId}`,
-                        id
-                    )
-                );
+            document.getElementById('amount').value = '';
+            document.getElementById('memo').value = '';
+            document.getElementById('date').value = toLocalDateString(new Date());
+            document.getElementById('withdrawalDate').value = '';
+            document.getElementById('nextSalaryDate').value = '';
+        } catch (error) {
+            showDebug(error);
+            alert(`保存に失敗しました。\n${error.code || error.message}`);
+        }
+    });
 
-            }
-            catch (error) {
+    window.deleteTransaction = async function(id) {
+        if (!db || !auth?.currentUser) return;
+        try {
+            await deleteDoc(doc(db, 'artifacts', 'github_pages_app', 'public', 'data', `family_tx_${familyId}`, id));
+        } catch (error) {
+            showDebug(error);
+        }
+    };
 
-                showDebug(
-                    error
-                );
-            }
-        };
+    document.getElementById('fixedForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!db || !auth?.currentUser) return;
 
+        const memo = document.getElementById('fixedMemo').value.trim();
+        const amount = Number(document.getElementById('fixedAmount').value);
+        const category = document.getElementById('fixedCategory').value;
+        const day = Number(document.getElementById('fixedDay').value);
 
-    /* 固定費反映 */
-    document
-        .getElementById(
-            'applyFixedBtn'
-        )
-        .addEventListener(
-            'click',
-            async () => {
+        if (!memo || !Number.isFinite(amount) || amount <= 0 || !Number.isInteger(day) || day < 1 || day > 31) return;
 
-                if (
-                    !db ||
-                    !auth?.currentUser
-                ) {
+        try {
+            const fcColRef = collection(db, 'artifacts', 'github_pages_app', 'public', 'data', `family_fc_${familyId}`);
+            await addDoc(fcColRef, { memo, amount, category, day, createdAt: Date.now() });
+            document.getElementById('fixedMemo').value = '';
+            document.getElementById('fixedAmount').value = '';
+        } catch (error) {
+            showDebug(error);
+        }
+    });
 
-                    alert(
-                        'Firebase接続が完了していません。'
-                    );
-
-                    return;
-                }
-
-                if (
-                    fixedCosts.length === 0
-                ) {
-
-                    alert(
-                        '固定費が登録されていません。'
-                    );
-
-                    return;
-                }
-
-                const year =
-                    selectedDate
-                        .getFullYear();
-
-                const monthIndex =
-                    selectedDate
-                        .getMonth();
-
-                const month =
-                    String(
-                        monthIndex + 1
-                    )
-                    .padStart(
-                        2,
-                        '0'
-                    );
-
-                const lastDay =
-                    new Date(
-                        year,
-                        monthIndex + 1,
-                        0
-                    )
-                    .getDate();
-
-                let addedCount = 0;
-
-                const txColRef =
-                    collection(
-                        db,
-                        'artifacts',
-                        'github_pages_app',
-                        'public',
-                        'data',
-                        `family_tx_${familyId}`
-                    );
-
-                for (
-                    const fixed of fixedCosts
-                ) {
-
-                    const actualDay =
-                        Math.min(
-                            Number(
-                                fixed.day
-                            ),
-                            lastDay
-                        );
-
-                    const day =
-                        String(
-                            actualDay
-                        )
-                        .padStart(
-                            2,
-                            '0'
-                        );
-
-                    const targetDate =
-                        `${year}-${month}-${day}`;
-
-                    const exists =
-                        transactions.some(
-                            transaction =>
-
-                                transaction.date
-                                    ?.startsWith(
-                                        `${year}-${month}`
-                                    )
-
-                                &&
-
-                                transaction.memo ===
-                                    fixed.memo
-
-                                &&
-
-                                Number(
-                                    transaction.amount
-                                ) ===
-                                    Number(
-                                        fixed.amount
-                                    )
-                        );
-
-                    if (
-                        exists
-                    ) {
-                        continue;
-                    }
-
-                    try {
-
-                        await addDoc(
-                            txColRef,
-                            {
-                                type: 'expense',
-                                amount:
-                                    Number(
-                                        fixed.amount
-                                    ),
-                                category:
-                                    fixed.category,
-                                memo:
-                                    fixed.memo,
-                                date:
-                                    targetDate,
-                                createdAt:
-                                    Date.now()
-                            }
-                        );
-
-                        addedCount++;
-
-                    }
-                    catch (error) {
-
-                        showDebug(
-                            error
-                        );
-                    }
-                }
-
-                closeFixedModal();
-
-                alert(
-                    `${addedCount}件の固定費を反映しました！`
-                );
-            }
-        );
-
+    window.deleteFixedCost = async function(id) {
+        if (!db || !auth?.currentUser) return;
+        try {
+            await deleteDoc(doc(db, 'artifacts', 'github_pages_app', 'public', 'data', `family_fc_${familyId}`, id));
+        } catch (error) {
+            showDebug(error);
+        }
+    };
 
     function closeFixedModal() {
-
-        const modal =
-            document.getElementById(
-                'fixedModal'
-            );
-
-        modal.classList.add(
-            'hidden'
-        );
-
-        modal.classList.remove(
-            'flex'
-        );
+        const modal = document.getElementById('fixedModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
     }
 
-
-    /* メイン描画 */
     function renderApp() {
+        const period = resolveSelectedPeriod();
+        const labelEl = document.getElementById('currentPeriodLabel');
+        const rangeEl = document.getElementById('currentPeriodRange');
+        const prevBtn = document.getElementById('prevPeriodBtn');
+        const nextBtn = document.getElementById('nextPeriodBtn');
 
-        const year =
-            selectedDate
-                .getFullYear();
-
-        const month =
-            selectedDate
-                .getMonth() + 1;
-
-        const monthLabel =
-            document.getElementById(
-                'currentMonthLabel'
-            );
-
-        if (
-            monthLabel
-        ) {
-
-            monthLabel.textContent =
-                `${year}年 ${month}月`;
-        }
-
-        const prefix =
-            `${year}-${String(month).padStart(2, '0')}`;
-
-        const filtered =
-            transactions.filter(
-                transaction =>
-                    transaction.date &&
-                    transaction.date.startsWith(
-                        prefix
-                    )
-            );
-
-        let income = 0;
-        let expense = 0;
-
-        filtered.forEach(
-            transaction => {
-
-                if (
-                    transaction.type ===
-                    'income'
-                ) {
-
-                    income +=
-                        Number(
-                            transaction.amount
-                        );
-                }
-                else {
-
-                    expense +=
-                        Number(
-                            transaction.amount
-                        );
-                }
-            }
-        );
-
-        document
-            .getElementById(
-                'totalBalance'
-            )
-            .textContent =
-            `¥${(
-                income - expense
-            ).toLocaleString()}`;
-
-        document
-            .getElementById(
-                'totalIncome'
-            )
-            .textContent =
-            `¥${income.toLocaleString()}`;
-
-        document
-            .getElementById(
-                'totalExpense'
-            )
-            .textContent =
-            `¥${expense.toLocaleString()}`;
-
-        const listEl =
-            document.getElementById(
-                'transactionList'
-            );
-
-        if (
-            filtered.length === 0
-        ) {
-
-            listEl.innerHTML = `
-                <p class="text-center text-slate-400 text-xs py-6">
-                    この月のデータはまだありません
-                </p>
-            `;
-
+        if (!period) {
+            labelEl.textContent = '給与期間を登録してください';
+            rangeEl.textContent = '収入 → 給与（開始日）から登録できます';
+            prevBtn.disabled = true;
+            nextBtn.disabled = true;
+            prevBtn.classList.add('opacity-30');
+            nextBtn.classList.add('opacity-30');
+            document.getElementById('projectedRemaining').textContent = '¥0';
+            document.getElementById('totalIncome').textContent = '¥0';
+            document.getElementById('directExpense').textContent = '¥0';
+            document.getElementById('plannedExpense').textContent = '¥0';
+            document.getElementById('totalExpenseForecast').textContent = '¥0';
+            document.getElementById('shortageMessage').classList.add('hidden');
+            renderCreditSummary(null);
+            document.getElementById('transactionList').innerHTML = `<div class="text-center py-7"><p class="text-xs font-semibold text-slate-500">最初の給与を登録してください</p><p class="text-[10px] text-slate-400 mt-1">「収入」→「給与（開始日）」を選び、次回給与予定日も入力します。</p></div>`;
             return;
         }
 
-        listEl.innerHTML =
-            filtered.map(
-                transaction => `
+        labelEl.textContent = period.label;
+        rangeEl.textContent = `${formatShortDate(period.start)} ～ ${formatShortDate(period.end)}${period.endSource === 'actual' ? '（実績確定）' : '（予定）'}`;
 
-                    <div
-                        class="
-                            flex
-                            items-center
-                            justify-between
-                            gap-2
-                            p-2.5
-                            bg-slate-50
-                            rounded-xl
-                            border
-                            border-slate-100
-                            text-sm
-                        "
-                    >
+        prevBtn.disabled = selectedPeriodIndex <= 0;
+        nextBtn.disabled = selectedPeriodIndex >= periods.length - 1;
+        prevBtn.classList.toggle('opacity-30', prevBtn.disabled);
+        nextBtn.classList.toggle('opacity-30', nextBtn.disabled);
 
+        const periodTransactions = transactions.filter(tx => dateInPeriod(tx.date, period));
+        const income = periodTransactions
+            .filter(tx => tx.type === 'income')
+            .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+
+        const directExpenses = periodTransactions
+            .filter(tx => tx.type === 'expense' && tx.paymentMethod !== 'credit')
+            .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+
+        const creditDue = getCreditTransactions().filter(tx => dateInPeriod(tx.withdrawalDate, period));
+        const creditDueAmount = creditDue.reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+        const fixedOccurrences = getFixedOccurrences(period);
+        const fixedAmount = fixedOccurrences.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+        const plannedExpense = creditDueAmount + fixedAmount;
+        const remaining = income - directExpenses - plannedExpense;
+
+        const remainingEl = document.getElementById('projectedRemaining');
+        const shortageEl = document.getElementById('shortageMessage');
+        const remainingSummaryCard = document.getElementById('remainingSummaryCard');
+        remainingEl.textContent = formatMoney(remaining);
+        document.getElementById('totalIncome').textContent = formatMoney(income);
+        document.getElementById('directExpense').textContent = formatMoney(directExpenses);
+        document.getElementById('plannedExpense').textContent = formatMoney(plannedExpense);
+        document.getElementById('totalExpenseForecast').textContent = formatMoney(directExpenses + plannedExpense);
+
+        if (remaining < 0) {
+            remainingEl.className = 'text-xs sm:text-sm font-bold text-rose-200 truncate';
+            remainingSummaryCard.className = 'bg-rose-500/35 px-2 py-1.5 rounded-xl border border-rose-300/40 text-center min-w-0';
+            shortageEl.textContent = `${formatMoney(Math.abs(remaining))} 不足予定`;
+            shortageEl.classList.remove('hidden');
+        } else {
+            remainingEl.className = 'text-xs sm:text-sm font-bold truncate';
+            remainingSummaryCard.className = 'bg-indigo-700/60 px-2 py-1.5 rounded-xl border border-indigo-500/30 text-center min-w-0';
+            shortageEl.classList.add('hidden');
+        }
+
+        renderCreditSummary(period);
+        renderTransactionList(period, periodTransactions, fixedOccurrences, creditDue);
+    }
+
+    function renderCreditSummary(period) {
+        const today = toLocalDateString(new Date());
+        const outstandingItems = getCreditTransactions().filter(tx => tx.withdrawalDate >= today);
+        const futureGroups = groupCreditByWithdrawal(outstandingItems);
+        const periodGroups = period
+            ? groupCreditByWithdrawal(getCreditTransactions().filter(tx => dateInPeriod(tx.withdrawalDate, period)))
+            : [];
+
+        const creditSummary = document.getElementById('creditSummary');
+        const shouldShow = futureGroups.length > 0 || periodGroups.length > 0;
+        creditSummary.classList.toggle('hidden', !shouldShow);
+        if (!shouldShow) return;
+
+        const outstanding = outstandingItems.reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+        document.getElementById('creditOutstanding').textContent = formatMoney(outstanding);
+
+        const nextInfo = document.getElementById('creditNextInfo');
+        if (futureGroups.length) {
+            const next = futureGroups[0];
+            nextInfo.innerHTML = `次回 ${escapeHtml(formatShortDate(next.withdrawalDate))} · ${escapeHtml(next.cardName)} · <span class="font-semibold text-indigo-700">${formatMoney(next.amount)}</span>`;
+        } else {
+            nextInfo.textContent = 'これからのカード引落予定はありません';
+        }
+
+        const periodList = document.getElementById('creditPeriodList');
+        if (!periodGroups.length) {
+            periodList.innerHTML = '';
+            return;
+        }
+
+        periodList.innerHTML = periodGroups.map(group => `
+            <div class="flex justify-between items-center gap-2 pt-1 text-[10px] border-t border-indigo-100 first:border-t-0">
+                <span class="text-slate-500">期間内 ${escapeHtml(formatShortDate(group.withdrawalDate))} · ${escapeHtml(group.cardName)} (${group.count}件)</span>
+                <span class="font-bold text-slate-700">${formatMoney(group.amount)}</span>
+            </div>
+        `).join('');
+    }
+
+    function renderTransactionList(period, periodTransactions, fixedOccurrences, creditDue) {
+        const listEl = document.getElementById('transactionList');
+        const rows = [];
+
+        periodTransactions.forEach(tx => {
+            const isCredit = tx.type === 'expense' && tx.paymentMethod === 'credit';
+            const isIncome = tx.type === 'income';
+            rows.push({
+                sortDate: tx.date,
+                html: `
+                    <div class="flex items-center justify-between gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-sm">
                         <div class="flex items-center gap-2.5 min-w-0">
-
-                            <div
-                                class="
-                                    w-8
-                                    h-8
-                                    rounded-lg
-                                    flex
-                                    items-center
-                                    justify-center
-                                    font-bold
-                                    text-xs
-                                    shrink-0
-                                    ${
-                                        transaction.type === 'income'
-                                            ? 'bg-emerald-100 text-emerald-600'
-                                            : 'bg-rose-100 text-rose-600'
-                                    }
-                                "
-                            >
-                                ${
-                                    transaction.type === 'income'
-                                        ? '収'
-                                        : '支'
-                                }
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-[10px] shrink-0 ${isIncome ? 'bg-emerald-100 text-emerald-600' : isCredit ? 'bg-indigo-100 text-indigo-600' : 'bg-rose-100 text-rose-600'}">
+                                ${isIncome ? '収' : isCredit ? 'カード' : '支'}
                             </div>
-
                             <div class="min-w-0">
-
-                                <p class="font-semibold text-xs text-slate-800 truncate">
-                                    ${
-                                        escapeHtml(
-                                            transaction.memo
-                                        )
-                                    }
-                                </p>
-
-                                <p class="text-[10px] text-slate-400 truncate">
-                                    ${
-                                        escapeHtml(
-                                            transaction.date
-                                        )
-                                    }
-                                    ·
-                                    ${
-                                        escapeHtml(
-                                            transaction.category
-                                        )
-                                    }
-                                </p>
-
+                                <p class="font-semibold text-xs text-slate-800 truncate">${escapeHtml(tx.memo)}</p>
+                                <p class="text-[10px] text-slate-400 truncate">${escapeHtml(formatShortDate(tx.date))} · ${escapeHtml(tx.category)}${tx.type === 'expense' ? ` · ${escapeHtml(paymentLabels[tx.paymentMethod] || '現金')}` : ''}</p>
+                                ${isCredit ? `<p class="text-[9px] text-indigo-500 mt-0.5">${escapeHtml(formatShortDate(tx.withdrawalDate))}引落予定 · ${escapeHtml(tx.cardName || 'クレジットカード')}</p>` : ''}
+                                ${isPeriodStartTransaction(tx) ? `<p class="text-[9px] text-emerald-600 mt-0.5">次回給与予定 ${escapeHtml(formatShortDate(tx.nextSalaryDate))}</p>` : ''}
                             </div>
-
                         </div>
-
                         <div class="flex items-center gap-2 shrink-0">
-
-                            <span
-                                class="
-                                    font-bold
-                                    text-xs
-                                    ${
-                                        transaction.type === 'income'
-                                            ? 'text-emerald-600'
-                                            : 'text-slate-800'
-                                    }
-                                "
-                            >
-                                ${
-                                    transaction.type === 'income'
-                                        ? '+'
-                                        : '-'
-                                }
-                                ¥${Number(
-                                    transaction.amount
-                                ).toLocaleString()}
-                            </span>
-
-                            <button
-                                type="button"
-                                onclick="deleteTransaction('${transaction.id}')"
-                                class="text-slate-300 hover:text-rose-500 transition text-xs px-1"
-                            >
-                                ×
-                            </button>
-
+                            <span class="font-bold text-xs ${isIncome ? 'text-emerald-600' : isCredit ? 'text-indigo-600' : 'text-slate-800'}">${isIncome ? '+' : isCredit ? '' : '-'}${formatMoney(tx.amount)}</span>
+                            <button type="button" onclick="deleteTransaction('${tx.id}')" class="text-slate-300 hover:text-rose-500 transition text-xs px-1">×</button>
                         </div>
+                    </div>`
+            });
+        });
 
-                    </div>
-                `
-            ).join('');
+        fixedOccurrences.forEach(item => {
+            rows.push({
+                sortDate: item.date,
+                html: `
+                    <div class="flex items-center justify-between gap-2 p-2.5 bg-amber-50/70 rounded-xl border border-amber-100 text-sm">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-[9px] shrink-0 bg-amber-100 text-amber-700">固定</div>
+                            <div class="min-w-0">
+                                <p class="font-semibold text-xs text-slate-800 truncate">${escapeHtml(item.memo)}</p>
+                                <p class="text-[10px] text-slate-400 truncate">${escapeHtml(formatShortDate(item.date))} · ${escapeHtml(item.category)} · 引落予定</p>
+                            </div>
+                        </div>
+                        <span class="font-bold text-xs text-amber-700">-${formatMoney(item.amount)}</span>
+                    </div>`
+            });
+        });
+
+        const creditFromOtherPeriods = creditDue.filter(tx => !dateInPeriod(tx.date, period));
+        creditFromOtherPeriods.forEach(tx => {
+            rows.push({
+                sortDate: tx.withdrawalDate,
+                html: `
+                    <div class="flex items-center justify-between gap-2 p-2.5 bg-indigo-50/70 rounded-xl border border-indigo-100 text-sm">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-[9px] shrink-0 bg-indigo-100 text-indigo-700">引落</div>
+                            <div class="min-w-0">
+                                <p class="font-semibold text-xs text-slate-800 truncate">${escapeHtml(tx.memo)}</p>
+                                <p class="text-[10px] text-slate-400 truncate">${escapeHtml(formatShortDate(tx.withdrawalDate))} · ${escapeHtml(tx.cardName || 'クレジットカード')} · 利用日 ${escapeHtml(formatShortDate(tx.date))}</p>
+                            </div>
+                        </div>
+                        <span class="font-bold text-xs text-indigo-700">-${formatMoney(tx.amount)}</span>
+                    </div>`
+            });
+        });
+
+        rows.sort((a, b) => String(b.sortDate).localeCompare(String(a.sortDate)));
+
+        if (!rows.length) {
+            listEl.innerHTML = `<p class="text-center text-slate-400 text-xs py-6">この給与期間のデータはまだありません</p>`;
+            return;
+        }
+
+        listEl.innerHTML = rows.map(row => row.html).join('');
     }
 
-
-    /* 固定費描画 */
     function renderFixedList() {
+        const listEl = document.getElementById('fixedList');
+        const countEl = document.getElementById('fixedCount');
+        const totalEl = document.getElementById('fixedTotal');
+        const totalAmount = fixedCosts.reduce((sum, fixed) => sum + Number(fixed.amount || 0), 0);
 
-        const listEl =
-            document.getElementById(
-                'fixedList'
-            );
+        if (countEl) countEl.textContent = `${fixedCosts.length}件`;
+        if (totalEl) totalEl.textContent = formatMoney(totalAmount);
+        if (!listEl) return;
 
-        const countEl =
-            document.getElementById(
-                'fixedCount'
-            );
-
-        const totalEl =
-            document.getElementById(
-                'fixedTotal'
-            );
-
-
-        const totalAmount =
-            fixedCosts.reduce(
-                (sum, fixed) => {
-
-                    return (
-                        sum +
-                        Number(
-                            fixed.amount || 0
-                        )
-                    );
-
-                },
-                0
-            );
-
-
-        if (
-            countEl
-        ) {
-
-            countEl.textContent =
-                `${fixedCosts.length}件`;
-        }
-
-
-        if (
-            totalEl
-        ) {
-
-            totalEl.textContent =
-                `¥${totalAmount.toLocaleString()}`;
-        }
-
-
-        if (
-            !listEl
-        ) {
+        if (!fixedCosts.length) {
+            listEl.innerHTML = `<p class="text-center text-slate-400 text-xs py-3">登録されている固定費はありません</p>`;
             return;
         }
 
-
-        if (
-            fixedCosts.length === 0
-        ) {
-
-            listEl.innerHTML = `
-                <p
-                    class="
-                        text-center
-                        text-slate-400
-                        text-xs
-                        py-3
-                    "
-                >
-                    登録されている固定費はありません
-                </p>
-            `;
-
-            return;
-        }
-
-
-        listEl.innerHTML =
-            fixedCosts.map(
-                fixed => `
-
-                    <div
-                        class="
-                            flex
-                            items-center
-                            justify-between
-                            gap-2
-                            p-2.5
-                            bg-white
-                            rounded-xl
-                            border
-                            border-slate-100
-                            text-sm
-                        "
-                    >
-
-                        <div class="min-w-0">
-
-                            <p class="font-semibold text-slate-800 truncate">
-
-                                ${
-                                    escapeHtml(
-                                        fixed.memo
-                                    )
-                                }
-
-                                <span class="text-xs font-normal text-slate-400">
-                                    (${
-                                        escapeHtml(
-                                            fixed.category
-                                        )
-                                    })
-                                </span>
-
-                            </p>
-
-                            <p class="text-xs text-indigo-600">
-                                毎月
-                                ${Number(fixed.day)}
-                                日
-                                ·
-                                ¥${Number(
-                                    fixed.amount
-                                ).toLocaleString()}
-                            </p>
-
-                        </div>
-
-                        <button
-                            type="button"
-                            onclick="deleteFixedCost('${fixed.id}')"
-                            class="
-                                text-slate-300
-                                hover:text-rose-500
-                                px-2
-                                transition
-                                text-sm
-                                shrink-0
-                            "
-                        >
-                            ×
-                        </button>
-
-                    </div>
-                `
-            ).join('');
+        listEl.innerHTML = fixedCosts.map(fixed => `
+            <div class="flex items-center justify-between gap-2 p-2.5 bg-white rounded-xl border border-slate-100 text-sm">
+                <div class="min-w-0">
+                    <p class="font-semibold text-slate-800 truncate">${escapeHtml(fixed.memo)} <span class="text-xs font-normal text-slate-400">(${escapeHtml(fixed.category)})</span></p>
+                    <p class="text-xs text-indigo-600">毎月 ${Number(fixed.day)}日 · ${formatMoney(fixed.amount)}</p>
+                </div>
+                <button type="button" onclick="deleteFixedCost('${fixed.id}')" class="text-slate-300 hover:text-rose-500 px-2 transition text-sm shrink-0">×</button>
+            </div>
+        `).join('');
     }
 
-
-    /* HTML Escape */
     function escapeHtml(value) {
-
-        if (
-            value === null ||
-            value === undefined
-        ) {
-            return '';
-        }
-
-        return String(value)
-            .replace(
-                /[&<>'"]/g,
-                char => ({
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    "'": '&#39;',
-                    '"': '&quot;'
-                }[char])
-            );
+        if (value === null || value === undefined) return '';
+        return String(value).replace(/[&<>'"]/g, char => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        }[char]));
     }
-
 </script>
-
 </body>
 </html>
