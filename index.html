@@ -16,11 +16,11 @@
                         sans: ['"Plus Jakarta Sans"', '"Noto Sans JP"', 'sans-serif'],
                     },
                     colors: {
-                        stonebg: '#F8F6F0',
-                        cardbg: '#FFFFFF',
-                        accent: '#38332E',
+                        stonebg: '#FFFFFF',
+                        cardbg: '#FAFAFA',
+                        accent: '#2B2623',
                         subtext: '#827A71',
-                        line: '#EAE5DE',
+                        line: '#EFECE6',
                     }
                 }
             }
@@ -29,7 +29,7 @@
     <style>
         body {
             font-family: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
-            background-color: #F8F6F0;
+            background-color: #FFFFFF;
             color: #262320;
             -webkit-tap-highlight-color: transparent;
             word-break: normal;
@@ -47,7 +47,7 @@
             border-radius: 3px;
         }
         .ios-shadow {
-            box-shadow: 0 -10px 30px -5px rgba(56, 51, 46, 0.08), 0 4px 20px -2px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 -8px 25px -4px rgba(40, 35, 30, 0.06), 0 4px 16px -2px rgba(0, 0, 0, 0.03);
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(6px); }
@@ -61,16 +61,16 @@
 <body class="h-full flex flex-col justify-between selection:bg-stone-200">
 
     <!-- ヘッダーエリア -->
-    <header class="w-full bg-stonebg pt-6 pb-3 px-6 flex items-center justify-between z-10 shrink-0">
+    <header class="w-full bg-white pt-6 pb-3 px-6 flex items-center justify-between z-10 shrink-0 border-b border-stone-100">
         <div>
             <span class="text-[11px] tracking-widest text-subtext uppercase font-semibold block mb-0.5">Household Budget</span>
             <div class="flex items-center space-x-2">
                 <h1 id="currentPeriodLabel" class="text-base font-semibold text-accent tracking-tight whitespace-nowrap">2月25日 〜 3月24日</h1>
                 <div class="flex space-x-0.5">
-                    <button onclick="changeMonth(-1)" class="p-1 rounded-full hover:bg-stone-200/60 text-subtext transition-colors" aria-label="前月へ">
+                    <button onclick="changeMonth(-1)" class="p-1 rounded-full hover:bg-stone-100 text-subtext transition-colors" aria-label="前月へ">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                     </button>
-                    <button onclick="changeMonth(1)" class="p-1 rounded-full hover:bg-stone-200/60 text-subtext transition-colors" aria-label="翌月へ">
+                    <button onclick="changeMonth(1)" class="p-1 rounded-full hover:bg-stone-100 text-subtext transition-colors" aria-label="翌月へ">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </button>
                 </div>
@@ -81,25 +81,25 @@
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
                 <span>AIアドバイス</span>
             </button>
-            <button onclick="toggleSettings()" class="p-2 text-subtext hover:text-accent transition-colors rounded-full hover:bg-stone-200/50" aria-label="設定">
+            <button onclick="toggleSettings()" class="p-2 text-subtext hover:text-accent transition-colors rounded-full hover:bg-stone-100" aria-label="設定">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             </button>
         </div>
     </header>
 
     <!-- メインコンテンツエリア（下部入力バーのために下部に十分な余白を確保） -->
-    <main class="flex-1 overflow-y-auto px-5 py-2 pb-44 max-w-md mx-auto w-full flex flex-col space-y-4">
+    <main class="flex-1 overflow-y-auto px-5 py-4 pb-44 max-w-md mx-auto w-full flex flex-col space-y-4">
         
         <!-- サマリーカード -->
-        <div class="bg-cardbg rounded-3xl p-5 border border-line shadow-xs relative overflow-hidden">
-            <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-stone-50 rounded-full pointer-events-none"></div>
+        <div class="bg-stone-50/80 rounded-3xl p-5 border border-line shadow-xs relative overflow-hidden">
+            <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-stone-100/60 rounded-full pointer-events-none"></div>
             <div class="text-[11px] text-subtext font-medium mb-0.5">今月の残高</div>
             <div class="flex items-baseline space-x-2">
                 <span id="totalBalance" class="text-3xl font-bold tracking-tight text-accent">¥0</span>
                 <span id="budgetStatusText" class="text-[11px] text-emerald-600 font-medium">順調です</span>
             </div>
             
-            <div class="mt-4 grid grid-cols-2 gap-4 pt-3.5 border-t border-stone-100">
+            <div class="mt-4 grid grid-cols-2 gap-4 pt-3.5 border-t border-stone-200/60">
                 <div>
                     <div class="text-[10px] text-subtext tracking-wide">収入</div>
                     <div id="totalIncome" class="text-sm font-semibold text-accent mt-0.5">¥0</div>
@@ -116,7 +116,7 @@
                     <span>予算消化率</span>
                     <span id="budgetPercentage">0%</span>
                 </div>
-                <div class="w-full bg-stone-100 h-1.5 rounded-full overflow-hidden">
+                <div class="w-full bg-stone-200/60 h-1.5 rounded-full overflow-hidden">
                     <div id="budgetProgressBar" class="bg-accent h-full rounded-full transition-all duration-500" style="width: 0%"></div>
                 </div>
             </div>
@@ -126,7 +126,7 @@
         <div class="flex flex-col flex-1">
             <div class="flex items-center justify-between mb-2.5 px-1">
                 <h2 class="text-xs font-semibold text-accent tracking-wider uppercase">収支履歴</h2>
-                <div class="flex space-x-1 bg-stone-200/60 p-0.5 rounded-lg text-xs">
+                <div class="flex space-x-1 bg-stone-100 p-0.5 rounded-lg text-xs">
                     <button onclick="setFilter('all')" id="filterAll" class="px-2.5 py-1 rounded-md bg-white text-accent font-medium shadow-2xs transition-all">すべて</button>
                     <button onclick="setFilter('expense')" id="filterExpense" class="px-2.5 py-1 rounded-md text-subtext font-medium transition-all">支出</button>
                     <button onclick="setFilter('income')" id="filterIncome" class="px-2.5 py-1 rounded-md text-subtext font-medium transition-all">収入</button>
@@ -145,31 +145,31 @@
         </div>
     </main>
 
-    <!-- 画面下部の固定入力バー（位置を少し上に設定し、視認性と押しやすさを向上） -->
-    <div class="fixed bottom-16 left-3 right-3 sm:left-auto sm:right-auto sm:w-full sm:max-w-md sm:translate-x-[-50%] sm:left-[50%] bg-stonebg/95 backdrop-blur-md border border-line rounded-3xl ios-shadow p-3.5 z-20">
+    <!-- 画面下部の固定入力バー -->
+    <div class="fixed bottom-16 left-3 right-3 sm:left-auto sm:right-auto sm:w-full sm:max-w-md sm:translate-x-[-50%] sm:left-[50%] bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-3xl ios-shadow p-3.5 z-20">
         <form id="transactionForm" onsubmit="addTransaction(event)" class="flex flex-col space-y-2.5">
             <!-- 収支切替・カテゴリ・日付 -->
             <div class="flex items-center justify-between space-x-2">
-                <div class="flex bg-stone-200/60 p-0.5 rounded-xl text-xs shrink-0">
+                <div class="flex bg-stone-100 p-0.5 rounded-xl text-xs shrink-0">
                     <button type="button" onclick="setType('expense')" id="typeExpenseBtn" class="px-3 py-1.5 rounded-lg bg-accent text-white font-medium transition-all">支出</button>
                     <button type="button" onclick="setType('income')" id="typeIncomeBtn" class="px-3 py-1.5 rounded-lg text-subtext font-medium transition-all">収入</button>
                 </div>
                 <!-- カテゴリ選択 -->
-                <select id="categorySelect" class="flex-1 bg-white border border-line rounded-xl px-2.5 py-1.5 text-xs text-accent focus:outline-none focus:border-accent">
+                <select id="categorySelect" class="flex-1 bg-stone-50 border border-line rounded-xl px-2.5 py-1.5 text-xs text-accent focus:outline-none focus:border-accent">
                     <!-- JSにより動的挿入 -->
                 </select>
                 <!-- 日付選択 -->
-                <input type="date" id="txDate" class="bg-white border border-line rounded-xl px-2 py-1.5 text-xs text-accent w-28 focus:outline-none focus:border-accent">
+                <input type="date" id="txDate" class="bg-stone-50 border border-line rounded-xl px-2 py-1.5 text-xs text-accent w-28 focus:outline-none focus:border-accent">
             </div>
 
             <!-- 金額・メモ・追加ボタン -->
             <div class="flex items-center space-x-2">
                 <div class="relative w-28 shrink-0">
                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-subtext">¥</span>
-                    <input type="number" id="txAmount" placeholder="金額" required min="1" class="w-full bg-white border border-line rounded-xl pl-7 pr-3 py-2 text-sm font-semibold text-accent focus:outline-none focus:border-accent placeholder:text-stone-300 placeholder:font-normal">
+                    <input type="number" id="txAmount" placeholder="金額" required min="1" class="w-full bg-stone-50 border border-line rounded-xl pl-7 pr-3 py-2 text-sm font-semibold text-accent focus:outline-none focus:border-accent placeholder:text-stone-300 placeholder:font-normal">
                 </div>
                 <div class="flex-1">
-                    <input type="text" id="txMemo" placeholder="メモ（例：ランチ、スーパーなど）" class="w-full bg-white border border-line rounded-xl px-3 py-2 text-xs text-accent focus:outline-none focus:border-accent placeholder:text-stone-300">
+                    <input type="text" id="txMemo" placeholder="メモ（例：ランチ、スーパーなど）" class="w-full bg-stone-50 border border-line rounded-xl px-3 py-2 text-xs text-accent focus:outline-none focus:border-accent placeholder:text-stone-300">
                 </div>
                 <button type="submit" class="bg-accent text-white px-4 py-2 rounded-xl text-xs font-medium hover:bg-stone-700 transition-all shrink-0 flex items-center justify-center">
                     追加
@@ -500,7 +500,7 @@
 
             filtered.forEach(t => {
                 const item = document.createElement('div');
-                item.className = 'bg-cardbg rounded-2xl p-3.5 border border-line flex items-center justify-between shadow-2xs hover:border-stone-300 transition-all';
+                item.className = 'bg-stone-50/60 rounded-2xl p-3.5 border border-line flex items-center justify-between shadow-2xs hover:border-stone-300 transition-all';
                 
                 const isIncome = t.type === 'income';
                 const sign = isIncome ? '+' : '-';
@@ -508,7 +508,7 @@
 
                 item.innerHTML = `
                     <div class="flex items-center space-x-3 overflow-hidden mr-2">
-                        <div class="w-8 h-8 rounded-xl bg-stonebg flex items-center justify-center text-[11px] font-medium text-subtext shrink-0">
+                        <div class="w-8 h-8 rounded-xl bg-white border border-stone-100 flex items-center justify-center text-[11px] font-medium text-subtext shrink-0 shadow-2xs">
                             ${t.category.slice(0, 2)}
                         </div>
                         <div class="truncate">
