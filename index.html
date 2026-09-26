@@ -87,7 +87,7 @@
         </div>
     </header>
 
-    <!-- メインコンテンツエリア（下部入力バーのために下部に十分な余白を確保） -->
+    <!-- メインコンテンツエリア -->
     <main class="flex-1 overflow-y-auto px-5 py-4 pb-48 max-w-md mx-auto w-full flex flex-col space-y-4">
         
         <!-- サマリーカード -->
@@ -146,8 +146,8 @@
     </main>
 
     <!-- 画面下部の固定入力バー（位置を少し上に調整） -->
-    <div class="fixed bottom-20 left-3 right-3 sm:left-auto sm:right-auto sm:w-full sm:max-w-md sm:translate-x-[-50%] sm:left-[50%] bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-3xl ios-shadow p-3.5 z-20">
-        <form id="transactionForm" onsubmit="addTransaction(event)" class="flex flex-col space-y-2.5">
+    <div class="fixed bottom-28 left-3 right-3 sm:left-auto sm:right-auto sm:w-full sm:max-w-md sm:translate-x-[-50%] sm:left-[50%] bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-3xl ios-shadow p-3.5 z-20">
+        <form id="transactionForm" onsubmit="handleFormSubmit(event)" class="flex flex-col space-y-2.5">
             <!-- 収支切替・カテゴリ・日付 -->
             <div class="flex items-center justify-between space-x-2">
                 <div class="flex bg-stone-100 p-0.5 rounded-xl text-xs shrink-0">
@@ -171,19 +171,63 @@
                 <div class="flex-1">
                     <input type="text" id="txMemo" placeholder="メモ（例：ランチ、スーパーなど）" class="w-full bg-cardbg border border-line rounded-xl px-3 py-2 text-xs text-accent focus:outline-none focus:border-accent placeholder:text-stone-300">
                 </div>
-                <button type="submit" class="bg-accent text-white px-4 py-2 rounded-xl text-xs font-medium hover:bg-stone-700 transition-all shrink-0 flex items-center justify-center">
+                <button type="submit" id="submitBtn" class="bg-accent text-white px-5 py-2 rounded-xl text-xs font-medium hover:bg-stone-700 transition-all shrink-0 flex items-center justify-center">
                     追加
                 </button>
             </div>
         </form>
     </div>
 
-    <!-- AIアドバイザーモーダル（確認画面なしで即時実行対応） -->
+    <!-- 編集ポップアップモーダル -->
+    <div id="editModal" class="fixed inset-0 bg-black/30 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-cardbg rounded-3xl max-w-sm w-full p-6 border border-line shadow-xl animate-fade-in">
+            <div class="flex items-center justify-between pb-3 border-b border-stone-100">
+                <h3 class="text-sm font-semibold text-accent tracking-tight">収支の編集</h3>
+                <button onclick="closeEditModal()" class="text-subtext hover:text-accent p-1" aria-label="閉じる">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <form onsubmit="handleEditSubmit(event)" class="py-4 space-y-3">
+                <input type="hidden" id="editId">
+                <div>
+                    <label class="block text-[11px] text-subtext mb-1">収支種別</label>
+                    <div class="flex bg-stone-100 p-0.5 rounded-xl text-xs">
+                        <button type="button" onclick="setEditType('expense')" id="editTypeExpenseBtn" class="flex-1 py-1.5 rounded-lg bg-accent text-white font-medium transition-all">支出</button>
+                        <button type="button" onclick="setEditType('income')" id="editTypeIncomeBtn" class="flex-1 py-1.5 rounded-lg text-subtext font-medium transition-all">収入</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[11px] text-subtext mb-1">カテゴリ</label>
+                    <select id="editCategorySelect" class="w-full bg-stone-50 border border-line rounded-xl px-3 py-2 text-xs text-accent focus:outline-none focus:border-accent">
+                        <!-- 動的 -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[11px] text-subtext mb-1">金額 (¥)</label>
+                    <input type="number" id="editAmount" required min="1" class="w-full bg-stone-50 border border-line rounded-xl px-3 py-2 text-sm font-semibold text-accent focus:outline-none focus:border-accent">
+                </div>
+                <div>
+                    <label class="block text-[11px] text-subtext mb-1">日付</label>
+                    <input type="date" id="editDate" class="w-full bg-stone-50 border border-line rounded-xl px-3 py-2 text-xs text-accent focus:outline-none focus:border-accent">
+                </div>
+                <div>
+                    <label class="block text-[11px] text-subtext mb-1">メモ</label>
+                    <input type="text" id="editMemo" class="w-full bg-stone-50 border border-line rounded-xl px-3 py-2 text-xs text-accent focus:outline-none focus:border-accent">
+                </div>
+                <div class="pt-3 border-t border-stone-100 flex justify-end space-x-2">
+                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-stone-100 text-subtext rounded-xl text-xs font-medium hover:bg-stone-200 transition-all">キャンセル</button>
+                    <button type="submit" class="px-4 py-2 bg-accent text-white rounded-xl text-xs font-medium hover:bg-stone-700 transition-all">保存する</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- AIアドバイザーモーダル -->
     <div id="aiModal" class="fixed inset-0 bg-black/30 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-cardbg rounded-3xl max-w-md w-full p-6 border border-line shadow-xl animate-fade-in flex flex-col max-h-[85vh]">
             <div class="flex items-center justify-between pb-3 border-b border-stone-100">
                 <div class="flex items-center space-x-2">
-                    <div class="w-7 h-7 rounded-full bg-accent text-white flex items-center justify-center text-xs">AI</div>
+                    <div class="w-7 h-7 rounded-full bg-accent text-white flex items-center justify-center text-xs font-semibold">AI</div>
                     <h3 class="text-sm font-semibold text-accent tracking-tight">家計アドバイザー</h3>
                 </div>
                 <button onclick="closeAIModal()" class="text-subtext hover:text-accent p-1" aria-label="閉じる">
@@ -204,7 +248,7 @@
         </div>
     </div>
 
-    <!-- 設定モーダル（予算 ＆ Gemini APIキー設定） -->
+    <!-- 設定モーダル -->
     <div id="settingsModal" class="fixed inset-0 bg-black/30 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-cardbg rounded-3xl max-w-sm w-full p-6 border border-line shadow-xl animate-fade-in">
             <div class="flex items-center justify-between pb-3 border-b border-stone-100">
@@ -223,7 +267,7 @@
                 </div>
                 <div>
                     <label class="block text-[11px] text-subtext mb-1">Gemini APIキー (GitHub用)</label>
-                    <input type="password" id="apiKeyInput" placeholder="AIAIzaSy..." class="w-full bg-stone-50 border border-line rounded-xl px-3 py-2 text-xs text-accent focus:outline-none focus:border-accent">
+                    <input type="password" id="apiKeyInput" placeholder="AIzaSy..." class="w-full bg-stone-50 border border-line rounded-xl px-3 py-2 text-xs text-accent focus:outline-none focus:border-accent">
                     <p class="text-[10px] text-subtext mt-1">※ブラウザのLocalStorageに安全に保存されます。</p>
                 </div>
             </div>
@@ -243,6 +287,7 @@
         // アプリケーション状態
         let currentType = 'expense';
         let currentFilter = 'all';
+        let editCurrentType = 'expense';
         let selectedYear = new Date().getFullYear();
         let selectedMonth = new Date().getMonth(); // 0-11
         if (new Date().getDate() < 25) {
@@ -282,13 +327,44 @@
             updateCategoryOptions();
         }
 
-        function updateCategoryOptions() {
+        function setEditType(type) {
+            editCurrentType = type;
+            const expBtn = document.getElementById('editTypeExpenseBtn');
+            const incBtn = document.getElementById('editTypeIncomeBtn');
+            if (type === 'expense') {
+                expBtn.className = "flex-1 py-1.5 rounded-lg bg-accent text-white font-medium transition-all";
+                incBtn.className = "flex-1 py-1.5 rounded-lg text-subtext font-medium transition-all";
+            } else {
+                incBtn.className = "flex-1 py-1.5 rounded-lg bg-accent text-white font-medium transition-all";
+                expBtn.className = "flex-1 py-1.5 rounded-lg text-subtext font-medium transition-all";
+            }
+            updateEditCategoryOptions();
+        }
+
+        function updateCategoryOptions(selectedCategory = null) {
             const select = document.getElementById('categorySelect');
             select.innerHTML = '';
             categories[currentType].forEach(cat => {
                 const opt = document.createElement('option');
                 opt.value = cat;
                 opt.textContent = cat;
+                if (selectedCategory && cat === selectedCategory) {
+                    opt.selected = true;
+                }
+                select.appendChild(opt);
+            });
+        }
+
+        function updateEditCategoryOptions(selectedCategory = null) {
+            const select = document.getElementById('editCategorySelect');
+            select.innerHTML = '';
+            categories[editCurrentType].forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                if (selectedCategory && cat === selectedCategory) {
+                    opt.selected = true;
+                }
                 select.appendChild(opt);
             });
         }
@@ -330,7 +406,7 @@
             return `${year}-${month}`;
         }
 
-        function addTransaction(e) {
+        function handleFormSubmit(e) {
             e.preventDefault();
             const amount = parseFloat(document.getElementById('txAmount').value);
             const category = document.getElementById('categorySelect').value;
@@ -347,16 +423,58 @@
                 date: date,
                 memo: memo
             };
-
             transactions.unshift(newTx);
-            saveTransactions();
-
             document.getElementById('txAmount').value = '';
             document.getElementById('txMemo').value = '';
+            setDefaultDate();
+
+            saveTransactions();
             render();
         }
 
-        function deleteTransaction(id) {
+        function openEditModal(id, event) {
+            if (event) event.stopPropagation();
+            const t = transactions.find(item => item.id === id);
+            if (!t) return;
+
+            document.getElementById('editId').value = t.id;
+            setEditType(t.type);
+            document.getElementById('editAmount').value = t.amount;
+            document.getElementById('editDate').value = t.date;
+            document.getElementById('editMemo').value = t.memo;
+            updateEditCategoryOptions(t.category);
+
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        function handleEditSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const amount = parseFloat(document.getElementById('editAmount').value);
+            const category = document.getElementById('editCategorySelect').value;
+            const date = document.getElementById('editDate').value;
+            const memo = document.getElementById('editMemo').value || category;
+
+            if (!amount || isNaN(amount)) return;
+
+            transactions = transactions.map(t => {
+                if (t.id === id) {
+                    return { ...t, type: editCurrentType, amount: amount, category: category, date: date, memo: memo };
+                }
+                return t;
+            });
+
+            saveTransactions();
+            closeEditModal();
+            render();
+        }
+
+        function deleteTransaction(id, event) {
+            event.stopPropagation();
             transactions = transactions.filter(t => t.id !== id);
             saveTransactions();
             render();
@@ -415,7 +533,6 @@
             renderSummary();
         }
 
-        // AIアドバイスボタンを押した瞬間にモーダルを開きつつ、そのまま実行する
         function openAIModal() {
             document.getElementById('aiModal').classList.remove('hidden');
             requestAIAdvice();
@@ -518,11 +635,16 @@
                             <div class="text-[10px] text-subtext mt-0.5 truncate">${t.date} · <span class="bg-stone-100 px-1.5 py-0.5 rounded text-stone-600">${t.category}</span></div>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-2.5 shrink-0">
+                    <div class="flex items-center space-x-2 shrink-0">
                         <span class="text-sm font-bold ${amountColor}">${sign}¥${t.amount.toLocaleString()}</span>
-                        <button onclick="deleteTransaction('${t.id}')" class="text-stone-300 hover:text-stone-500 p-1 transition-colors" aria-label="削除">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                        </button>
+                        <div class="flex items-center space-x-1 ml-1">
+                            <button onclick="openEditModal('${t.id}', event)" class="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg hover:bg-stone-100 transition-colors" aria-label="編集">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                            </button>
+                            <button onclick="deleteTransaction('${t.id}', event)" class="text-stone-300 hover:text-rose-500 p-1.5 rounded-lg hover:bg-stone-100 transition-colors" aria-label="削除">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </div>
                     </div>
                 `;
                 listEl.appendChild(item);
