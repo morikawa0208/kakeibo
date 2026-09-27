@@ -58,7 +58,7 @@
         }
     </style>
 </head>
-<body class="h-full flex flex-col justify-between selection:bg-stone-200">
+<body class="h-full flex flex-col bg-white selection:bg-stone-200">
 
     <!-- ヘッダーエリア -->
     <header class="w-full bg-white pt-6 pb-3 px-6 flex items-center justify-between z-10 shrink-0 border-b border-stone-100">
@@ -91,7 +91,7 @@
     <main class="flex-1 overflow-y-auto px-5 py-4 pb-48 max-w-md mx-auto w-full flex flex-col space-y-4">
         
         <!-- サマリーカード -->
-        <div class="bg-cardbg rounded-3xl p-5 border border-line shadow-2xs relative overflow-hidden">
+        <div class="bg-cardbg rounded-3xl p-5 border border-line shadow-2xs relative overflow-hidden shrink-0">
             <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-stone-100/50 rounded-full pointer-events-none"></div>
             <div class="text-[11px] text-subtext font-medium mb-0.5">今月の残高</div>
             <div class="flex items-baseline space-x-2">
@@ -146,7 +146,7 @@
     </main>
 
     <!-- 画面下部の固定入力バー（少し上に配置） -->
-    <div class="fixed bottom-36 left-3 right-3 sm:left-auto sm:right-auto sm:w-full sm:max-w-md sm:translate-x-[-50%] sm:left-[50%] bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-3xl ios-shadow p-3.5 z-20">
+    <div class="fixed bottom-28 left-3 right-3 sm:left-auto sm:right-auto sm:w-full sm:max-w-md sm:translate-x-[-50%] sm:left-[50%] bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-3xl ios-shadow p-3.5 z-20">
         <form id="transactionForm" onsubmit="handleFormSubmit(event)" class="flex flex-col space-y-2.5">
             <!-- 収支切替・カテゴリ・日付 -->
             <div class="flex items-center justify-between space-x-2">
@@ -553,7 +553,6 @@
         function getFilteredTransactionsForCurrentPeriod() {
             const { startDate, endDate } = getPeriodRange(selectedYear, selectedMonth);
             return transactions.filter(t => {
-                // 日付文字列 (YYYY-MM-DD) を安全に比較
                 const tDate = new Date(t.date + 'T00:00:00');
                 return tDate >= startDate && tDate <= endDate;
             });
@@ -643,10 +642,10 @@
                     <div class="flex items-center space-x-2 shrink-0">
                         <span class="text-sm font-bold ${amountColor}">${sign}¥${amtNum.toLocaleString()}</span>
                         <div class="flex items-center space-x-1 ml-1">
-                            <button onclick="openEditModal('${t.id}', event)" class="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg hover:bg-stone-100 transition-colors" aria-label="編集">
+                            <button type="button" onclick="openEditModal('${t.id}', event)" class="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg hover:bg-stone-100 transition-colors" aria-label="編集">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                             </button>
-                            <button onclick="deleteTransaction('${t.id}', event)" class="text-stone-300 hover:text-rose-500 p-1.5 rounded-lg hover:bg-stone-100 transition-colors" aria-label="削除">
+                            <button type="button" onclick="deleteTransaction('${t.id}', event)" class="text-stone-300 hover:text-rose-500 p-1.5 rounded-lg hover:bg-stone-100 transition-colors" aria-label="削除">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                             </button>
                         </div>
