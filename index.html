@@ -145,8 +145,8 @@
         </div>
     </main>
 
-    <!-- 画面下部の固定入力バー（位置を少し上に調整） -->
-    <div class="fixed bottom-28 left-3 right-3 sm:left-auto sm:right-auto sm:w-full sm:max-w-md sm:translate-x-[-50%] sm:left-[50%] bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-3xl ios-shadow p-3.5 z-20">
+    <!-- 画面下部の固定入力バー（少し上に配置） -->
+    <div class="fixed bottom-36 left-3 right-3 sm:left-auto sm:right-auto sm:w-full sm:max-w-md sm:translate-x-[-50%] sm:left-[50%] bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-3xl ios-shadow p-3.5 z-20">
         <form id="transactionForm" onsubmit="handleFormSubmit(event)" class="flex flex-col space-y-2.5">
             <!-- 収支切替・カテゴリ・日付 -->
             <div class="flex items-center justify-between space-x-2">
@@ -268,7 +268,7 @@
                 <div>
                     <label class="block text-[11px] text-subtext mb-1">Gemini APIキー (GitHub用)</label>
                     <input type="password" id="apiKeyInput" placeholder="AIzaSy..." class="w-full bg-stone-50 border border-line rounded-xl px-3 py-2 text-xs text-accent focus:outline-none focus:border-accent">
-                    <p class="text-[10px] text-subtext mt-1">※ブラウザのLocalStorageに安全に保存されます。</p>
+                    <p class="text-[10px] text-subtext mt-1">※ブラウザに安全に保存されます。</p>
                 </div>
             </div>
             <div class="pt-3 border-t border-stone-100 flex justify-end space-x-2">
@@ -408,10 +408,12 @@
 
         function handleFormSubmit(e) {
             e.preventDefault();
-            const amount = parseFloat(document.getElementById('txAmount').value);
+            const amountInput = document.getElementById('txAmount');
+            const amount = parseFloat(amountInput.value);
             const category = document.getElementById('categorySelect').value;
             const date = document.getElementById('txDate').value;
-            const memo = document.getElementById('txMemo').value || category;
+            const memoInput = document.getElementById('txMemo');
+            const memo = memoInput.value.trim() || category;
 
             if (!amount || isNaN(amount)) return;
 
@@ -424,8 +426,8 @@
                 memo: memo
             };
             transactions.unshift(newTx);
-            document.getElementById('txAmount').value = '';
-            document.getElementById('txMemo').value = '';
+            amountInput.value = '';
+            memoInput.value = '';
             setDefaultDate();
 
             saveTransactions();
@@ -457,7 +459,7 @@
             const amount = parseFloat(document.getElementById('editAmount').value);
             const category = document.getElementById('editCategorySelect').value;
             const date = document.getElementById('editDate').value;
-            const memo = document.getElementById('editMemo').value || category;
+            const memo = document.getElementById('editMemo').value.trim() || category;
 
             if (!amount || isNaN(amount)) return;
 
@@ -551,7 +553,8 @@
         function getFilteredTransactionsForCurrentPeriod() {
             const { startDate, endDate } = getPeriodRange(selectedYear, selectedMonth);
             return transactions.filter(t => {
-                const tDate = new Date(t.date);
+                // 日付文字列 (YYYY-MM-DD) を安全に比較
+                const tDate = new Date(t.date + 'T00:00:00');
                 return tDate >= startDate && tDate <= endDate;
             });
         }
@@ -562,8 +565,9 @@
             let expense = 0;
 
             periodTxs.forEach(t => {
-                if (t.type === 'income') income += t.amount;
-                else expense += t.amount;
+                const amt = Number(t.amount) || 0;
+                if (t.type === 'income') income += amt;
+                else expense += amt;
             });
 
             const balance = income - expense;
@@ -624,11 +628,12 @@
                 const isIncome = t.type === 'income';
                 const sign = isIncome ? '+' : '-';
                 const amountColor = isIncome ? 'text-emerald-600' : 'text-accent';
+                const amtNum = Number(t.amount) || 0;
 
                 item.innerHTML = `
                     <div class="flex items-center space-x-3 overflow-hidden mr-2">
                         <div class="w-8 h-8 rounded-xl bg-white border border-stone-100 flex items-center justify-center text-[11px] font-medium text-subtext shrink-0 shadow-2xs">
-                            ${t.category.slice(0, 2)}
+                            ${escapeHtml(t.category.slice(0, 2))}
                         </div>
                         <div class="truncate">
                             <div class="text-xs font-semibold text-accent truncate">${escapeHtml(t.memo)}</div>
@@ -636,7 +641,7 @@
                         </div>
                     </div>
                     <div class="flex items-center space-x-2 shrink-0">
-                        <span class="text-sm font-bold ${amountColor}">${sign}¥${t.amount.toLocaleString()}</span>
+                        <span class="text-sm font-bold ${amountColor}">${sign}¥${amtNum.toLocaleString()}</span>
                         <div class="flex items-center space-x-1 ml-1">
                             <button onclick="openEditModal('${t.id}', event)" class="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg hover:bg-stone-100 transition-colors" aria-label="編集">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
@@ -652,7 +657,7 @@
         }
 
         function escapeHtml(str) {
-            return str.replace(/[&<>"]/g, function(tag) {
+            return String(str).replace(/[&<>"]/g, function(tag) {
                 const chars = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
                 return chars[tag] || tag;
             });
@@ -691,11 +696,12 @@
             const categoryMap = {};
 
             periodTxs.forEach(t => {
+                const amt = Number(t.amount) || 0;
                 if (t.type === 'income') {
-                    totalIncome += t.amount;
+                    totalIncome += amt;
                 } else {
-                    totalExpense += t.amount;
-                    categoryMap[t.category] = (categoryMap[t.category] || 0) + t.amount;
+                    totalExpense += amt;
+                    categoryMap[t.category] = (categoryMap[t.category] || 0) + amt;
                 }
             });
 
