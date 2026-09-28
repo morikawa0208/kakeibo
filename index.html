@@ -47,7 +47,7 @@
             border-radius: 3px;
         }
         .ios-shadow {
-            box-shadow: 0 -8px 25px -4px rgba(40, 35, 30, 0.05), 0 4px 16px -2px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 -6px 20px -4px rgba(40, 35, 30, 0.04), 0 2px 10px -2px rgba(0, 0, 0, 0.02);
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(6px); }
@@ -60,7 +60,6 @@
 </head>
 <body class="h-full flex flex-col bg-white selection:bg-stone-200">
 
-    <!-- ヘッダーエリア -->
     <header class="w-full bg-white pt-6 pb-3 px-6 flex items-center justify-between z-10 shrink-0 border-b border-stone-100">
         <div>
             <span class="text-[11px] tracking-widest text-subtext uppercase font-semibold block mb-0.5">Household Budget</span>
@@ -77,7 +76,7 @@
             </div>
         </div>
         <div class="flex items-center space-x-2">
-            <button onclick="openAIModal()" class="flex items-center space-x-1.5 px-3.5 py-1.5 bg-accent text-white text-xs font-medium rounded-full shadow-sm hover:bg-stone-700 transition-all shrink-0">
+            <button onclick="requestAIAdvice()" class="flex items-center space-x-1.5 px-3.5 py-1.5 bg-accent text-white text-xs font-medium rounded-full shadow-sm hover:bg-stone-700 transition-all shrink-0">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
                 <span>AIアドバイス</span>
             </button>
@@ -87,7 +86,6 @@
         </div>
     </header>
 
-    <!-- メインコンテンツエリア -->
     <main class="flex-1 overflow-y-auto px-5 py-4 pb-48 max-w-md mx-auto w-full flex flex-col space-y-4">
         
         <!-- サマリーカード -->
@@ -145,8 +143,7 @@
         </div>
     </main>
 
-    <!-- 画面下部の固定入力バー（少し上に配置） -->
-    <div class="fixed bottom-28 left-3 right-3 sm:left-auto sm:right-auto sm:w-full sm:max-w-md sm:translate-x-[-50%] sm:left-[50%] bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-3xl ios-shadow p-3.5 z-20">
+    <div class="fixed bottom-24 left-3 right-3 sm:left-auto sm:right-auto sm:w-full sm:max-w-md sm:translate-x-[-50%] sm:left-[50%] bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-3xl ios-shadow p-3.5 z-20">
         <form id="transactionForm" onsubmit="handleFormSubmit(event)" class="flex flex-col space-y-2.5">
             <!-- 収支切替・カテゴリ・日付 -->
             <div class="flex items-center justify-between space-x-2">
@@ -535,9 +532,9 @@
             renderSummary();
         }
 
-        function openAIModal() {
+        function requestAIAdvice() {
             document.getElementById('aiModal').classList.remove('hidden');
-            requestAIAdvice();
+            fetchAIAdviceContent();
         }
 
         function closeAIModal() {
@@ -552,9 +549,16 @@
 
         function getFilteredTransactionsForCurrentPeriod() {
             const { startDate, endDate } = getPeriodRange(selectedYear, selectedMonth);
+            // 期間内でフィルタリングしつつ、日付順（新しい日付が上）にソート
             return transactions.filter(t => {
                 const tDate = new Date(t.date + 'T00:00:00');
                 return tDate >= startDate && tDate <= endDate;
+            }).sort((a, b) => {
+                // 日付降順（新しい日付が上）。日付が同じ場合はid(登録順)が新しいものを上に
+                if (b.date !== a.date) {
+                    return new Date(b.date) - new Date(a.date);
+                }
+                return Number(b.id) - Number(a.id);
             });
         }
 
@@ -662,7 +666,7 @@
             });
         }
 
-        async function requestAIAdvice() {
+        async function fetchAIAdviceContent() {
             const aiContent = document.getElementById('aiContent');
             const aiRefreshBtn = document.getElementById('aiRefreshBtn');
             aiRefreshBtn.disabled = true;
