@@ -76,8 +76,8 @@
             </div>
         </div>
         <div class="flex items-center space-x-2">
-            <!-- AIアドバイスおよび拡張機能ボタンを縦並び・幅広に統一 -->
-            <div class="flex flex-col space-y-1 w-32">
+            <!-- 右上ボタン類：幅を広めに統一し、設定ボタンと重ならないように配置 -->
+            <div class="flex flex-col space-y-1 w-36">
                 <button onclick="requestAIAdvice()" class="w-full flex items-center justify-center space-x-1 px-3 py-1 bg-accent text-white text-[11px] font-medium rounded-full shadow-sm hover:bg-stone-700 transition-all shrink-0">
                     <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
                     <span>AIアドバイス</span>
@@ -94,7 +94,7 @@
 
     <main class="flex-1 overflow-y-auto px-4 py-3 pb-36 max-w-md mx-auto w-full flex flex-col space-y-3">
         
-        <!-- サマリーカード：枠なし・装飾なしで今月残高と縦2行スペースを配置（100万単位対応、右側は枠なしで右揃え） -->
+        <!-- サマリーカード：枠なし・装飾なし。今月の残高と、ご要望の縦2行スペース（右揃え、枠なし、100万単位対応） -->
         <div class="bg-cardbg rounded-2xl p-3.5 border border-line shadow-2xs shrink-0">
             <div class="flex items-start justify-between">
                 <!-- 左側：今月の残高 -->
@@ -106,9 +106,9 @@
                     </div>
                 </div>
 
-                <!-- 右側：縦2行スペース（枠なし、右揃え、100万単位対応・フォント調整） -->
+                <!-- 右側：縦2行スペース（枠なし、右揃え、100万単位対応） -->
                 <div class="flex flex-col space-y-2 text-right pl-2">
-                    <!-- 1行目：今月収入・支出 -->
+                    <!-- 1行目：今月収入・支出（枠なし・右揃え） -->
                     <div class="flex items-center justify-end space-x-4">
                         <div>
                             <div class="text-[8px] text-subtext leading-tight">今月収入</div>
@@ -120,8 +120,8 @@
                         </div>
                     </div>
 
-                    <!-- 2行目：年間収入・年間支出・年間累計（横3グリッド、右揃え） -->
-                    <div class="grid grid-cols-3 gap-2.5 text-right">
+                    <!-- 2行目：年間収入・年間支出・年間累計（横3グリッド、右揃え、枠なし） -->
+                    <div class="grid grid-cols-3 gap-2 text-right">
                         <div>
                             <div class="text-[7px] text-subtext leading-tight">年間収入</div>
                             <div id="yearlyIncome" class="text-[9px] font-semibold text-accent tracking-tight truncate mt-0.5">¥0</div>
@@ -274,16 +274,16 @@
         </div>
     </div>
 
-    <!-- 設定モーダル -->
+    <!-- 設定モーダル（APIキー設定 ＆ カテゴリ編集・並び替え） -->
     <div id="settingsModal" class="fixed inset-0 bg-black/30 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-cardbg rounded-3xl max-w-sm w-full p-5 border border-line shadow-xl animate-fade-in">
-            <div class="flex items-center justify-between pb-2.5 border-b border-stone-100">
-                <h3 class="text-xs font-semibold text-accent tracking-tight">設定</h3>
+        <div class="bg-cardbg rounded-3xl max-w-sm w-full p-5 border border-line shadow-xl animate-fade-in flex flex-col max-h-[90vh]">
+            <div class="flex items-center justify-between pb-2.5 border-b border-stone-100 shrink-0">
+                <h3 class="text-xs font-semibold text-accent tracking-tight">設定 & タグ管理</h3>
                 <button onclick="toggleSettings()" class="text-subtext hover:text-accent p-1" aria-label="閉じる">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
-            <div class="py-3 space-y-3">
+            <div class="py-3 space-y-4 overflow-y-auto flex-1 text-[11px]">
                 <div>
                     <label class="block text-[10px] text-subtext mb-1">今月の目標予算（支出上限）</label>
                     <div class="relative">
@@ -292,22 +292,51 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-[10px] text-subtext mb-1">Gemini APIキー (GitHub用)</label>
+                    <label class="block text-[10px] text-subtext mb-1">Gemini APIキー</label>
                     <input type="password" id="apiKeyInput" placeholder="AIzaSy..." class="w-full bg-stone-50 border border-line rounded-xl px-2.5 py-1.5 text-[11px] text-accent focus:outline-none focus:border-accent">
-                    <p class="text-[9px] text-subtext mt-1">※ブラウザに安全に保存されます。</p>
+                </div>
+
+                <!-- 支出カテゴリ編集・並び替え -->
+                <div class="pt-2 border-t border-stone-100">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="text-[10px] font-semibold text-accent">支出タグ（カテゴリ）の編集・並び替え</label>
+                    </div>
+                    <div id="expenseCategoryList" class="space-y-1.5 mb-2">
+                        <!-- 動的生成 -->
+                    </div>
+                    <div class="flex space-x-1.5">
+                        <input type="text" id="newExpenseCat" placeholder="新しい支出タグ" class="flex-1 bg-stone-50 border border-line rounded-xl px-2.5 py-1 text-[11px] text-accent focus:outline-none focus:border-accent">
+                        <button type="button" onclick="addCategory('expense')" class="px-3 py-1 bg-accent text-white rounded-xl text-[10px] font-medium hover:bg-stone-700 transition-all">追加</button>
+                    </div>
+                </div>
+
+                <!-- 収入カテゴリ編集・並び替え -->
+                <div class="pt-2 border-t border-stone-100">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="text-[10px] font-semibold text-accent">収入タグ（カテゴリ）の編集・並び替え</label>
+                    </div>
+                    <div id="incomeCategoryList" class="space-y-1.5 mb-2">
+                        <!-- 動的生成 -->
+                    </div>
+                    <div class="flex space-x-1.5">
+                        <input type="text" id="newIncomeCat" placeholder="新しい収入タグ" class="flex-1 bg-stone-50 border border-line rounded-xl px-2.5 py-1 text-[11px] text-accent focus:outline-none focus:border-accent">
+                        <button type="button" onclick="addCategory('income')" class="px-3 py-1 bg-accent text-white rounded-xl text-[10px] font-medium hover:bg-stone-700 transition-all">追加</button>
+                    </div>
                 </div>
             </div>
-            <div class="pt-2.5 border-t border-stone-100 flex justify-end space-x-2">
+            <div class="pt-2.5 border-t border-stone-100 flex justify-end space-x-2 shrink-0">
                 <button onclick="saveSettings()" class="px-3.5 py-1.5 bg-accent text-white rounded-xl text-[11px] font-medium hover:bg-stone-700 transition-all">保存する</button>
             </div>
         </div>
     </div>
 
     <script>
-        const categories = {
+        let defaultCategories = {
             expense: ['食費', '日用品', '住居', '光熱費', '交通費', '交際費', '趣味', '美容', 'その他'],
             income: ['給与', '副業', 'お小遣い', 'その他']
         };
+
+        let categories = JSON.parse(localStorage.getItem('minimal_kakeibo_categories') || JSON.stringify(defaultCategories));
 
         let currentType = 'expense';
         let currentFilter = 'all';
@@ -367,7 +396,8 @@
         function updateCategoryOptions(selectedCategory = null) {
             const select = document.getElementById('categorySelect');
             select.innerHTML = '';
-            categories[currentType].forEach(cat => {
+            const list = categories[currentType] || [];
+            list.forEach(cat => {
                 const opt = document.createElement('option');
                 opt.value = cat;
                 opt.textContent = cat;
@@ -381,7 +411,8 @@
         function updateEditCategoryOptions(selectedCategory = null) {
             const select = document.getElementById('editCategorySelect');
             select.innerHTML = '';
-            categories[editCurrentType].forEach(cat => {
+            const list = categories[editCurrentType] || [];
+            list.forEach(cat => {
                 const opt = document.createElement('option');
                 opt.value = cat;
                 opt.textContent = cat;
@@ -543,7 +574,62 @@
             const pKey = getPeriodKey(selectedYear, selectedMonth);
             document.getElementById('budgetInput').value = budgets[pKey] || '';
             document.getElementById('apiKeyInput').value = localStorage.getItem('minimal_gemini_api_key') || '';
+            
+            renderCategorySettingsUI();
             modal.classList.toggle('hidden');
+        }
+
+        function renderCategorySettingsUI() {
+            ['expense', 'income'].forEach(type => {
+                const listEl = document.getElementById(type === 'expense' ? 'expenseCategoryList' : 'incomeCategoryList');
+                listEl.innerHTML = '';
+                const items = categories[type] || [];
+                
+                items.forEach((cat, index) => {
+                    const row = document.createElement('div');
+                    row.className = 'flex items-center space-x-1.5';
+                    row.innerHTML = `
+                        <input type="text" value="${escapeHtml(cat)}" onchange="updateCategoryName('${type}', ${index}, this.value)" class="flex-1 bg-stone-50 border border-line rounded-xl px-2.5 py-1 text-[11px] text-accent focus:outline-none focus:border-accent">
+                        <button type="button" onclick="moveCategory('${type}', ${index}, -1)" class="p-1 text-subtext hover:text-accent rounded hover:bg-stone-200" title="上へ">▲</button>
+                        <button type="button" onclick="moveCategory('${type}', ${index}, 1)" class="p-1 text-subtext hover:text-accent rounded hover:bg-stone-200" title="下へ">▼</button>
+                        <button type="button" onclick="removeCategoryItem('${type}', ${index})" class="p-1 text-stone-400 hover:text-rose-500 rounded hover:bg-stone-200" title="削除">✕</button>
+                    `;
+                    listEl.appendChild(row);
+                });
+            });
+        }
+
+        function updateCategoryName(type, index, newName) {
+            const trimmed = newName.trim();
+            if (!trimmed) return;
+            categories[type][index] = trimmed;
+        }
+
+        function moveCategory(type, index, direction) {
+            const targetIndex = index + direction;
+            if (targetIndex < 0 || targetIndex >= categories[type].length) return;
+            const temp = categories[type][index];
+            categories[type][index] = categories[type][targetIndex];
+            categories[type][targetIndex] = temp;
+            renderCategorySettingsUI();
+        }
+
+        function removeCategoryItem(type, index) {
+            if (categories[type].length <= 1) return;
+            categories[type].splice(index, 1);
+            renderCategorySettingsUI();
+        }
+
+        function addCategory(type) {
+            const inputId = type === 'expense' ? 'newExpenseCat' : 'newIncomeCat';
+            const inputEl = document.getElementById(inputId);
+            const val = inputEl.value.trim();
+            if (!val) return;
+            if (!categories[type].includes(val)) {
+                categories[type].push(val);
+                inputEl.value = '';
+                renderCategorySettingsUI();
+            }
         }
 
         function saveSettings() {
@@ -563,8 +649,12 @@
                 localStorage.removeItem('minimal_gemini_api_key');
             }
 
+            localStorage.setItem('minimal_kakeibo_categories', JSON.stringify(categories));
+
             toggleSettings();
+            updateCategoryOptions();
             renderSummary();
+            renderTransactionList();
         }
 
         function requestAIAdvice() {
@@ -703,7 +793,7 @@
                         </div>
                         <div class="truncate">
                             <div class="text-[11px] font-semibold text-accent truncate">${escapeHtml(t.memo)}</div>
-                            <div class="text-[9px] text-subtext mt-0.5 truncate">${t.date} · <span class="bg-stone-100 px-1 py-0.5 rounded text-stone-600">${t.category}</span></div>
+                            <div class="text-[9px] text-subtext mt-0.5 truncate">${t.date} · <span class="bg-stone-100 px-1 py-0.5 rounded text-stone-600">${escapeHtml(t.category)}</span></div>
                         </div>
                     </div>
                     <div class="flex items-center space-x-2 shrink-0">
