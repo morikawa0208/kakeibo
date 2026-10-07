@@ -62,7 +62,7 @@
 
     <header class="w-full bg-white pt-4 pb-2.5 px-5 flex items-center justify-between z-10 shrink-0 border-b border-stone-100">
         <div>
-            <span class="text-[10px] tracking-widest text-subtext uppercase font-semibold block mb-0.5">Household Budget</span>
+            <span class="text-[10px] tracking-widest text-subtext uppercase font-semibold block mb-0.5">HOUSEHOLD BUDGET</span>
             <div class="flex items-center space-x-1.5">
                 <h1 id="currentPeriodLabel" class="text-sm font-semibold text-accent tracking-tight whitespace-nowrap">9月25日 〜 10月24日</h1>
                 <div class="flex space-x-0.5">
@@ -76,14 +76,15 @@
             </div>
         </div>
         <div class="flex items-center space-x-2">
-            <!-- 右上ボタン類：幅を広めに統一し、設定ボタンと重ならないように配置 -->
-            <div class="flex flex-col space-y-1 w-36">
+            <!-- 右上ボタン類：AIアドバイスと拡張機能ボタンを同じ幅に揃える -->
+            <div class="flex flex-col space-y-1 w-32">
                 <button onclick="requestAIAdvice()" class="w-full flex items-center justify-center space-x-1 px-3 py-1 bg-accent text-white text-[11px] font-medium rounded-full shadow-sm hover:bg-stone-700 transition-all shrink-0">
                     <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
                     <span>AIアドバイス</span>
                 </button>
-                <button onclick="handlePlaceholderAction()" class="w-full px-3 py-1 bg-accent text-white text-[11px] font-medium rounded-full shadow-sm hover:bg-stone-700 transition-all shrink-0 text-center">
-                    拡張機能
+                <button onclick="openReceiptModal()" class="w-full flex items-center justify-center space-x-1 px-3 py-1 bg-accent text-white text-[11px] font-medium rounded-full shadow-sm hover:bg-stone-700 transition-all shrink-0 text-center">
+                    <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span>拡張機能</span>
                 </button>
             </div>
             <button onclick="toggleSettings()" class="p-1.5 text-subtext hover:text-accent transition-colors rounded-full hover:bg-stone-100 shrink-0 ml-1" aria-label="設定">
@@ -94,7 +95,7 @@
 
     <main class="flex-1 overflow-y-auto px-4 py-3 pb-36 max-w-md mx-auto w-full flex flex-col space-y-3">
         
-        <!-- サマリーカード：枠なし・装飾なし。今月の残高と、ご要望の縦2行スペース（右揃え、枠なし、100万単位対応） -->
+        <!-- サマリーカード：枠なし・装飾なし。今月の残高、右側に縦2行（右揃え、枠なし、100万単位対応） -->
         <div class="bg-cardbg rounded-2xl p-3.5 border border-line shadow-2xs shrink-0">
             <div class="flex items-start justify-between">
                 <!-- 左側：今月の残高 -->
@@ -274,6 +275,56 @@
         </div>
     </div>
 
+    <!-- レシート・明細OCR読取モーダル（複数画像・複数レシート対応 ＆ 固定日対応） -->
+    <div id="receiptModal" class="fixed inset-0 bg-black/30 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-cardbg rounded-3xl max-w-sm w-full p-5 border border-line shadow-xl animate-fade-in flex flex-col max-h-[90vh]">
+            <div class="flex items-center justify-between pb-2.5 border-b border-stone-100 shrink-0">
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 rounded-full bg-accent text-white flex items-center justify-center text-[11px] font-semibold">OCR</div>
+                    <h3 class="text-xs font-semibold text-accent tracking-tight">レシート・明細AI一括読取</h3>
+                </div>
+                <button onclick="closeReceiptModal()" class="text-subtext hover:text-accent p-1" aria-label="閉じる">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="py-3 space-y-3 overflow-y-auto flex-1 text-[11px]">
+                <p class="text-subtext leading-relaxed">複数枚のレシートや、1枚に複数の明細が含まれる画像を一度に選択できます。カードの引き落とし日などで日付を統一したい場合は、下記に日付を指定してください。</p>
+                
+                <!-- 固定日指定（任意） -->
+                <div>
+                    <label class="block text-[10px] text-subtext mb-1">一括登録する日付（空欄なら画像内の日付を適用）</label>
+                    <input type="date" id="ocrFixedDate" class="w-full bg-white border border-line rounded-xl px-2.5 py-1.5 text-[11px] text-accent focus:outline-none focus:border-accent">
+                </div>
+
+                <!-- 撮影・複数選択ボタンエリア -->
+                <div class="grid grid-cols-2 gap-2">
+                    <label class="flex flex-col items-center justify-center p-3 bg-white border border-dashed border-stone-300 rounded-2xl cursor-pointer hover:bg-stone-50 transition-all text-center">
+                        <svg class="w-5 h-5 text-subtext mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <span class="text-[11px] font-medium text-accent">カメラで撮影</span>
+                        <input type="file" accept="image/*" capture="environment" multiple onchange="handleImagesSelected(event)" class="hidden">
+                    </label>
+                    <label class="flex flex-col items-center justify-center p-3 bg-white border border-dashed border-stone-300 rounded-2xl cursor-pointer hover:bg-stone-50 transition-all text-center">
+                        <svg class="w-5 h-5 text-subtext mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span class="text-[11px] font-medium text-accent">画像を選択(複数可)</span>
+                        <input type="file" accept="image/*" multiple onchange="handleImagesSelected(event)" class="hidden">
+                    </label>
+                </div>
+
+                <!-- プレビューと解析結果表示エリア -->
+                <div id="ocrResultArea" class="hidden space-y-2.5 pt-2 border-t border-stone-100">
+                    <div id="ocrPreviewContainer" class="flex space-x-2 overflow-x-auto py-1">
+                        <!-- プレビュー画像がここに追加されます -->
+                    </div>
+                    <div id="ocrStatus" class="text-center py-2 text-subtext">AIが画像を解析中...</div>
+                </div>
+            </div>
+            <div id="ocrActionFooter" class="pt-2.5 border-t border-stone-100 flex justify-end space-x-2 shrink-0 hidden">
+                <button type="button" onclick="closeReceiptModal()" class="px-3.5 py-1.5 bg-stone-100 text-subtext rounded-xl text-[11px] font-medium hover:bg-stone-200 transition-all">キャンセル</button>
+                <button type="button" onclick="confirmOcrTransactions()" class="px-3.5 py-1.5 bg-accent text-white rounded-xl text-[11px] font-medium hover:bg-stone-700 transition-all">一括登録する</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 設定モーダル（APIキー設定 ＆ カテゴリ編集・並び替え） -->
     <div id="settingsModal" class="fixed inset-0 bg-black/30 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-cardbg rounded-3xl max-w-sm w-full p-5 border border-line shadow-xl animate-fade-in flex flex-col max-h-[90vh]">
@@ -353,6 +404,7 @@
 
         let transactions = JSON.parse(localStorage.getItem('minimal_kakeibo_tx') || '[]');
         let budgets = JSON.parse(localStorage.getItem('minimal_kakeibo_budgets') || '{}');
+        let tempOcrParsedTransactions = [];
 
         window.onload = function() {
             setDefaultDate();
@@ -460,15 +512,6 @@
             return `${year}-${month}`;
         }
 
-        function handlePlaceholderAction() {
-            const btn = document.activeElement;
-            if (btn) {
-                const orig = btn.textContent;
-                btn.textContent = '準備中...';
-                setTimeout(() => { btn.textContent = orig; }, 1000);
-            }
-        }
-
         function handleFormSubmit(e) {
             e.preventDefault();
             const amountInput = document.getElementById('txAmount');
@@ -481,7 +524,7 @@
             if (!amount || isNaN(amount)) return;
 
             const newTx = {
-                id: Date.now().toString(),
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 4),
                 type: currentType,
                 amount: amount,
                 category: category,
@@ -666,6 +709,177 @@
             document.getElementById('aiModal').classList.add('hidden');
         }
 
+        function openReceiptModal() {
+            tempOcrParsedTransactions = [];
+            document.getElementById('ocrFixedDate').value = '';
+            document.getElementById('ocrPreviewContainer').innerHTML = '';
+            document.getElementById('ocrResultArea').classList.add('hidden');
+            document.getElementById('ocrActionFooter').classList.add('hidden');
+            document.getElementById('receiptModal').classList.remove('hidden');
+        }
+
+        function closeReceiptModal() {
+            document.getElementById('receiptModal').classList.add('hidden');
+        }
+
+        async function handleImagesSelected(event) {
+            const files = Array.from(event.target.files);
+            if (files.length === 0) return;
+
+            const previewContainer = document.getElementById('ocrPreviewContainer');
+            previewContainer.innerHTML = '';
+            document.getElementById('ocrResultArea').classList.remove('hidden');
+            document.getElementById('ocrStatus').textContent = `${files.length}枚の画像をAIが一括解析中...`;
+            document.getElementById('ocrActionFooter').classList.add('hidden');
+
+            const apiKey = localStorage.getItem('minimal_gemini_api_key') || "";
+            if (!apiKey) {
+                document.getElementById('ocrStatus').textContent = 'エラー: 右上の設定からGemini APIキーを設定してください。';
+                return;
+            }
+
+            const expenseCats = categories.expense.join(', ');
+            const incomeCats = categories.income.join(', ');
+            const promptText = `これらの画像はレシートやクレジットカード・銀行の利用明細（スクリーンショット等）です。画像に含まれるすべての取引（1枚に複数ある場合や複数枚の画像全体を含む）を完全に抽出してください。
+以下のJSONフォーマットの「配列（Array）」のみで正確に回答してください。マークダウンや他の文章は一切含めないでください。
+[
+  {
+    "type": "expense または income",
+    "amount": 数値のみ（例: 1480）,
+    "category": "以下のカテゴリから最も適切なものを1つ選択 [${expenseCats}, ${incomeCats}]",
+    "date": "YYYY-MM-DD形式の日付（不明な場合は本日の日付 ${new Date().toISOString().split('T')[0]}）",
+    "memo": "店舗名や明細の内容（例: スーパー、Amazonなど）"
+  }
+]`;
+
+            const parts = [{ text: promptText }];
+
+            const readerPromises = files.map(file => {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const fullData = e.target.result;
+                        const base64Data = fullData.split(',')[1];
+                        const mimeType = file.type || 'image/jpeg';
+
+                        const img = document.createElement('img');
+                        img.src = fullData;
+                        img.className = "h-20 w-20 object-cover rounded-xl border border-line shrink-0";
+                        previewContainer.appendChild(img);
+
+                        resolve({
+                            inlineData: {
+                                mimeType: mimeType,
+                                data: base64Data
+                            }
+                        });
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            });
+
+            try {
+                const imageParts = await Promise.all(readerPromises);
+                imageParts.forEach(p => parts.push(p));
+
+                const payload = {
+                    contents: [
+                        {
+                            role: "user",
+                            parts: parts
+                        }
+                    ]
+                };
+
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+                let response = null;
+                for (let attempt = 0; attempt < 3; attempt++) {
+                    try {
+                        response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        if (response.ok) break;
+                    } catch (err) {
+                        if (attempt === 2) throw err;
+                        await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 1000));
+                    }
+                }
+
+                if (!response || !response.ok) {
+                    throw new Error('API request failed');
+                }
+
+                const result = await response.json();
+                const candidate = result.candidates?.[0];
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    let rawText = candidate.content.parts[0].text.trim();
+                    if (rawText.startsWith('```json')) {
+                        rawText = rawText.replace(/^```json/, '').replace(/```$/, '').trim();
+                    } else if (rawText.startsWith('```')) {
+                        rawText = rawText.replace(/^```/, '').replace(/```$/, '').trim();
+                    }
+
+                    const parsedArray = JSON.parse(rawText);
+                    if (!Array.isArray(parsedArray)) {
+                        throw new Error('Expected array format');
+                    }
+
+                    tempOcrParsedTransactions = parsedArray;
+
+                    let htmlList = `<div class="space-y-1.5 text-left"><div class="text-[10px] font-semibold text-subtext uppercase">解析成功 (${parsedArray.length}件検出)</div>`;
+                    parsedArray.forEach((item) => {
+                        const isInc = item.type === 'income';
+                        htmlList += `
+                            <div class="bg-stone-50 p-2 rounded-xl border border-line flex items-center justify-between">
+                                <div>
+                                    <div class="text-[11px] font-semibold text-accent">${escapeHtml(item.memo || '明細')} (${escapeHtml(item.category)})</div>
+                                    <div class="text-[9px] text-subtext">${escapeHtml(item.date)}</div>
+                                </div>
+                                <div class="text-xs font-bold ${isInc ? 'text-emerald-600' : 'text-accent'}">
+                                    ${isInc ? '+' : '-'}¥${Number(item.amount || 0).toLocaleString()}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    htmlList += `</div>`;
+
+                    document.getElementById('ocrStatus').innerHTML = htmlList;
+                    document.getElementById('ocrActionFooter').classList.remove('hidden');
+                } else {
+                    throw new Error('Invalid response structure');
+                }
+            } catch (error) {
+                document.getElementById('ocrStatus').textContent = '解析に失敗しました。画像が鮮明か、APIキーやプランをご確認ください。';
+            }
+        }
+
+        function confirmOcrTransactions() {
+            if (!tempOcrParsedTransactions || tempOcrParsedTransactions.length === 0) return;
+
+            const fixedDate = document.getElementById('ocrFixedDate').value;
+
+            tempOcrParsedTransactions.forEach(item => {
+                const finalDate = fixedDate ? fixedDate : (item.date || new Date().toISOString().split('T')[0]);
+                const newTx = {
+                    id: Date.now().toString() + Math.random().toString(36).substr(2, 4),
+                    type: item.type === 'income' ? 'income' : 'expense',
+                    amount: parseFloat(item.amount) || 0,
+                    category: item.category || (item.type === 'income' ? categories.income[0] : categories.expense[0]),
+                    date: finalDate,
+                    memo: item.memo || 'レシート・明細読取'
+                };
+                transactions.unshift(newTx);
+            });
+
+            saveTransactions();
+            closeReceiptModal();
+            render();
+        }
+
         function render() {
             document.getElementById('currentPeriodLabel').textContent = formatPeriodLabel(selectedYear, selectedMonth);
             renderSummary();
@@ -677,7 +891,7 @@
                 if (b.date !== a.date) {
                     return new Date(b.date) - new Date(a.date);
                 }
-                return Number(b.id) - Number(a.id);
+                return Number(b.id) - Number(b.id);
             });
         }
 
