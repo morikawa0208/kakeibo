@@ -151,6 +151,19 @@
             </div>
         </div>
 
+        <section class="bg-cardbg rounded-2xl p-3.5 border border-line shrink-0" aria-labelledby="categoryChartHeading">
+            <div class="flex items-center justify-between gap-2 mb-3">
+                <h2 id="categoryChartHeading" class="text-[11px] font-semibold text-accent">カテゴリ別の収支</h2>
+                <div class="flex space-x-1 bg-stone-100 p-0.5 rounded-lg text-[11px]" role="group" aria-label="グラフの収支種別">
+                    <button type="button" onclick="setChartType('expense')" id="chartExpenseBtn" aria-pressed="true" class="px-2 py-0.5 rounded-md bg-white text-accent font-medium shadow-2xs transition-all">支出</button>
+                    <button type="button" onclick="setChartType('income')" id="chartIncomeBtn" aria-pressed="false" class="px-2 py-0.5 rounded-md text-subtext font-medium transition-all">収入</button>
+                </div>
+            </div>
+            <p id="categoryChartSummary" class="text-[10px] text-subtext mb-3"></p>
+            <ul id="categoryChart" class="space-y-3" aria-label="カテゴリ別支出"></ul>
+            <p id="categoryChartEmpty" class="hidden py-3 text-center text-[11px] text-subtext">この期間の支出はまだありません</p>
+        </section>
+
         <div class="flex flex-col flex-1">
             <div class="flex items-center justify-between mb-2 px-1">
                 <h2 class="text-[11px] font-semibold text-accent tracking-wider uppercase">収支履歴</h2>
@@ -336,6 +349,21 @@
             </div>
             <div class="py-3 space-y-4 overflow-y-auto flex-1 text-[11px]">
                 <div>
+                    <h4 class="text-[11px] font-semibold text-accent mb-2">家計簿の集計期間</h4>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label for="periodStartDayInput" class="block text-[10px] text-subtext mb-1">開始日</label>
+                            <select id="periodStartDayInput" onchange="syncPeriodSettings('start')" class="w-full bg-stone-50 border border-line rounded-xl px-2.5 py-1.5 text-[11px] text-accent focus:outline-none focus:border-accent"></select>
+                        </div>
+                        <div>
+                            <label for="periodEndDayInput" class="block text-[10px] text-subtext mb-1">締め日</label>
+                            <select id="periodEndDayInput" onchange="syncPeriodSettings('end')" class="w-full bg-stone-50 border border-line rounded-xl px-2.5 py-1.5 text-[11px] text-accent focus:outline-none focus:border-accent"></select>
+                        </div>
+                    </div>
+                    <p id="periodSettingsPreview" class="text-[10px] text-accent mt-2" aria-live="polite"></p>
+                    <p class="text-[10px] text-subtext mt-1 leading-relaxed">開始日と締め日は連動します。開始日がない月は月末から、次の開始日の前日まで集計します。変更は過去の表示にも適用され、記録の日付は変わりません。</p>
+                </div>
+                <div>
                     <label class="block text-[10px] text-subtext mb-1">今月の目標予算（支出上限）</label>
                     <div class="relative">
                         <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] text-subtext">¥</span>
@@ -391,10 +419,13 @@
 
         let currentType = 'expense';
         let currentFilter = 'all';
+        let chartType = 'expense';
+        const savedPeriodStart = Number(localStorage.getItem('minimal_kakeibo_period_start'));
+        let periodStartDay = Number.isInteger(savedPeriodStart) && savedPeriodStart >= 1 && savedPeriodStart <= 31 ? savedPeriodStart : 25;
         let editCurrentType = 'expense';
         let selectedYear = new Date().getFullYear();
         let selectedMonth = new Date().getMonth(); 
-        if (new Date().getDate() < 25) {
+        if (new Date() < getPeriodRange(selectedYear, selectedMonth).startDate) {
             selectedMonth -= 1;
             if (selectedMonth < 0) {
                 selectedMonth = 11;
@@ -487,25 +518,16 @@
             render();
         }
 
-        function getPeriodRange(year, month) {
-            const startDate = new Date(year, month, 25);
-            let endYear = year;
-            let endMonth = month + 1;
-            if (endMonth > 11) {
-                endMonth = 0;
-                endYear += 1;
-            }
-            const endDate = new Date(endYear, endMonth, 24, 23, 59, 59);
+        function getPeriodRange(year, month, startDay = periodStartDay) {
+            const startDate = new Date(year, month, Math.min(startDay, new Date(year, month + 1, 0).getDate()));
+            const nextStart = new Date(year, month + 1, Math.min(startDay, new Date(year, month + 2, 0).getDate()));
+            const endDate = new Date(nextStart.getTime() - 1);
             return { startDate, endDate };
         }
 
-        function formatPeriodLabel(year, month) {
-            let startM = month + 1;
-            let endM = month + 2;
-            if (endM > 12) {
-                endM = 1;
-            }
-            return `${startM}月25日 〜 ${endM}月24日`;
+        function formatPeriodLabel(year, month, startDay = periodStartDay) {
+            const { startDate, endDate } = getPeriodRange(year, month, startDay);
+            return `${startDate.getMonth() + 1}月${startDate.getDate()}日 〜 ${endDate.getMonth() + 1}月${endDate.getDate()}日`;
         }
 
         function getPeriodKey(year, month) {
@@ -614,12 +636,39 @@
 
         function toggleSettings() {
             const modal = document.getElementById('settingsModal');
+            const startInput = document.getElementById('periodStartDayInput');
+            const endInput = document.getElementById('periodEndDayInput');
+            startInput.innerHTML = '';
+            endInput.innerHTML = '';
+            for (let day = 1; day <= 31; day++) {
+                const option = document.createElement('option');
+                option.value = String(day);
+                option.textContent = `毎月${day}日`;
+                startInput.appendChild(option);
+                const endOption = document.createElement('option');
+                endOption.value = String(day === 31 ? 0 : day);
+                endOption.textContent = day === 31 ? '月末' : `毎月${day}日`;
+                endInput.appendChild(endOption);
+            }
+            startInput.value = String(periodStartDay);
+            syncPeriodSettings('start');
             const pKey = getPeriodKey(selectedYear, selectedMonth);
             document.getElementById('budgetInput').value = budgets[pKey] || '';
             document.getElementById('apiKeyInput').value = localStorage.getItem('minimal_gemini_api_key') || '';
             
             renderCategorySettingsUI();
             modal.classList.toggle('hidden');
+        }
+
+        function syncPeriodSettings(changed) {
+            const startInput = document.getElementById('periodStartDayInput');
+            const endInput = document.getElementById('periodEndDayInput');
+            if (changed === 'end') {
+                startInput.value = String(Number(endInput.value) + 1);
+            } else {
+                endInput.value = String(Number(startInput.value) - 1);
+            }
+            document.getElementById('periodSettingsPreview').textContent = `表示期間：${formatPeriodLabel(selectedYear, selectedMonth, Number(startInput.value))}`;
         }
 
         function renderCategorySettingsUI() {
@@ -676,6 +725,10 @@
         }
 
         function saveSettings() {
+            const startDay = Number(document.getElementById('periodStartDayInput').value);
+            if (!Number.isInteger(startDay) || startDay < 1 || startDay > 31) return;
+            periodStartDay = startDay;
+            localStorage.setItem('minimal_kakeibo_period_start', String(periodStartDay));
             const val = parseFloat(document.getElementById('budgetInput').value);
             const pKey = getPeriodKey(selectedYear, selectedMonth);
             if (!isNaN(val) && val > 0) {
@@ -696,8 +749,7 @@
 
             toggleSettings();
             updateCategoryOptions();
-            renderSummary();
-            renderTransactionList();
+            render();
         }
 
         function requestAIAdvice() {
@@ -884,6 +936,60 @@
             document.getElementById('currentPeriodLabel').textContent = formatPeriodLabel(selectedYear, selectedMonth);
             renderSummary();
             renderTransactionList();
+            renderCategoryChart();
+        }
+
+        function setChartType(type) {
+            if (type !== 'income' && type !== 'expense') return;
+            chartType = type;
+            renderCategoryChart();
+        }
+
+        function getCategoryTotals(type) {
+            const totals = new Map();
+            getFilteredTransactionsForCurrentPeriod().forEach(t => {
+                if (t.type !== type) return;
+                const amount = Number(t.amount) || 0;
+                const category = t.category || '未分類';
+                totals.set(category, (totals.get(category) || 0) + amount);
+            });
+            return [...totals].map(([category, amount]) => ({ category, amount }))
+                .sort((a, b) => b.amount - a.amount);
+        }
+
+        function renderCategoryChart() {
+            const items = getCategoryTotals(chartType);
+            const total = items.reduce((sum, item) => sum + item.amount, 0);
+            const max = Math.max(0, ...items.map(item => item.amount));
+            const label = chartType === 'income' ? '収入' : '支出';
+            ['expense', 'income'].forEach(type => {
+                const button = document.getElementById(type === 'expense' ? 'chartExpenseBtn' : 'chartIncomeBtn');
+                button.setAttribute('aria-pressed', String(chartType === type));
+                button.className = chartType === type
+                    ? 'px-2 py-0.5 rounded-md bg-white text-accent font-medium shadow-2xs transition-all'
+                    : 'px-2 py-0.5 rounded-md text-subtext font-medium transition-all';
+            });
+            document.getElementById('categoryChartSummary').textContent = `${formatPeriodLabel(selectedYear, selectedMonth)} ・ ${label}合計 ¥${total.toLocaleString()}`;
+            const chart = document.getElementById('categoryChart');
+            chart.setAttribute('aria-label', `カテゴリ別${label}`);
+            chart.innerHTML = '';
+            const empty = document.getElementById('categoryChartEmpty');
+            empty.textContent = `この期間の${label}はまだありません`;
+            empty.classList.toggle('hidden', items.length > 0);
+            items.forEach(item => {
+                const row = document.createElement('li');
+                const percentage = total > 0 ? Math.round(item.amount / total * 100) : 0;
+                const width = max > 0 ? Math.max(0, item.amount / max * 100) : 0;
+                row.innerHTML = `
+                    <div class="flex items-start justify-between gap-3 text-[11px] mb-1">
+                        <span class="min-w-0 break-words">${escapeHtml(item.category)}</span>
+                        <span class="shrink-0 font-semibold">¥${item.amount.toLocaleString()} <span class="text-[9px] text-subtext font-normal">${percentage}%</span></span>
+                    </div>
+                    <div class="h-2 bg-stone-200/60 rounded-full overflow-hidden" aria-hidden="true">
+                        <div class="h-full rounded-full ${chartType === 'income' ? 'bg-emerald-600' : 'bg-accent'}" style="width: ${width}%"></div>
+                    </div>`;
+                chart.appendChild(row);
+            });
         }
 
         function getSortedTransactions() {
